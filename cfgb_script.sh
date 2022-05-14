@@ -53,7 +53,7 @@ if [ -e $bnd_dir/$id/packages ] ; then
 	echo '-=- Atualizando Flathub -=-'
 	sudo ${pkgm[0]} ${pkgm[2]} -y ;
 	for i in $(cat $bnd_dir/$id/flatpaks) ; do echo -=$i=- ; sudo ${pkgm[0]} ${pkgm[1]} ${pkgm[3]} $i -y ; done ;
-fi ;
+fi ; } ;
 
 $prt '[Configuration Bundles Manager] by -=Matheus Dias=-
 ~Making desktop setups most simple possible!~
@@ -75,7 +75,7 @@ echo files: [$(ls -c $bnd_dir/$a)] -Ok
 $prt '-=- ['$a']: Cooking Bundle -=-'
 cd $bnd_dir/$a/ ; pkg_install ; 
 if [ -e $bnd_dir/$a/recipe ] ; then
-echo -=- [$name]: Cooking Directories -=- ; } ;
+echo "-=- [$name]: Cooking Directories -=-" ;
 bash recipe ;
 fi ; echo '-=- '$a' Instaled -=-' ;  done ;
 fi
