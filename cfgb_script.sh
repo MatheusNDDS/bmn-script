@@ -12,7 +12,7 @@ load_data(){
 	export dl="wget -q"
 	
 	#references
-	name="cfgb2"
+	name="cfgb"
 	file_format="tar.gz"
 	export id="$2"
 	pdir="/usr/share/$name"
@@ -57,10 +57,10 @@ setup(){
 	sudo $elf $bin
 	#setting configs variables
 	sudo echo -e "
-		export h=/home/$1
-		export pm=$2
-		export repo=$3" > $pdir/cfg
-	$print "C.F.G.B Manager instaled"
+		export h=/home/$2
+		export pm=$3
+		export repo=$4" > $pdir/cfg
+	$prt "C.F.G.B Manager instaled"
 exit
 }
 pkg_install(){
@@ -68,13 +68,13 @@ pkg_install(){
 	if [ -e $bnd_dir/$1/packages ]
 	then
 		pkgm=($pm 'install' 'update' 'upgrade')
-		$print "-=- [${pkgm[0]}]: Installing Packages -=-"
-		$print "-=- Atualizando ${pkmg[0]} -=-"
+		$prt "-=- [${pkgm[0]}]: Installing Packages -=-"
+		$prt "-=- Atualizando ${pkmg[0]} -=-"
 		sudo ${pkgm[0]} ${pkgm[2]} -y
 		sudo ${pkgm[0]} ${pkgm[3]} -y
 		for i in $(cat $bnd_dir/$1/packages) 
 		do 
-			$print "-=$i=-" ; 
+			$prt "-=$i=-" ; 
 			sudo ${pkgm[0]} ${pkgm[1]} $i -y 
 		done 
 	fi
@@ -82,17 +82,17 @@ pkg_install(){
 	if [ -e $bnd_dir/$id/flatpaks ]
 	then
 	pkgm=('flatpak' 'install' 'update' 'flathub')
-		$print '-=- Atualizando Flathub -=-'
+		$prt '-=- Atualizando Flathub -=-'
 		sudo ${pkgm[0]} ${pkgm[2]} -y
 		for i in $(cat $bnd_dir/$1/flatpaks) 
 		do 
-			echo -=$i=-
+			$prt -=$i=-
 			sudo ${pkgm[0]} ${pkgm[1]} ${pkgm[3]} $i -y
 		done
 	fi 
 }
 download(){
-	$print "-=- [$name]: Download Bundle -=-\n Repo: $repo"
+	$prt "-=- [$name]: Download Bundle -=-\n Repo: $repo"
 	$dl $repo/$1.$file_format ;
 	$print "files: [ $(ls $bnd_dir/) ] -Ok \n "
 }
@@ -101,7 +101,7 @@ unpack(){
 	$mkd $1/  
 	tar -xf $1.$file_format -C $1/
 	$rm $1.$file_format
-	echo files: [ $(ls -c $bnd_dir/$1) ] -Ok
+	$prt files: [ $(ls -c $bnd_dir/$1) ] -Ok
 }
 cook(){
 	$prt "-=- [$1: Cooking Bundle -=-"
@@ -125,7 +125,7 @@ enable_extras(){
 			$prt "-=- [$name]: OK! -=-"
 		fi
 		if [ $i = snap ] ; then
-			$prt "soom... maybe.."
+			$prt "soom..."
 		fi
 	done
 exit
