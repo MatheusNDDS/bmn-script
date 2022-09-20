@@ -60,7 +60,7 @@ setup(){
 		export h=/home/$2
 		export pm=$3
 		export repo=$4" > $pdir/cfg
-	$print "C.F.G.B Manager instaled"
+	$prt "C.F.G.B Manager instaled"
 exit
 }
 pkg_install(){
