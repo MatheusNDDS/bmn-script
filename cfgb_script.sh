@@ -1,84 +1,134 @@
 #!/bin/bash
-clear
-u=$(whoami) ; if [ $u != root ]; then echo 'Error: this command needs run with sudo: 
-Ex: sudo command/script' ; exit 1 ; fi
+#Default functions
+load_data(){
+	#mini shell
+	export cp="sudo cp -r"
+	export rm="sudo rm -rf"
+	export prt="echo -e"
+	export mkd="sudo mkdir"
+	export add_ppa="sudo add-apt-repository"
+	export elf="sudo chmod +x"
+	export print="echo -e"
+	export dl="wget -q"
+	
+	#references
+	name="cfgb2"
+	file_format="tar.gz"
+	export id="$2"
+	pdir="/usr/share/$name"
+	bnd_dir="$pdir/bundles"
+	bin="/bin/cfgb"
+	script="$(pwd)/cfgb_script.sh"
+}
+start(){
+load_data
+	#for i in $(cat $pdir/cfg)
+	for i in $(cat /usr/share/cfgb/cfg) #probisore test change
+	do 
+		export $i
+	done
+	if [ $1 = '-i' ]
+	then
+		for i in $*
+		do
+			if [ $i != '-i' ]
+			then
+				cd $bnd_dir
+				download $i ; unpack $i ; cook $i
+			fi
+		done
+	elif [ $1 = '-e' ] 
+	then
+		enable_extras $2 $3
+	elif [ $1 = '-d' ] 
+	then
+		cd $bnd_dir
+		download $2
+	else
+		$1 $*
+	fi
+}
 
-#setup Script
-if [ $1 = setup ]; then
-if [ $2 = "" ] ; then echo  ; exit ; fi ;
-sudo mkdir /usr/share/cfgb ; sudo mkdir /usr/share/cfgb/bundles ;
-sudo cp -r "$(pwd)/cfgb_script.sh" /bin/cfgb ; sudo chmod +x /bin/cfgb ;
-#setting configs variables
-sudo echo -e "
-export repo=$4
-export h=/home/$2
-export pm=$3" > /usr/share/cfgb/cfg ; echo C.F.G.B Manager instaled;
+#Custom Functions
+setup(){
+	sudo $mkd $pdir 
+	sudo $mkd $bnd_dir
+	sudo $cp $script $bin
+	sudo $elf $bin
+	#setting configs variables
+	sudo echo -e "
+		export h=/home/$1
+		export pm=$2
+		export repo=$3" > $pdir/cfg
+	$print "C.F.G.B Manager instaled"
 exit
-fi
-
-#Setup Global variables (mini shell)
-export name=cfgb ; export cp="sudo cp -r";export rm="sudo rm -rf";export prt="echo -e" ; export pdir=/usr/share/$name ; export id=$2 ; export mkd='sudo mkdir' ; export bnd_dir=$pdir/bundles;export add_ppa="sudo add-apt-repository" ;
-
-#Start Setup
-cfg=$(cat $pdir/cfg); $cfg ; cd $bnd_dir ;
-
-#extra package managers
-if [ $1 = '-e' ]; then 
-for a in $2 $3 ; do 
-if [ $a = flatpak ] ; then
-echo "-=- [$name]: Configuring $a -=-" ; $pm install flatpak -y ;
-flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo ; echo "-=- [$name]: OK! -=-"
-fi
-if [ $a = snap ] ; then
-echo soom!
-fi
-done ; exit 0 ; fi ;
-
-#configurations debug
-if [ $1 = -l ]; then cat /usr/share/cfgb/cfg ; exit ; fi
-
-pkg_install () {
+}
+pkg_install(){
 #Distro Pkgs
-if [ -e $bnd_dir/$id/packages ] ; then
-	pkgm=($pm 'install' 'update' 'upgrade');
-	echo -=- [${pkgm[0]}]: Installing Packages -=-;
-	echo '-=- Atualizando '${pkmg[0]}' -=-'
-	sudo ${pkgm[0]} ${pkgm[2]} -y ;
-	sudo ${pkgm[0]} ${pkgm[3]} -y ;
-	for i in $(cat $bnd_dir/$id/packages) ; do echo -=$i=- ; sudo ${pkgm[0]} ${pkgm[1]} $i -y ; done ; 
-	fi ;
+	if [ -e $bnd_dir/$1/packages ]
+	then
+		pkgm=($pm 'install' 'update' 'upgrade')
+		$print "-=- [${pkgm[0]}]: Installing Packages -=-"
+		$print "-=- Atualizando ${pkmg[0]} -=-"
+		sudo ${pkgm[0]} ${pkgm[2]} -y
+		sudo ${pkgm[0]} ${pkgm[3]} -y
+		for i in $(cat $bnd_dir/$1/packages) 
+		do 
+			$print "-=$i=-" ; 
+			sudo ${pkgm[0]} ${pkgm[1]} $i -y 
+		done 
+	fi
 #Flatpaks
-	if [ -e $bnd_dir/$id/flatpaks ] ; then
-	pkgm=('flatpak' 'install' 'update' 'flathub') ;
-	echo '-=- Atualizando Flathub -=-'
-	sudo ${pkgm[0]} ${pkgm[2]} -y ;
-	for i in $(cat $bnd_dir/$id/flatpaks) ; do echo -=$i=- ; sudo ${pkgm[0]} ${pkgm[1]} ${pkgm[3]} $i -y ; done ;
-fi ; } ;
+	if [ -e $bnd_dir/$id/flatpaks ]
+	then
+	pkgm=('flatpak' 'install' 'update' 'flathub')
+		$print '-=- Atualizando Flathub -=-'
+		sudo ${pkgm[0]} ${pkgm[2]} -y
+		for i in $(cat $bnd_dir/$1/flatpaks) 
+		do 
+			echo -=$i=-
+			sudo ${pkgm[0]} ${pkgm[1]} ${pkgm[3]} $i -y
+		done
+	fi 
+}
+download(){
+	$print "-=- [$name]: Download Bundle -=-\n Repo: $repo"
+	$dl $repo/$1.$file_format ;
+	$print "files: [ $(ls $bnd_dir/) ] -Ok \n "
+}
+unpack(){
+	$prt "-=- [$1: Unpacking Bundle -=-"
+	$mkd $1/  
+	tar -xf $1.$file_format -C $1/
+	$rm $1.$file_format
+	echo files: [ $(ls -c $bnd_dir/$1) ] -Ok
+}
+cook(){
+	$prt "-=- [$1: Cooking Bundle -=-"
+	cd $bnd_dir/$1/
+	pkg_install $1
+	if [ -e $bnd_dir/$1/recipe ]
+	then
+		echo "-=- [$name]: Cooking Directories -=-" ;
+		bash recipe
+	fi
+	$prt "-=- $1 Instaled -=-"
+	$rm $bnd_dir/*
+}
+enable_extras(){
+	for i in $*
+	do 
+		if [ $i = flatpak ] ; then
+			$prt "-=- [$name]: Configuring ${a[$i]} -=-"
+			$pm install flatpak -y
+			flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo 
+			$prt "-=- [$name]: OK! -=-"
+		fi
+		if [ $i = snap ] ; then
+			$prt "soom... maybe.."
+		fi
+	done
+exit
+}
 
-$prt '[Configuration Bundles Manager] by -=Matheus Dias=-
-~Making desktop setups most simple possible!~
-'
-if [ $1 = -i ]; then 
-args=($2 $3 $4 $5 $6) ; for a in ${args[@]} ; do
-#getting a bundle
-echo '-=- ['$name']: Download Bundle -=-
-Repository: '$repo''
-wget -q $repo/$a.tar.gz ;
-echo 'tar: ['$(ls $bnd_dir/ )'] -Ok
-'
-#unpacking a bundle
-echo '-=- ['$a']: Unpacking Bundle -=-'
-$mkd $a/ ; tar -xf $a.tar.gz -C $a/ ; $rm $a.tar.gz
-echo files: [$(ls -c $bnd_dir/$a)] -Ok
-
-#Cooking directories recipes
-$prt '-=- ['$a']: Cooking Bundle -=-'
-cd $bnd_dir/$a/ ; pkg_install ; 
-if [ -e $bnd_dir/$a/recipe ] ; then
-echo "-=- [$name]: Cooking Directories -=-" ;
-bash recipe ;
-fi ; echo '-=- '$a' Instaled -=-' ;  done ;
-fi
-
-#Clean bundles folder
-$rm $bnd_dir/*
+start $*
