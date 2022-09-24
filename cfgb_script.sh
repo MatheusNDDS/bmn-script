@@ -10,6 +10,7 @@ load_data(){
 	export elf="sudo chmod +x"
 	export print="echo -e"
 	export dl="wget -q"
+	export dnull="/dev/null"
 	
 	#references
 	name="cfgb"
@@ -23,6 +24,7 @@ load_data(){
 start(){
 load_data
 	clear
+	output header "Configuration Bundles Manager" "Matheus Dias"
 	for i in $(cat /usr/share/cfgb/cfg)
 	do 
 		export $i
@@ -51,9 +53,9 @@ load_data
 
 #Custom Functions
 setup(){
-	sudo $mkd $pdir 
-	sudo $mkd $bnd_dir
-	sudo $cp $script $bin
+	sudo $mkd $pdir > $dnull 
+	sudo $mkd $bnd_dir > $dnull
+	sudo $cp $script $bin > $dnull
 	sudo $elf $bin
 	#setting configs variables
 	sudo echo -e "
@@ -65,14 +67,13 @@ exit
 }
 output(){
 	declare -A t
+	t[header]="\033[01;36m-=$2=-\033[00;37m\n~ $3 \n"
 	t[bnd_header]="Bundle:$2\nRepo:$repo"
-	t[progress]="-=- [$2]: $3 -=-"
-	t[show_files]="files: [$2] -Ok"
-	t[title]="-=- $2 -=-"
-	t[sub_title]="- $2"
-	
+	t[progress]="\033[00;32m-=- [$2]: $3 -=-\033[00;37m"
+	t[show_files]="\033[00;37mfiles: [$2] -Ok\033[00;37m "
+	t[title]="\033[01;36m-=- $2 -=-\033[00;37m"
+	t[sub_title]="\033[00;33m- $2\033[00;37m"
 	$prt ${t[$1]}
-	
 }
 pkg_install(){
 #Distro Pkgs
@@ -80,12 +81,12 @@ pkg_install(){
 	then
 		pkgm=($pm 'install' 'update' 'upgrade')
 		output progress ${pkgm[0]} "Installing Packages"
-		output sub_title "Atualizando ${pkmg[0]}"
+		output sub_title "Updating repositories ${pkmg[0]}"
 		sudo ${pkgm[0]} ${pkgm[2]} -y
 		sudo ${pkgm[0]} ${pkgm[3]} -y
 		for i in $(cat $bnd_dir/$1/packages) 
 		do 
-			output sub_title $i
+			output sub_title "Installing $i"
 			sudo ${pkgm[0]} ${pkgm[1]} $i -y 
 		done 
 	fi
@@ -93,39 +94,40 @@ pkg_install(){
 	if [ -e $bnd_dir/$1/flatpaks ]
 	then
 		pkgm=('flatpak' 'install' 'update' 'flathub')
-		output progress ${pkgm[0]} "Installing flatpaks"
+		output progress ${pkgm[0]} "Installing Flatpaks"
 		output sub_title 'Uptating Flathub'
 		sudo ${pkgm[0]} ${pkgm[2]} -y
 		for i in $(cat $bnd_dir/$1/flatpaks) 
 		do 
-			output sub_title $i
+			output sub_title "Installing $i"
 			sudo ${pkgm[0]} ${pkgm[1]} ${pkgm[3]} $i -y
 		done
 	fi 
 }
 download(){
 	output bnd_header $1
-	output progress $name "Downloading..."
+	output title "Downloading $1"
 	$dl $repo/$1.$file_format
 	output show_files "$(ls $bnd_dir/)"
 }
 unpack(){
-	output progress "tar" "Unpacking..."
+	output progress "tar" "Unpacking"
 	$mkd $1/  
 	tar -xf $1.$file_format -C $1/
 	$rm $1.$file_format
 	output show_files "$(ls $bnd_dir/$1/)"
 }
 cook(){
-	output title "Cooking $1"
+	output title "Setting-up $1"
 	cd $bnd_dir/$1/
 	pkg_install $1
 	if [ -e $bnd_dir/$1/recipe ]
 	then
-		output progress $1 "Setting Files"
+		output progress $1 "Setting Recipe Script"
+		#cat recipe
 		bash recipe
 	fi
-	output progress $name "$1 Instaled"
+	output title "$1 Instaled"
 	$rm $bnd_dir/*
 }
 enable_extras(){
