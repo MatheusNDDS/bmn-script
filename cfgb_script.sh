@@ -40,10 +40,10 @@ load_data
 			cook $i
 
 		done
-	elif [ $1 = '-e' ] 
+	elif [ $1 = '-e' ]
 	then
 		enable_extras $2 $3
-	elif [ $1 = '-d' ] 
+	elif [ $1 = '-d' ]
 	then
 		download $2
 	else
@@ -76,6 +76,7 @@ output(){
 	$prt ${t[$1]}
 }
 pkg_install(){
+	pkgm=($pm "install" "update" "upgrade" "remove" "flatpak" "flathub" )
 #Distro Pkgs
 	if [ -e $bnd_dir/$1/packages ]
 	then
@@ -94,13 +95,13 @@ pkg_install(){
 	if [ -e $bnd_dir/$1/flatpaks ]
 	then
 		pkgm=('flatpak' 'install' 'update' 'flathub')
-		output progress ${pkgm[0]} "Installing Flatpaks"
+		output progress ${pkgm[5]} "Installing Flatpaks"
 		output sub_title 'Uptating Flathub'
-		sudo ${pkgm[0]} ${pkgm[2]} -y
+		sudo ${pkgm[5]} ${pkgm[2]} -y
 		for i in $(cat $bnd_dir/$1/flatpaks) 
 		do 
 			output sub_title "Installing $i"
-			sudo ${pkgm[0]} ${pkgm[1]} ${pkgm[3]} $i -y
+			sudo ${pkgm[5]} ${pkgm[1]} ${pkgm[6]} $i -y
 		done
 	fi 
 }
