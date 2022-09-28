@@ -11,21 +11,23 @@ load_data(){
 	export print="echo -e"
 	export dl="wget -q"
 	export dnull="/dev/null"
+	to_install=()
+	to_remove=()
 	
 	#references
 	name="cfgb"
 	file_format="tar.gz"
-	export id="$2"
 	pdir="/usr/share/$name"
 	bnd_dir="$pdir/bundles"
 	bin="/bin/cfgb"
 	script="$(pwd)/cfgb_script.sh"
+	pkg_flag=""
 }
 start(){
 load_data
 	clear
 	output header "Configuration Bundles Manager" "Matheus Dias"
-	for i in $(cat /usr/share/cfgb/cfg)
+	for i in $(cat $pdir/cfg)
 	do 
 		export $i
 	done
@@ -53,9 +55,9 @@ load_data
 
 #Custom Functions
 setup(){
-	sudo $mkd $pdir > $dnull 
-	sudo $mkd $bnd_dir > $dnull
-	sudo $cp $script $bin > $dnull
+	sudo $mkd $pdir >> $dnull 
+	sudo $mkd $bnd_dir >> $dnull
+	sudo $cp $script $bin >> $dnull
 	sudo $elf $bin
 	#setting configs variables
 	sudo echo -e "
@@ -73,36 +75,83 @@ output(){
 	t[show_files]="\033[00;37mfiles: [$2] -Ok\033[00;37m "
 	t[title]="\033[01;36m-=- $2 -=-\033[00;37m"
 	t[sub_title]="\033[00;33m- $2\033[00;37m"
+	t[list_data]="\033[01;37m$2: [$3]\033[00;37m"
 	$prt ${t[$1]}
 }
+pkg_parser(){
+	if [ $1 = "parse" ]
+	then
+		for i in $(cat $bnd_dir/$2/$3)
+			do
+				if [ $i = "#install" ]
+				then
+					pkg_flag="install"
+				elif [ $i = "#remove" ]
+				then
+					pkg_flag="remove"
+				else
+					if [ $pkg_flag = "install" ]
+					then
+						to_install+=($i)
+					fi
+					if [ $pkg_flag = "remove" ]
+					then
+						to_remove+=($i)
+				fi
+				
+			fi
+		done
+	elif [ $1 = "clean" ]
+	then
+		unset to_install
+		unset to_remove
+		to_install=()
+		to_remove=()
+	fi
+}
 pkg_install(){
-	pkgm=($pm "install" "update" "upgrade" "remove" "flatpak" "flathub" )
 #Distro Pkgs
 	if [ -e $bnd_dir/$1/packages ]
 	then
-		pkgm=($pm 'install' 'update' 'upgrade')
-		output progress ${pkgm[0]} "Installing Packages"
-		output sub_title "Updating repositories ${pkmg[0]}"
-		sudo ${pkgm[0]} ${pkgm[2]} -y
-		sudo ${pkgm[0]} ${pkgm[3]} -y
-		for i in $(cat $bnd_dir/$1/packages) 
-		do 
-			output sub_title "Installing $i"
-			sudo ${pkgm[0]} ${pkgm[1]} $i -y 
-		done 
+		pkg_parser parse $1 packages
+		output progress $pm "Installing Packages"
+		output list_data "install" "${to_install[*]}"
+		output list_data "remove" "${to_remove[*]}"
+		output sub_title "Updating repositories"
+		sudo $pm update -y
+		sudo $pm upgrade -y
+		for i in ${to_install[*]}
+		do
+			output sub_title "Installing: $i"
+			sudo $pm install $i
+		done
+		for i in ${to_remove[*]}
+		do
+			output sub_title "Removing: $i"
+			sudo $pm remove $i
+		done
+		pkg_parser clean
 	fi
 #Flatpaks
 	if [ -e $bnd_dir/$1/flatpaks ]
 	then
-		pkgm=('flatpak' 'install' 'update' 'flathub')
-		output progress ${pkgm[5]} "Installing Flatpaks"
+		pkg_parser parse $1 flatpaks
+		output progress Flatpak "Installing Flatpaks"
+		output list_data "install" "${to_install[*]}"
+		output list_data "remove" "${to_remove[*]}"
 		output sub_title 'Uptating Flathub'
-		sudo ${pkgm[5]} ${pkgm[2]} -y
-		for i in $(cat $bnd_dir/$1/flatpaks) 
-		do 
-			output sub_title "Installing $i"
-			sudo ${pkgm[5]} ${pkgm[1]} ${pkgm[6]} $i -y
+		flatpak update -y
+		for i in ${to_install[*]}
+		do
+			output sub_title "Installing: $i"
+			flatpak install --system flathub $i -y
 		done
+		for i in ${to_remove[*]}
+		do
+			output sub_title "Removing: $i"
+			flatpak uninstall --system flathub $i -y
+		done
+		pkg_parser clean
 	fi 
 }
 download(){
@@ -129,7 +178,7 @@ cook(){
 		bash recipe
 	fi
 	output title "$1 Instaled"
-	$rm $bnd_dir/*
+	$rm $bnd_dir/$1
 }
 enable_extras(){
 	for i in $*
@@ -137,7 +186,7 @@ enable_extras(){
 		if [ $i = flatpak ] ; then
 			$prt "-=- [$name]: Configuring ${a[$i]} -=-"
 			$pm install flatpak -y
-			flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo 
+			flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 			$prt "-=- [$name]: OK! -=-"
 		fi
 		if [ $i = snap ] ; then
