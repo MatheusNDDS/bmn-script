@@ -10,7 +10,7 @@ load_data(){
 	export elf="sudo chmod +x"
 	export print="echo -e"
 	export dl="wget -q"
-	export dnull="/dev/null"
+	export dnull="/dev/0"
 	
 	#references
 	name="cfgb"
@@ -19,7 +19,7 @@ load_data(){
 	bnd_dir="$pdir/bundles"
 	bin="/bin/cfgb"
 	script="$(pwd)/cfgb_script.sh"
-	pkg_flag=""
+	pkg_flag="null"
 }
 start(){
 load_data
@@ -53,9 +53,9 @@ load_data
 
 #Custom Functions
 setup(){
-	sudo $mkd $pdir >> $dnull 
-	sudo $mkd $bnd_dir >> $dnull
-	sudo $cp $script $bin >> $dnull
+	sudo $mkd $pdir 2> $dnull
+	sudo $mkd $bnd_dir 2> $dnull
+	sudo $cp $script $bin 2> $dnull
 	sudo $elf $bin
 	#setting configs variables
 	sudo echo -e "
@@ -70,10 +70,10 @@ output(){
 	t[header]="\033[01;36m-=$2=-\033[00;37m\n~ $3 \n"
 	t[bnd_header]="Bundle:$2\nRepo:$repo"
 	t[progress]="\033[00;32m-=- [$2]: $3 -=-\033[00;37m"
-	t[show_files]="\033[00;37mfiles: [$2] -Ok\033[00;37m "
+	t[show_files]="\033[00;37mfiles: [ $2 ] -Ok\033[00;37m "
 	t[title]="\033[01;36m-=- $2 -=-\033[00;37m"
 	t[sub_title]="\033[00;33m- $2\033[00;37m"
-	t[list_data]="\033[00;37m$2: [$3]\033[00;37m"
+	t[dialogue]="\033[00;37m$2: [ $3 ]\033[00;37m"
 	$prt ${t[$1]}
 }
 pkg_parser(){
@@ -102,11 +102,11 @@ pkg_parser(){
 		
 		if [ -n "${to_install[*]}" ]
 		then
-			output list_data "install" "${to_install[*]}"
+			output dialogue "install" "${to_install[*]}"
 		fi
 		if [ -n "${to_remove[*]}" ]
 		then
-			output list_data "remove" "${to_remove[*]}"
+			output dialogue "remove" "${to_remove[*]}"
 		fi
 	elif [ $1 = "clean" ]
 	then
@@ -116,7 +116,7 @@ pkg_parser(){
 }
 pkg_install(){
 #Distro Pkgs
-	if [ -e $bnd_dir/$1/packages ]
+	if [ -e $bnd_dir/$1/packages -a $pkg_flag != "null" ]
 	then
 		output progress $pm "Installing Packages"
 		pkg_parser parse $1 packages
@@ -136,7 +136,7 @@ pkg_install(){
 		pkg_parser clean
 	fi
 #Flatpaks
-	if [ -e $bnd_dir/$1/flatpaks ]
+	if [ -e $bnd_dir/$1/flatpaks -a $pkg_flag != "null" ]
 	then
 		output progress Flatpak "Installing Flatpaks"
 		pkg_parser parse $1 flatpaks
@@ -153,7 +153,11 @@ pkg_install(){
 			flatpak uninstall --system flathub $i -y
 		done
 		pkg_parser clean
-	fi 
+	fi
+	if [ $pkg_flag = "null" ]
+	then
+		output dialogue $name "No packages to install"
+	fi
 }
 download(){
 	output bnd_header $1
