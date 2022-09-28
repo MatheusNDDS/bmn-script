@@ -11,8 +11,6 @@ load_data(){
 	export print="echo -e"
 	export dl="wget -q"
 	export dnull="/dev/null"
-	to_install=()
-	to_remove=()
 	
 	#references
 	name="cfgb"
@@ -75,7 +73,7 @@ output(){
 	t[show_files]="\033[00;37mfiles: [$2] -Ok\033[00;37m "
 	t[title]="\033[01;36m-=- $2 -=-\033[00;37m"
 	t[sub_title]="\033[00;33m- $2\033[00;37m"
-	t[list_data]="\033[01;37m$2: [$3]\033[00;37m"
+	t[list_data]="\033[00;37m$2: [$3]\033[00;37m"
 	$prt ${t[$1]}
 }
 pkg_parser(){
@@ -101,22 +99,27 @@ pkg_parser(){
 				
 			fi
 		done
+		
+		if [ -n "${to_install[*]}" ]
+		then
+			output list_data "install" "${to_install[*]}"
+		fi
+		if [ -n "${to_remove[*]}" ]
+		then
+			output list_data "remove" "${to_remove[*]}"
+		fi
 	elif [ $1 = "clean" ]
 	then
 		unset to_install
 		unset to_remove
-		to_install=()
-		to_remove=()
 	fi
 }
 pkg_install(){
 #Distro Pkgs
 	if [ -e $bnd_dir/$1/packages ]
 	then
-		pkg_parser parse $1 packages
 		output progress $pm "Installing Packages"
-		output list_data "install" "${to_install[*]}"
-		output list_data "remove" "${to_remove[*]}"
+		pkg_parser parse $1 packages
 		output sub_title "Updating repositories"
 		sudo $pm update -y
 		sudo $pm upgrade -y
@@ -135,10 +138,8 @@ pkg_install(){
 #Flatpaks
 	if [ -e $bnd_dir/$1/flatpaks ]
 	then
-		pkg_parser parse $1 flatpaks
 		output progress Flatpak "Installing Flatpaks"
-		output list_data "install" "${to_install[*]}"
-		output list_data "remove" "${to_remove[*]}"
+		pkg_parser parse $1 flatpaks
 		output sub_title 'Uptating Flathub'
 		flatpak update -y
 		for i in ${to_install[*]}
