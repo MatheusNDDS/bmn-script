@@ -24,7 +24,7 @@ load_data(){
 start(){
 load_data
 	clear
-	output header "Configuration Bundles Manager" "Matheus Dias"
+	output header "/Configuration Bundles Manager/" "Matheus Dias"
 	for i in $(cat $pdir/cfg)
 	do 
 		export $i
