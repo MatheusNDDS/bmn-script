@@ -35,7 +35,7 @@ load_data
 		for i in ${b[@]:2}
 		do
 			cd $bnd_dir
-			download $i 
+			download $i 0
 			unpack $i
 			cook $i
 
@@ -45,7 +45,11 @@ load_data
 		enable_extras $2 $3
 	elif [ $1 = '-d' ]
 	then
-		download $2
+		b=$*
+		for i in ${b[@]:2}
+		do
+			download $i 1
+		done
 	else
 		$1 $*
 	fi
@@ -77,7 +81,7 @@ output(){
 	$prt ${t[$1]}
 }
 pkg_parser(){
-	if [ $1 = "parse" ]
+	if [ $1 = "parse" -a -e $bnd_dir/$2/$3 ]
 	then
 		for i in $(cat $bnd_dir/$2/$3)
 			do
@@ -99,7 +103,8 @@ pkg_parser(){
 				
 			fi
 		done
-		
+	elif [ $1 = "list_pkgs" ]
+	then
 		if [ -n "${to_install[*]}" ]
 		then
 			output dialogue "install" "${to_install[*]}"
@@ -112,14 +117,16 @@ pkg_parser(){
 	then
 		unset to_install
 		unset to_remove
+		pkg_flag="null"
 	fi
 }
 pkg_install(){
 #Distro Pkgs
-	if [ -e $bnd_dir/$1/packages -a $pkg_flag != "null" ]
+	pkg_parser parse $1 packages
+	if [ $pkg_flag != "null" ]
 	then
 		output progress $pm "Installing Packages"
-		pkg_parser parse $1 packages
+		pkg_parser list_pkgs
 		output sub_title "Updating repositories"
 		sudo $pm update -y
 		sudo $pm upgrade -y
@@ -136,10 +143,11 @@ pkg_install(){
 		pkg_parser clean
 	fi
 #Flatpaks
-	if [ -e $bnd_dir/$1/flatpaks -a $pkg_flag != "null" ]
+	pkg_parser parse $1 flatpaks
+	if [ $pkg_flag != "null" ]
 	then
 		output progress Flatpak "Installing Flatpaks"
-		pkg_parser parse $1 flatpaks
+		pkg_parser list_pkgs
 		output sub_title 'Uptating Flathub'
 		flatpak update -y
 		for i in ${to_install[*]}
@@ -154,16 +162,17 @@ pkg_install(){
 		done
 		pkg_parser clean
 	fi
-	if [ $pkg_flag = "null" ]
-	then
-		output dialogue $name "No packages to install"
-	fi
 }
 download(){
 	output bnd_header $1
 	output title "Downloading $1"
 	$dl $repo/$1.$file_format
-	output show_files "$(ls $bnd_dir/)"
+	if [ $2 != 1 ]
+	then 
+		output show_files "$(ls $bnd_dir/)"
+	else
+		output show_files "$(ls . | grep $1.$file_format)"
+	fi
 }
 unpack(){
 	output progress "tar" "Unpacking"
@@ -174,16 +183,16 @@ unpack(){
 }
 cook(){
 	output title "Setting-up $1"
-	cd $bnd_dir/$1/
+	cd $1/
 	pkg_install $1
-	if [ -e $bnd_dir/$1/recipe ]
+	if [ -e recipe ]
 	then
 		output progress $1 "Setting Recipe Script"
 		#cat recipe
 		bash recipe
 	fi
 	output title "$1 Instaled"
-	$rm $bnd_dir/$1
+	$rm $bnd_dir/*
 }
 enable_extras(){
 	for i in $*
@@ -195,7 +204,7 @@ enable_extras(){
 			$prt "-=- [$name]: OK! -=-"
 		fi
 		if [ $i = snap ] ; then
-			$prt "soom... maybe.."
+			$prt "soom..."
 		fi
 	done
 exit
