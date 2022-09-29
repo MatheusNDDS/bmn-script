@@ -192,7 +192,7 @@ cook(){
 		bash recipe
 	fi
 	output title "$1 Instaled"
-	$rm $bnd_dir/*
+	$rm $bnd_dir/$1
 }
 enable_extras(){
 	for i in $*
