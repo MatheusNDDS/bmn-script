@@ -10,6 +10,7 @@ load_data(){
 	export elf="sudo chmod +x"
 	export dl="wget -q"
 	export d0="/dev/0"
+	export cfgbi="sudo cfgb -i"
 	export -f output
 	
 	#references
