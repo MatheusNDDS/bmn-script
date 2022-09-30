@@ -100,15 +100,6 @@ pkg_parser(){
 					then
 						to_remove+=($i)
 				fi
-				
-			fi
-		if [ $pm = "dnf" ]
-		then
-			installed=($(dnf list installed))
-		elif [ $pm = "apt" ]
-		then
-			installed=($(apt list --installed))
-		fi
 		done
 	elif [ $1 = "list_pkgs" ]
 	then
@@ -196,6 +187,7 @@ cook(){
 	then
 		output progress $1 "Setting Recipe Script"
 		#cat recipe
+		export id="$1"
 		bash recipe
 	fi
 	output title "$1 Instaled"
