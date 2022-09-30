@@ -24,7 +24,7 @@ load_data(){
 start(){
 load_data
 	clear
-	output header "/Configuration Bundles Manager/" "Matheus Dias"
+	output header "Configuration Bundles Manager" "Matheus Dias"
 	for i in $(cat $pdir/cfg)
 	do 
 		export $i
@@ -71,7 +71,7 @@ exit
 }
 output(){
 	declare -A t
-	t[header]="\033[01;36m-=$2=-\033[00;37m\n~ $3 \n"
+	t[header]="\033[01;36m-=/$2/=-\033[00;37m\n~ $3 \n"
 	t[bnd_header]="Bundle:$2\nRepo:$repo"
 	t[progress]="\033[00;32m-=- [$2]: $3 -=-\033[00;37m"
 	t[ok_dialogue]="\033[00;37mfiles: [ $2 ] -Ok\033[00;37m "
@@ -102,6 +102,13 @@ pkg_parser(){
 				fi
 				
 			fi
+		if [ $pm = "dnf" ]
+		then
+			installed=($(dnf list installed))
+		elif [ $pm = "apt" ]
+		then
+			installed=($(apt list --installed))
+		fi
 		done
 	elif [ $1 = "list_pkgs" ]
 	then
@@ -198,7 +205,7 @@ enable_extras(){
 	for i in $*
 	do 
 		if [ $i = flatpak ] ; then
-			$prt "-=- [$name]: Configuring ${a[$i]} -=-"
+			output progress $name "Configuring flatpak"
 			$pm install flatpak -y
 			flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 			output ok_dialogue $name "flatpak enabled"
