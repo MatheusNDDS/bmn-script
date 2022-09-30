@@ -99,6 +99,7 @@ pkg_parser(){
 					if [ $pkg_flag = "remove" ]
 					then
 						to_remove+=($i)
+					fi
 				fi
 		done
 	elif [ $1 = "list_pkgs" ]
