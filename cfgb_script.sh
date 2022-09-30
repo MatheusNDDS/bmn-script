@@ -8,9 +8,9 @@ load_data(){
 	export mkd="sudo mkdir"
 	export add_ppa="sudo add-apt-repository"
 	export elf="sudo chmod +x"
-	export print="echo -e"
 	export dl="wget -q"
-	export dnull="/dev/0"
+	export d0="/dev/0"
+	export -f output
 	
 	#references
 	name="cfgb"
@@ -57,16 +57,16 @@ load_data
 
 #Custom Functions
 setup(){
-	sudo $mkd $pdir 2> $dnull
-	sudo $mkd $bnd_dir 2> $dnull
-	sudo $cp $script $bin 2> $dnull
+	sudo $mkd $pdir 2> $d0
+	sudo $mkd $bnd_dir 2> $d0
+	sudo $cp $script $bin 2> $d0
 	sudo $elf $bin
 	#setting configs variables
 	sudo echo -e "
 		export h=/home/$2
 		export pm=$3
 		export repo=$4" > $pdir/cfg
-	$print "C.F.G.B Manager instaled"
+	output title "C.F.G.B Manager instaled"
 exit
 }
 output(){
@@ -74,7 +74,7 @@ output(){
 	t[header]="\033[01;36m-=$2=-\033[00;37m\n~ $3 \n"
 	t[bnd_header]="Bundle:$2\nRepo:$repo"
 	t[progress]="\033[00;32m-=- [$2]: $3 -=-\033[00;37m"
-	t[show_files]="\033[00;37mfiles: [ $2 ] -Ok\033[00;37m "
+	t[ok_dialogue]="\033[00;37mfiles: [ $2 ] -Ok\033[00;37m "
 	t[title]="\033[01;36m-=- $2 -=-\033[00;37m"
 	t[sub_title]="\033[00;33m- $2\033[00;37m"
 	t[dialogue]="\033[00;37m$2: [ $3 ]\033[00;37m"
@@ -169,9 +169,9 @@ download(){
 	$dl $repo/$1.$file_format
 	if [ $2 != 1 ]
 	then 
-		output show_files "$(ls $bnd_dir/)"
+		output ok_dialogue "$(ls $bnd_dir/)"
 	else
-		output show_files "$(ls . | grep $1.$file_format)"
+		output ok_dialogue "$(ls . | grep $1.$file_format)"
 	fi
 }
 unpack(){
@@ -179,7 +179,7 @@ unpack(){
 	$mkd $1/  
 	tar -xf $1.$file_format -C $1/
 	$rm $1.$file_format
-	output show_files "$(ls $bnd_dir/$1/)"
+	output ok_dialogue "$(ls $bnd_dir/$1/)"
 }
 cook(){
 	output title "Setting-up $1"
@@ -201,7 +201,7 @@ enable_extras(){
 			$prt "-=- [$name]: Configuring ${a[$i]} -=-"
 			$pm install flatpak -y
 			flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-			$prt "-=- [$name]: OK! -=-"
+			output ok_dialogue $name "flatpak enabled"
 		fi
 		if [ $i = snap ] ; then
 			$prt "soom..."
