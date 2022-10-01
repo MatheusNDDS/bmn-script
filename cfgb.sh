@@ -25,7 +25,6 @@ load_data(){
 }
 start(){
 load_data
-	clear
 	output header "Configuration Bundles Manager" "Matheus Dias"
 	for i in $(cat $pdir/cfg)
 	do 
@@ -66,10 +65,16 @@ setup(){
 	#setting configs variables
 	if [ -z "$3" ]
 	then
-		sudo echo -e "
-		export pm=$2
-		export repo=$(cat repo)" > $pdir/cfg
-		output title "C.F.G.B Manager portable repository file"
+		if [ -e repo ]
+		then
+			sudo echo -e "
+			export pm=$2
+			export repo=$(cat repo)" > $pdir/cfg
+			output title "C.F.G.B instelled with portable repo file"
+		else
+			output error "install error" "required portable 'repo' file, or enter the repository url address last. "
+			exit 1
+		fi
 	else
 		sudo echo -e "
 		export pm=$2
@@ -84,33 +89,34 @@ output(){
 	t[header]="\033[01;36m-=/$2/=-\033[00;37m\n~ $3 \n"
 	t[bnd_header]="Bundle:$2\nRepo:$repo"
 	t[progress]="\033[00;32m-=- [$2]: $3 -=-\033[00;37m"
-	t[ok_dialogue]="\033[00;37mfiles: [ $2 ] -Ok\033[00;37m "
+	t[ok_dialogue]="\033[00;37m$2: [ $3 ] -Ok\033[00;37m "
 	t[title]="\033[01;36m-=- $2 -=-\033[00;37m"
 	t[sub_title]="\033[00;33m- $2\033[00;37m"
 	t[dialogue]="\033[00;37m$2: [ $3 ]\033[00;37m"
+	t[error]="\033[01;31m[$2]: { $3 }\033[00;37m"
 	$prt ${t[$1]}
 }
 pkg_parser(){
 	if [ $1 = "parse" -a -e $bnd_dir/$2/$3 ]
 	then
 		for i in $(cat $bnd_dir/$2/$3)
-			do
-				if [ $i = "#install" ]
+		do
+			if [ $i = "#install" ]
+			then
+				pkg_flag="install"
+			elif [ $i = "#remove" ]
+			then
+				pkg_flag="remove"
+			else
+				if [ $pkg_flag = "install" ]
 				then
-					pkg_flag="install"
-				elif [ $i = "#remove" ]
-				then
-					pkg_flag="remove"
-				else
-					if [ $pkg_flag = "install" ]
-					then
-						to_install+=($i)
-					fi
-					if [ $pkg_flag = "remove" ]
-					then
-						to_remove+=($i)
-					fi
+					to_install+=($i)
 				fi
+				if [ $pkg_flag = "remove" ]
+				then
+					to_remove+=($i)
+				fi
+			fi
 		done
 	elif [ $1 = "list_pkgs" ]
 	then
@@ -178,9 +184,9 @@ download(){
 	$dl $repo/$1.$file_format
 	if [ $2 != 1 ]
 	then 
-		output ok_dialogue "$(ls $bnd_dir/)"
+		output ok_dialogue "files" "$(ls $bnd_dir/)"
 	else
-		output ok_dialogue "$(ls . | grep $1.$file_format)"
+		output ok_dialogue "files" "$(ls . | grep $1.$file_format)"
 	fi
 }
 unpack(){
@@ -188,7 +194,7 @@ unpack(){
 	$mkd $1/  
 	tar -xf $1.$file_format -C $1/
 	$rm $1.$file_format
-	output ok_dialogue "$(ls $bnd_dir/$1/)"
+	output ok_dialogue "files" "$(ls $bnd_dir/$1/)"
 }
 cook(){
 	output title "Setting-up $1"
