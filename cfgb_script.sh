@@ -85,23 +85,23 @@ pkg_parser(){
 	if [ $1 = "parse" -a -e $bnd_dir/$2/$3 ]
 	then
 		for i in $(cat $bnd_dir/$2/$3)
-			do
-				if [ $i = "#install" ]
+		do
+			if [ $i = "#install" ]
+			then
+				pkg_flag="$i"
+			elif [ $i = "#remove" ]
+			then
+				pkg_flag="$i"
+			else
+				if [ $pkg_flag = "#install" ]
 				then
-					pkg_flag="install"
-				elif [ $i = "#remove" ]
-				then
-					pkg_flag="remove"
-				else
-					if [ $pkg_flag = "install" ]
-					then
-						to_install+=($i)
-					fi
-					if [ $pkg_flag = "remove" ]
-					then
-						to_remove+=($i)
-					fi
+					to_install+=($i)
 				fi
+				if [ $pkg_flag = "#remove" ]
+				then
+					to_remove+=($i)
+				fi
+			fi
 		done
 	elif [ $1 = "list_pkgs" ]
 	then
