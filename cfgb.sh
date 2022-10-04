@@ -22,6 +22,7 @@ load_data(){
 	bin="/bin/cfgb"
 	script="$(pwd)/cfgb.sh"
 	pkg_flag="null"
+	dep=(wget)
 }
 start(){
 load_data
@@ -62,6 +63,8 @@ setup(){
 	$mkd $bnd_dir 2> $d0
 	$cp $script $bin 2> $d0
 	$elf $bin
+	output progress $name "Installing dependencies"
+	sudo $2 install wget -y
 	#setting configs variables
 	if [ -z "$3" ]
 	then
@@ -79,7 +82,7 @@ setup(){
 		sudo echo -e "
 		export pm=$2
 		export repo=$3" > $pdir/cfg
-		output title "C.F.G.B Manager instaled"
+		output title "C.F.G.B instaled"
 	fi
 	
 exit
@@ -103,16 +106,16 @@ pkg_parser(){
 		do
 			if [ $i = "#install" ]
 			then
-				pkg_flag="install"
+				pkg_flag=$i
 			elif [ $i = "#remove" ]
 			then
-				pkg_flag="remove"
+				pkg_flag=$i
 			else
-				if [ $pkg_flag = "install" ]
+				if [ $pkg_flag = "#install" ]
 				then
 					to_install+=($i)
 				fi
-				if [ $pkg_flag = "remove" ]
+				if [ $pkg_flag = "#remove" ]
 				then
 					to_remove+=($i)
 				fi
