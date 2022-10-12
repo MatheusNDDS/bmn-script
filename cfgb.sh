@@ -6,26 +6,28 @@ load_data(){
 	export rm="sudo rm -rf"
 	export prt="echo -e"
 	export mkd="sudo mkdir"
-	export add_ppa="sudo add-apt-repository"
 	export elf="sudo chmod +x"
 	export dl="wget -q"
 	export d0="/dev/0"
 	export cfgbi="sudo cfgb -i"
-	export h=$HOME
 	export -f output
+	export add_ppa="sudo add-apt-repository"
+	export flatpak_remote="flatpak remote-add --user --if-not-exists"
 	
 	#references
 	name="cfgb"
+	script="$(pwd)/cfgb.sh"
 	file_format="tar.gz"
-	pdir="/usr/share/$name"
+	pdir="/etc/$name"
 	bnd_dir="$pdir/bundles"
 	bin="/bin/cfgb"
-	script="$(pwd)/cfgb.sh"
 	pkg_flag="null"
-	dep=(wget)
+	deps="wget bash sudo"
+	flathub="flathub https://flathub.org/repo/flathub.flatpakrepo"
 }
 start(){
 load_data
+filter=$*
 	output header "Configuration Bundles Manager" "Matheus Dias"
 	for i in $(cat $pdir/cfg)
 	do 
@@ -33,8 +35,7 @@ load_data
 	done
 	if [ $1 = '-i' ]
 	then
-		b=$*
-		for i in ${b[@]:2}
+		for i in ${filter[@]:2}
 		do
 			cd $bnd_dir
 			download $i 0
@@ -47,13 +48,13 @@ load_data
 		enable_extras $2 $3
 	elif [ $1 = '-d' ]
 	then
-		b=$*
-		for i in ${b[@]:2}
+		for i in ${filter[@]:2}
 		do
 			download $i 1
 		done
-	else
-		$1 $*
+	elif [ $1 = '-s' ]
+	then
+		setup $*
 	fi
 }
 
@@ -64,24 +65,29 @@ setup(){
 	$cp $script $bin 2> $d0
 	$elf $bin
 	output progress $name "Installing dependencies"
-	sudo $2 install wget -y
+	sudo $2 update -y
+	sudo $2 install $deps -y &&
 	#setting configs variables
-	if [ -z "$3" ]
+	if [ -z "$4" ]
 	then
 		if [ -e repo ]
 		then
-			sudo echo -e "
-			export pm=$2
-			export repo=$(cat repo)" > $pdir/cfg
+			$prt "
+			pm=$2
+			h=/home/$3
+			repo=$(cat repo)
+			" > $pdir/cfg
 			output title "C.F.G.B instelled with portable repo file"
 		else
-			output error "install error" "required portable 'repo' file, or enter the repository url address last. "
+			output error "install error" "required portable 'repo' file, or type the repository url address last. "
 			exit 1
 		fi
 	else
-		sudo echo -e "
-		export pm=$2
-		export repo=$3" > $pdir/cfg
+		$prt "
+		pm=$2
+		h=/home/$3
+		repo=$4
+		" > $pdir/cfg
 		output title "C.F.G.B instaled"
 	fi
 	
@@ -219,7 +225,7 @@ enable_extras(){
 		if [ $i = flatpak ] ; then
 			output progress $name "Configuring flatpak"
 			$pm install flatpak -y
-			flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+			$flatpak_remote $flathub
 			output ok_dialogue $name "flatpak enabled"
 		fi
 		if [ $i = snap ] ; then
@@ -228,5 +234,4 @@ enable_extras(){
 	done
 exit
 }
-
 start $*
