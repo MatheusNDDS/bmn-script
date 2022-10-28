@@ -40,6 +40,7 @@ load_data $*
 			cd $bnd_dir
 			download $i 0
 			unpack $i
+			pkg_install $i
 			cook $i
 
 		done
@@ -234,7 +235,6 @@ unpack(){
 cook(){
 	output title "Setting-up $1"
 	cd $1/
-	pkg_install $1
 	if [ -e recipe ]
 	then
 		output progress $1 "Setting Recipe Script"
