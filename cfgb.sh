@@ -24,10 +24,10 @@ load_data(){
 	pkg_flag="null"
 	deps="wget bash sudo"
 	flathub="flathub https://flathub.org/repo/flathub.flatpakrepo"
+	filter=$*
 }
 start(){
-load_data
-filter=$*
+load_data $*
 	output header "Configuration Bundles Manager" "Matheus Dias"
 	for i in $(cat $pdir/cfg)
 	do 
@@ -108,6 +108,12 @@ output(){
 pkg_parser(){
 	if [ $1 = "parse" -a -e $bnd_dir/$2/$3 ]
 	then
+		if [ $3 = "flatpaks" ]
+		then
+			installed="$(flatpak list | tr [:upper:] [:lower:])"
+		else
+			installed="$($pm list --installed)"
+		fi
 		for i in $(cat $bnd_dir/$2/$3)
 		do
 			if [ $i = "#install" ]
@@ -156,13 +162,23 @@ pkg_install(){
 		sudo $pm upgrade -y
 		for i in ${to_install[*]}
 		do
-			output sub_title "Installing: $i"
-			sudo $pm install $i
+			if [[ "${installed[*]}" = *"$i"* ]]
+			then
+				output error "$pm/install" "$i is already installed"
+			else
+				output sub_title "Installing: $i"
+				sudo $pm install $i
+			fi
 		done
 		for i in ${to_remove[*]}
 		do
-			output sub_title "Removing: $i"
-			sudo $pm remove $i
+			if [[ "${installed[*]}" = *"$i"* ]]
+			then
+				output sub_title "Removing: $i"
+				sudo $pm remove $i
+			else
+				output error "$pm/remove" "$i is not installed"
+			fi
 		done
 		pkg_parser clean
 	fi
@@ -176,13 +192,23 @@ pkg_install(){
 		flatpak update -y
 		for i in ${to_install[*]}
 		do
-			output sub_title "Installing: $i"
-			flatpak install --system flathub $i -y
+			if [[ "${installed[*]}" = *"$i"* ]]
+			then
+				output error "flatpak/install" "$i is already installed"
+			else
+				output sub_title "Installing: $i"
+				flatpak install --system flathub $i -y
+			fi
 		done
 		for i in ${to_remove[*]}
 		do
-			output sub_title "Removing: $i"
-			flatpak uninstall --system flathub $i -y
+			if [[ "${installed[*]}" = *"$i"* ]]
+			then
+				output sub_title "Removing: $i"
+				flatpak uninstall --system flathub $i -y
+			else
+				output error "flatpak/remove" "$i is not installed"
+			fi
 		done
 		pkg_parser clean
 	fi
