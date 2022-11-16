@@ -25,6 +25,7 @@ load_data(){
 	deps="wget bash sudo"
 	flathub="flathub https://flathub.org/repo/flathub.flatpakrepo"
 	filter=$*
+	cmd="$1"
 }
 start(){
 load_data $*
@@ -33,16 +34,17 @@ load_data $*
 	do 
 		export $i
 	done
-	if [ $1 = '-i' ]
+	if [[ "$1" = *"-i"* ]]
 	then
 		for i in ${filter[@]:2}
 		do
-			cd $bnd_dir
-			download $i 0
-			unpack $i
-			pkg_install $i
-			cook $i
-
+			if [ $i != "u" ]
+			then
+				cd $bnd_dir
+				download $i 0
+				unpack $i
+				cook $i
+			fi
 		done
 	elif [ $1 = '-e' ]
 	then
@@ -109,12 +111,6 @@ output(){
 pkg_parser(){
 	if [ $1 = "parse" -a -e $bnd_dir/$2/$3 ]
 	then
-		if [ $3 = "flatpaks" ]
-		then
-			installed="$(flatpak list | tr [:upper:] [:lower:])"
-		else
-			installed="$($pm list --installed)"
-		fi
 		for i in $(cat $bnd_dir/$2/$3)
 		do
 			if [ $i = "#install" ]
@@ -149,6 +145,14 @@ pkg_parser(){
 		unset to_install
 		unset to_remove
 		pkg_flag="null"
+	elif [ $1 = "check_pkgs" ]
+	then
+		if [ $2 = "fp" ]
+		then
+			installed="$(flatpak list | tr [:upper:] [:lower:])"
+		else
+			installed="$($pm list --installed)"
+		fi 2> $d0
 	fi
 }
 pkg_install(){
@@ -158,9 +162,16 @@ pkg_install(){
 	then
 		output progress $pm "Installing Packages"
 		pkg_parser list_pkgs
-		output sub_title "Updating repositories"
-		sudo $pm update -y
-		sudo $pm upgrade -y
+		if [[ $cmd = *"u"* ]]
+		then
+			output sub_title "Updating repositories"
+			if [ $pm != "dnf" ]
+			then
+				sudo $pm update -y
+			fi
+			sudo $pm upgrade -y
+		fi
+		pkg_parser check_pkgs
 		for i in ${to_install[*]}
 		do
 			if [[ "${installed[*]}" = *"$i"* ]]
@@ -171,8 +182,9 @@ pkg_install(){
 				sudo $pm install $i
 			fi
 		done
+		pkg_parser check_pkgs
 		for i in ${to_remove[*]}
-		do
+		do	
 			if [[ "${installed[*]}" = *"$i"* ]]
 			then
 				output sub_title "Removing: $i"
@@ -189,24 +201,29 @@ pkg_install(){
 	then
 		output progress Flatpak "Installing Flatpaks"
 		pkg_parser list_pkgs
-		output sub_title 'Uptating Flathub'
-		flatpak update -y
+		if [[ $cmd = *"u"* ]]
+		then
+			output sub_title 'Uptating Flathub'
+			flatpak update -y
+		fi
+		pkg_parser check_pkgs fp
 		for i in ${to_install[*]}
-		do
+		do	
 			if [[ "${installed[*]}" = *"$i"* ]]
 			then
 				output error "flatpak/install" "$i is already installed"
 			else
 				output sub_title "Installing: $i"
-				flatpak install --system flathub $i -y
+				sudo flatpak install --system flathub $i -y
 			fi
 		done
+		pkg_parser check_pkgs fp
 		for i in ${to_remove[*]}
 		do
 			if [[ "${installed[*]}" = *"$i"* ]]
 			then
 				output sub_title "Removing: $i"
-				flatpak uninstall --system flathub $i -y
+				sudo flatpak uninstall --system flathub $i -y
 			else
 				output error "flatpak/remove" "$i is not installed"
 			fi
@@ -231,10 +248,11 @@ unpack(){
 	tar -xf $1.$file_format -C $1/
 	$rm $1.$file_format
 	output ok_dialogue "files" "$(ls $bnd_dir/$1/)"
+	output title "Setting-up $1"
 }
 cook(){
-	output title "Setting-up $1"
 	cd $1/
+	pkg_install $1
 	if [ -e recipe ]
 	then
 		output progress $1 "Setting Recipe Script"
