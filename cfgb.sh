@@ -28,6 +28,7 @@ load_data(){
 	cmd="$1"
 }
 start(){
+args=($*)
 load_data $*
 	output header "Configuration Bundles Manager" "Matheus Dias"
 	for i in $(cat $pdir/cfg)
@@ -36,7 +37,7 @@ load_data $*
 	done
 	if [[ "$1" = *"-i"* ]]
 	then
-		for i in ${filter[@]:2}
+		for i in ${args[@]:2}
 		do
 			if [ $i != "u" ]
 			then
@@ -51,7 +52,7 @@ load_data $*
 		enable_extras $2 $3
 	elif [ $1 = '-d' ]
 	then
-		for i in ${filter[@]:2}
+		for i in ${args[@]:2}
 		do
 			download $i 1
 		done
