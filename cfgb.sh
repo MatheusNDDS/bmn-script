@@ -145,14 +145,14 @@ pkg_parser(){
 		unset to_install
 		unset to_remove
 		pkg_flag="null"
-	elif [ $1 = "check_pkgs" ]
+	fi
+}
+check_pkgs(){
+	if [ $1 = "fp" ]
 	then
-		if [ $2 = "fp" ]
-		then
-			installed="$(flatpak list | tr [:upper:] [:lower:])"
-		else
-			installed="$($pm list --installed)"
-		fi 2> $d0
+		flatpak list | tr [:upper:] [:lower:]
+	else
+		pma -l
 	fi
 }
 pkg_install(){
@@ -164,32 +164,27 @@ pkg_install(){
 		pkg_parser list_pkgs
 		if [[ $cmd = *"u"* ]]
 		then
-			output sub_title "Updating repositories"
-			if [ $pm != "dnf" ]
-			then
-				sudo $pm update -y
-			fi
-			sudo $pm upgrade -y
+			pma -u
 		fi
-		pkg_parser check_pkgs
 		for i in ${to_install[*]}
 		do
-			if [[ "${installed[*]}" = *"$i"* ]]
+			if [[ "$(check_pkgs 0)" = *"$i"* ]]
 			then
+				output sub_title "Installing: $i"
 				output error "$pm/install" "$i is already installed"
 			else
 				output sub_title "Installing: $i"
-				sudo $pm install $i
+				pma -i $i
 			fi
 		done
-		pkg_parser check_pkgs
 		for i in ${to_remove[*]}
 		do	
-			if [[ "${installed[*]}" = *"$i"* ]]
+			if [[ "$(check_pkgs 0)" = *"$i"* ]]
 			then
 				output sub_title "Removing: $i"
-				sudo $pm remove $i
+				pma -r $i
 			else
+				output sub_title "Removing: $i"
 				output error "$pm/remove" "$i is not installed"
 			fi
 		done
@@ -206,29 +201,114 @@ pkg_install(){
 			output sub_title 'Uptating Flathub'
 			flatpak update -y
 		fi
-		pkg_parser check_pkgs fp
 		for i in ${to_install[*]}
 		do	
-			if [[ "${installed[*]}" = *"$i"* ]]
+			if [[ "$(check_pkgs fp)" = *"$i"* ]]
 			then
+				output sub_title "Installing: $i"
 				output error "flatpak/install" "$i is already installed"
 			else
 				output sub_title "Installing: $i"
-				sudo flatpak install --system flathub $i -y
+				sudo flatpak install $fp_opt $i -y
 			fi
 		done
-		pkg_parser check_pkgs fp
 		for i in ${to_remove[*]}
 		do
-			if [[ "${installed[*]}" = *"$i"* ]]
+			if [[ "$(check_pkgs fp)" = *"$i"* ]]
 			then
 				output sub_title "Removing: $i"
-				sudo flatpak uninstall --system flathub $i -y
+				sudo flatpak uninstall $fp_opt $i -y
 			else
+				output sub_title "Removing: $i"
 				output error "flatpak/remove" "$i is not installed"
 			fi
 		done
 		pkg_parser clean
+	fi
+}
+pma(){
+args=($*)
+	declare -A pm_i
+	declare -A pm_r
+	declare -A pm_l
+	declare -A pm_u
+	declare -A pm_g
+	pkg="${args[*]:1}"
+	fp_opt="--system flathub"
+	spm=$pm
+#Package Managers internal database 
+#(it's ugly and huge, but internal)
+##apt##
+	pm_i[apt]="install"
+	pm_r[apt]="remove"
+	pm_l[apt]="list --installed"
+	pm_u[apt]="update"
+	pm_g[apt]="upgrade"
+##pacman##
+	pm_i[pacman]="-S"
+	pm_r[pacman]="-Rs"
+	pm_l[pacman]="-Qs"
+	pm_u[pacman]="-Syu"
+	pm_g[pacman]=0
+##flatpak##
+	pm_i[flatpak]="install $fp_opt"
+	pm_r[flatpak]="uninstall $fp_opt"
+	pm_l[flatpak]="list | tr [:upper:] [:lower:]"
+	pm_u[flatpak]=@
+	pm_g[flatpak]=0
+##apk##
+	pm_i[apk]="add"
+	pm_r[apk]="del"
+	pm_l[apk]="info"
+	pm_u[apk]=@
+	pm_g[apk]=@
+##dnf##
+	pm_i[dnf]=@
+	pm_r[dnf]=@
+	pm_l[dnf]=@
+	pm_u[dnf]=@
+	pm_g[dnf]=0
+#Package Managers Abstraction
+	if [ $1 = "-i" ]	
+	then
+		if [ "${pm_i[$pm]}" = "@" ]
+		then
+			sudo $pm ${pm_i[apt]} ${pkg} -y
+		else
+			sudo $pm ${pm_i[$pm]} ${pkg} -y
+		fi 
+	elif [ $1 = "-r" ]
+	then
+		if [ "${pm_r[$pm]}" = "@" ]
+		then
+			sudo $pm ${pm_r[apt]} ${pkg} -y
+		else
+			sudo $pm ${pm_r[$pm]} ${pkg} -y
+		fi
+	elif [ $1 = "-l" ]
+	then
+		if [ "${pm_l[$pm]}" = "@" ]
+		then
+			sudo $pm ${pm_l[apt]}
+		else
+			sudo $pm ${pm_l[$pm]}
+		fi 
+	elif [ $1 = "-u" ]
+	then
+		if [ "${pm_u[$pm]}" = "@" ]
+		then
+			sudo $pm ${pm_u[apt]} -y
+			if [ ${pm_g[$pm]} != 0 ]
+			then
+				sudo $pm ${pm_g[apt]} -y
+			fi
+		else
+			sudo $pm ${pm_u[$pm]} -y
+			if [ ${pm_g[$pm]} != 0 ]
+			then
+				sudo $pm ${pm_g[$pm]} -y
+			fi
+		fi
 	fi
 }
 download(){
