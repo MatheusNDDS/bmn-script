@@ -24,12 +24,11 @@ load_data(){
 	pkg_flag="null"
 	deps="wget bash sudo"
 	flathub="flathub https://flathub.org/repo/flathub.flatpakrepo"
-	filter=$*
 	cmd="$1"
 }
 start(){
-args=($*)
 load_data $*
+args=($*)
 	output header "Configuration Bundles Manager" "Matheus Dias"
 	for i in $(cat $pdir/cfg)
 	do 
