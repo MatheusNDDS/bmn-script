@@ -70,7 +70,7 @@ setup(){
 	output progress $name "Installing dependencies"
 	sudo $2 update -y
 	sudo $2 install $deps -y &&
-	#setting configs variables
+#setting configs variables
 	if [ -z "$4" ]
 	then
 		if [ -e repo ]
