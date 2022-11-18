@@ -24,11 +24,11 @@ load_data(){
 	pkg_flag="null"
 	deps="wget bash sudo"
 	flathub="flathub https://flathub.org/repo/flathub.flatpakrepo"
+	filter=$*
 	cmd="$1"
 }
 start(){
 load_data $*
-args=($*)
 	output header "Configuration Bundles Manager" "Matheus Dias"
 	for i in $(cat $pdir/cfg)
 	do 
@@ -36,7 +36,7 @@ args=($*)
 	done
 	if [[ "$1" = *"-i"* ]]
 	then
-		for i in ${args[@]:2}
+		for i in ${filter[@]:2}
 		do
 			if [ $i != "u" ]
 			then
@@ -51,7 +51,7 @@ args=($*)
 		enable_extras $2 $3
 	elif [ $1 = '-d' ]
 	then
-		for i in ${args[@]:2}
+		for i in ${filter[@]:2}
 		do
 			download $i 1
 		done
@@ -70,7 +70,7 @@ setup(){
 	output progress $name "Installing dependencies"
 	sudo $2 update -y
 	sudo $2 install $deps -y &&
-#setting configs variables
+	#setting configs variables
 	if [ -z "$4" ]
 	then
 		if [ -e repo ]
@@ -98,14 +98,14 @@ exit
 }
 output(){
 	declare -A t
-	t[header]="\033[01;36m-=/$2/=-\033[00;37m\n~ $3 \n"
+	t[header]="\033[01;36m-=/$2/=-\033[00m\n~ $3 \n"
 	t[bnd_header]="Bundle:$2\nRepo:$repo"
-	t[progress]="\033[00;32m-=- [$2]: $3 -=-\033[00;37m"
-	t[ok_dialogue]="\033[00;37m$2: [ $3 ] -Ok\033[00;37m "
-	t[title]="\033[01;36m-=- $2 -=-\033[00;37m"
-	t[sub_title]="\033[00;33m- $2\033[00;37m"
-	t[dialogue]="\033[00;37m$2: [ $3 ]\033[00;37m"
-	t[error]="\033[01;31m[$2]: { $3 }\033[00;37m"
+	t[progress]="\033[00;32m-=- [$2]: $3 -=-\033[00m"
+	t[ok_dialogue]="\033[00m$2: [ $3 ] -Ok\033[00m "
+	t[title]="\033[01;36m-=- $2 -=-\033[00m"
+	t[sub_title]="\033[00;33m- $2\033[00m"
+	t[dialogue]="\033[00m$2: [ $3 ]\033[00m"
+	t[error]="\033[01;31m[$2]: { $3 }\033[00m"
 	$prt ${t[$1]}
 }
 pkg_parser(){
