@@ -1,6 +1,7 @@
 #!/bin/bash
 #Default functions
 load_data(){
+args=($*)
 	#mini shell
 	export cp="sudo cp -r"
 	export rm="sudo rm -rf"
@@ -24,7 +25,6 @@ load_data(){
 	pkg_flag="null"
 	deps="wget bash sudo"
 	flathub="flathub https://flathub.org/repo/flathub.flatpakrepo"
-	filter=$*
 	cmd="$1"
 }
 start(){
@@ -36,7 +36,7 @@ load_data $*
 	done
 	if [[ "$1" = *"-i"* ]]
 	then
-		for i in ${filter[@]:2}
+		for i in ${args[@]:2}
 		do
 			if [ $i != "u" ]
 			then
@@ -51,7 +51,7 @@ load_data $*
 		enable_extras $2 $3
 	elif [ $1 = '-d' ]
 	then
-		for i in ${filter[@]:2}
+		for i in ${args[@]:2}
 		do
 			download $i 1
 		done
