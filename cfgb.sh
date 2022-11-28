@@ -10,6 +10,7 @@ args=($*)
 	export elf="sudo chmod +x"
 	export dl="wget -q"
 	export d0="/dev/0"
+	export untar="tar -xf"
 	export cfgbi="sudo cfgb -i"
 	export -f output
 	export add_ppa="sudo add-apt-repository"
@@ -150,7 +151,7 @@ pkg_parser(){
 check_pkgs(){
 	if [ $1 = "fp" ]
 	then
-		flatpak list | tr [:upper:] [:lower:]
+		flatpak list #| tr [:upper:] [:lower:]
 	else
 		pma -l
 	fi
@@ -325,7 +326,7 @@ download(){
 unpack(){
 	output progress "tar" "Unpacking"
 	$mkd $1/  
-	tar -xf $1.$file_format -C $1/
+	$untar $1.$file_format -C $1/
 	$rm $1.$file_format
 	output ok_dialogue "files" "$(ls $bnd_dir/$1/)"
 	output title "Setting-up $1"
@@ -336,7 +337,6 @@ cook(){
 	if [ -e recipe ]
 	then
 		output progress $1 "Setting Recipe Script"
-		#cat recipe
 		export id="$1"
 		bash recipe
 	fi
@@ -346,13 +346,15 @@ cook(){
 enable_extras(){
 	for i in $*
 	do 
-		if [ $i = flatpak ] ; then
+		if [ $i = flatpak ]
+		then
 			output progress $name "Configuring flatpak"
 			$pm install flatpak -y
 			$flatpak_remote $flathub
 			output ok_dialogue $name "flatpak enabled"
 		fi
-		if [ $i = snap ] ; then
+		if [ $i = snap ]
+		then
 			$prt "soom..."
 		fi
 	done
