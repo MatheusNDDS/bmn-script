@@ -1,7 +1,6 @@
 #!/bin/bash
 #Default functions
 load_data(){
-args=($*)
 	#mini shell
 	export cp="sudo cp -r"
 	export rm="sudo rm -rf"
@@ -10,7 +9,6 @@ args=($*)
 	export elf="sudo chmod +x"
 	export dl="wget -q"
 	export d0="/dev/0"
-	export untar="tar -xf"
 	export cfgbi="sudo cfgb -i"
 	export -f output
 	export add_ppa="sudo add-apt-repository"
@@ -18,14 +16,15 @@ args=($*)
 	
 	#references
 	name="cfgb"
-	script="$(pwd)/$name.sh"
+	script="$(pwd)/cfgb.sh"
 	file_format="tar.gz"
 	pdir="/etc/$name"
 	bnd_dir="$pdir/bundles"
-	bin="/bin/$name"
+	bin="/bin/cfgb"
 	pkg_flag="null"
 	deps="wget bash sudo"
 	flathub="flathub https://flathub.org/repo/flathub.flatpakrepo"
+	filter=$*
 	cmd="$1"
 }
 start(){
@@ -37,7 +36,7 @@ load_data $*
 	done
 	if [[ "$1" = *"-i"* ]]
 	then
-		for i in ${args[@]:2}
+		for i in ${filter[@]:2}
 		do
 			if [ $i != "u" ]
 			then
@@ -52,7 +51,7 @@ load_data $*
 		enable_extras $2 $3
 	elif [ $1 = '-d' ]
 	then
-		for i in ${args[@]:2}
+		for i in ${filter[@]:2}
 		do
 			download $i 1
 		done
@@ -69,9 +68,9 @@ setup(){
 	$cp $script $bin 2> $d0
 	$elf $bin
 	output progress $name "Installing dependencies"
-	pma -u
-	pma -i $deps &&
-	#setting configs variables
+	sudo $2 update -y
+	sudo $2 install $deps -y &&
+#setting configs variables
 	if [ -z "$4" ]
 	then
 		if [ -e repo ]
@@ -151,7 +150,7 @@ pkg_parser(){
 check_pkgs(){
 	if [ $1 = "fp" ]
 	then
-		flatpak list #| tr [:upper:] [:lower:]
+		flatpak list
 	else
 		pma -l
 	fi
@@ -270,7 +269,7 @@ args=($*)
 	pm_u[dnf]=@
 	pm_g[dnf]=0
 #Package Managers Abstraction
-	if [ $1 = "-i" ] #Install
+	if [ $1 = "-i" ]	
 	then
 		if [ "${pm_i[$pm]}" = "@" ]
 		then
@@ -278,7 +277,7 @@ args=($*)
 		else
 			sudo $pm ${pm_i[$pm]} ${pkg} -y
 		fi 
-	elif [ $1 = "-r" ] #Remove
+	elif [ $1 = "-r" ]
 	then
 		if [ "${pm_r[$pm]}" = "@" ]
 		then
@@ -286,7 +285,7 @@ args=($*)
 		else
 			sudo $pm ${pm_r[$pm]} ${pkg} -y
 		fi
-	elif [ $1 = "-l" ] #List Installed
+	elif [ $1 = "-l" ]
 	then
 		if [ "${pm_l[$pm]}" = "@" ]
 		then
@@ -294,7 +293,7 @@ args=($*)
 		else
 			sudo $pm ${pm_l[$pm]}
 		fi 
-	elif [ $1 = "-u" ] #Update
+	elif [ $1 = "-u" ]
 	then
 		if [ "${pm_u[$pm]}" = "@" ]
 		then
@@ -326,7 +325,7 @@ download(){
 unpack(){
 	output progress "tar" "Unpacking"
 	$mkd $1/  
-	$untar $1.$file_format -C $1/
+	tar -xf $1.$file_format -C $1/
 	$rm $1.$file_format
 	output ok_dialogue "files" "$(ls $bnd_dir/$1/)"
 	output title "Setting-up $1"
@@ -337,6 +336,7 @@ cook(){
 	if [ -e recipe ]
 	then
 		output progress $1 "Setting Recipe Script"
+		#cat recipe
 		export id="$1"
 		bash recipe
 	fi
