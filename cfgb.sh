@@ -18,11 +18,11 @@ args=($*)
 	
 	#references
 	name="cfgb"
-	script="$(pwd)/cfgb.sh"
+	script="$(pwd)/$name.sh"
 	file_format="tar.gz"
 	pdir="/etc/$name"
 	bnd_dir="$pdir/bundles"
-	bin="/bin/cfgb"
+	bin="/bin/$name"
 	pkg_flag="null"
 	deps="wget bash sudo"
 	flathub="flathub https://flathub.org/repo/flathub.flatpakrepo"
