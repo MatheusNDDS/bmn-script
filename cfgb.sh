@@ -69,8 +69,8 @@ setup(){
 	$cp $script $bin 2> $d0
 	$elf $bin
 	output progress $name "Installing dependencies"
-	sudo $2 update -y
-	sudo $2 install $deps -y &&
+	pma -u
+	pma -i $deps &&
 	#setting configs variables
 	if [ -z "$4" ]
 	then
