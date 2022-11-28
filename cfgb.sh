@@ -270,7 +270,7 @@ args=($*)
 	pm_u[dnf]=@
 	pm_g[dnf]=0
 #Package Managers Abstraction
-	if [ $1 = "-i" ]	
+	if [ $1 = "-i" ] #Install
 	then
 		if [ "${pm_i[$pm]}" = "@" ]
 		then
@@ -278,7 +278,7 @@ args=($*)
 		else
 			sudo $pm ${pm_i[$pm]} ${pkg} -y
 		fi 
-	elif [ $1 = "-r" ]
+	elif [ $1 = "-r" ] #Remove
 	then
 		if [ "${pm_r[$pm]}" = "@" ]
 		then
@@ -286,7 +286,7 @@ args=($*)
 		else
 			sudo $pm ${pm_r[$pm]} ${pkg} -y
 		fi
-	elif [ $1 = "-l" ]
+	elif [ $1 = "-l" ] #List Installed
 	then
 		if [ "${pm_l[$pm]}" = "@" ]
 		then
@@ -294,7 +294,7 @@ args=($*)
 		else
 			sudo $pm ${pm_l[$pm]}
 		fi 
-	elif [ $1 = "-u" ]
+	elif [ $1 = "-u" ] #Update
 	then
 		if [ "${pm_u[$pm]}" = "@" ]
 		then
