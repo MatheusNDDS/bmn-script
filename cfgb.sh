@@ -6,7 +6,7 @@ load_data(){
 	export rm="sudo rm -rf"
 	export prt="echo -e"
 	export mkd="sudo mkdir"
-	export elf="sudo chmod +x"
+	export elf="sudo chmod 755"
 	export dl="wget -q"
 	export d0="/dev/0"
 	export cfgbi="sudo cfgb -i"
