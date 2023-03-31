@@ -24,6 +24,7 @@ load_data(){
 	pkg_flag="null"
 	deps="wget bash sudo"
 	flathub="flathub https://flathub.org/repo/flathub.flatpakrepo"
+	fp_opt="--user flathub"
 	filter=$*
 	cmd="$1"
 }
@@ -234,7 +235,6 @@ args=($*)
 	declare -A pm_u
 	declare -A pm_g
 	pkg="${args[*]:1}"
-	fp_opt="--system flathub"
 	spm=$pm
 #Package Managers internal database 
 #(it's ugly and huge, but internal)
