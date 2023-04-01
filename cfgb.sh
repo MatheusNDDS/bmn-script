@@ -366,7 +366,7 @@ enable_extras(){
 		if [ $i = flatpak ]
 		then
 			output progress $name "Configuring flatpak"
-			$pm install flatpak -y
+			pma -i flatpak
 			$flatpak_remote $flathub
 			output ok_dialogue $name "flatpak enabled"
 		fi
