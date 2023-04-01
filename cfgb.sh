@@ -7,7 +7,7 @@ load_data(){
 	export prt="echo -e"
 	export mkd="sudo mkdir"
 	export elf="sudo chmod 755"
-	export dl="wget -q"
+	export dl="wget"
 	export d0="/dev/0"
 	export cfgbi="sudo cfgb -i"
 	export -f output
@@ -24,9 +24,9 @@ load_data(){
 	pkg_flag="null"
 	deps="wget bash sudo"
 	flathub="flathub https://flathub.org/repo/flathub.flatpakrepo"
-	fp_opt="--user flathub"
 	filter=$*
 	cmd="$1"
+	bins=$(echo $PATH | tr ':' ' ')
 }
 start(){
 load_data $*
@@ -68,17 +68,18 @@ setup(){
 	$mkd $bnd_dir 2> $d0
 	$cp $script $bin 2> $d0
 	$elf $bin
+	pm_detect
 	output progress $name "Installing dependencies"
-	sudo $2 update -y
-	sudo $2 install $deps -y &&
+	sudo $pm update -y
+	sudo $pm install $deps -y &&
 #setting configs variables
 	if [ -z "$4" ]
 	then
 		if [ -e repo ]
 		then
 			$prt "
-			pm=$2
-			h=/home/$3
+			pm=NULL
+			h=/home/$2
 			repo=$(cat repo)
 			" > $pdir/cfg
 			output title "C.F.G.B instelled with portable repo file"
@@ -88,14 +89,28 @@ setup(){
 		fi
 	else
 		$prt "
-		pm=$2
-		h=/home/$3
-		repo=$4
+		pm=NULL
+		h=/home/$2
+		repo=$3
 		" > $pdir/cfg
 		output title "C.F.G.B instaled"
 	fi
 	
 exit
+}
+pm_detect(){
+	for bin in ${bins[@]}
+	do
+		bin_list+=($(ls $dir/))
+	done
+	#Package Manager Auto Detect
+	for pmc in ${!pm_l[@]}
+	do
+		if [[ "${bin_list[*]}" = *"$pmc"* ]]
+		then
+			pm=$pmc
+		fi
+	done
 }
 output(){
 	declare -A t
@@ -158,6 +173,7 @@ check_pkgs(){
 }
 pkg_install(){
 #Distro Pkgs
+	pm_detect
 	pkg_parser parse $1 packages
 	if [ $pkg_flag != "null" ]
 	then
@@ -235,6 +251,7 @@ args=($*)
 	declare -A pm_u
 	declare -A pm_g
 	pkg="${args[*]:1}"
+	fp_opt="--system flathub"
 	spm=$pm
 #Package Managers internal database 
 #(it's ugly and huge, but internal)
