@@ -1,6 +1,7 @@
 Setup instructions
 --
-Syntax:  
+Syntax:
+
 ``sudo sh cfgb.sh -s login_name repository``  
 - The login name field is your user folder in the /home directory.
 - The repository field can be from github or any other downloadable source.  
