@@ -345,9 +345,9 @@ unpack(){
 	tar -xf $1.$file_format -C $1/
 	$rm $1.$file_format
 	output ok_dialogue "files" "$(ls $bnd_dir/$1/)"
-	output title "Setting-up $1"
 }
 cook(){
+	output title "Setting-up $1"
 	cd $1/
 	pkg_install $1
 	if [ -e recipe ]
