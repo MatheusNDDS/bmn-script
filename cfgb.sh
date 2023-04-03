@@ -35,6 +35,7 @@ load_data $*
 	do 
 		export $i
 	done
+	pm_detect
 	if [[ "$1" = *"-i"* ]]
 	then
 		for i in ${filter[@]:2}
@@ -68,10 +69,9 @@ setup(){
 	$mkd $bnd_dir 2> $d0
 	$cp $script $bin 2> $d0
 	$elf $bin
-	pm_detect
 	output progress $name "Installing dependencies"
-	sudo $pm update -y
-	sudo $pm install $deps -y &&
+	pma -u
+	pma -i $deps &&
 #setting configs variables
 	if [ -z "$3" ]
 	then
@@ -173,7 +173,6 @@ check_pkgs(){
 }
 pkg_install(){
 #Distro Pkgs
-	pm_detect
 	pkg_parser parse $1 packages
 	if [ $pkg_flag != "null" ]
 	then
