@@ -73,7 +73,7 @@ setup(){
 	sudo $pm update -y
 	sudo $pm install $deps -y &&
 #setting configs variables
-	if [ -z "$4" ]
+	if [ -z "$3" ]
 	then
 		if [ -e repo ]
 		then
