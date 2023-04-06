@@ -7,8 +7,9 @@ load_data(){
 	export prt="echo -e"
 	export mkd="sudo mkdir"
 	export elf="sudo chmod 755"
-	export dl="wget"
+	export dl="sudo wget -q"
 	export d0="/dev/0"
+	export mk="sudo touch"
 	export cfgbi="sudo cfgb -i"
 	export -f output
 	export add_ppa="sudo add-apt-repository"
@@ -24,18 +25,21 @@ load_data(){
 	pkg_flag="null"
 	deps="wget bash sudo"
 	flathub="flathub https://flathub.org/repo/flathub.flatpakrepo"
+	fp_opt="--user flathub"
 	filter=$*
 	cmd="$1"
-	bins=$(echo $PATH | tr ':' ' ')
 }
 start(){
 load_data $*
 	output header "Configuration Bundles Manager" "Matheus Dias"
-	for i in $(cat $pdir/cfg)
-	do 
-		export $i
-	done
-	pm_detect
+	if [ $1 != '-s' ]
+	then
+		for i in $(cat $pdir/cfg)
+		do 
+			export $i
+		
+		done
+	fi
 	if [[ "$1" = *"-i"* ]]
 	then
 		for i in ${filter[@]:2}
@@ -60,6 +64,9 @@ load_data $*
 	elif [ $1 = '-s' ]
 	then
 		setup $*
+	elif [ $1 = '-l' ]
+	then
+		live_shell
 	fi
 }
 
@@ -67,18 +74,22 @@ load_data $*
 setup(){
 	$mkd $pdir 2> $d0
 	$mkd $bnd_dir 2> $d0
+	$mk $pdir/cfg
 	$cp $script $bin 2> $d0
 	$elf $bin
+#setting configs variables
+	output progress $name "Detecting package manager"
+	pma -qpm
+	pm=$pm_detected
 	output progress $name "Installing dependencies"
 	pma -u
-	pma -i $deps &&
-#setting configs variables
+	pma -i $deps
 	if [ -z "$3" ]
 	then
 		if [ -e repo ]
 		then
 			$prt "
-			pm=NULL
+			pm=$pm_detected
 			h=/home/$2
 			repo=$(cat repo)
 			" > $pdir/cfg
@@ -89,28 +100,13 @@ setup(){
 		fi
 	else
 		$prt "
-		pm=NULL
+		pm=$pm_detected
 		h=/home/$2
 		repo=$3
 		" > $pdir/cfg
 		output title "C.F.G.B instaled"
 	fi
-	
 exit
-}
-pm_detect(){
-	for bin in ${bins[@]}
-	do
-		bin_list+=($(ls $dir/))
-	done
-	#Package Manager Auto Detect
-	for pmc in ${!pm_l[@]}
-	do
-		if [[ "${bin_list[*]}" = *"$pmc"* ]]
-		then
-			pm=$pmc
-		fi
-	done
 }
 output(){
 	declare -A t
@@ -225,7 +221,7 @@ pkg_install(){
 				output error "flatpak/install" "$i is already installed"
 			else
 				output sub_title "Installing: $i"
-				sudo flatpak install $fp_opt $i -y
+				flatpak install $fp_opt $i -y
 			fi
 		done
 		for i in ${to_remove[*]}
@@ -233,7 +229,7 @@ pkg_install(){
 			if [[ "$(check_pkgs fp)" = *"$i"* ]]
 			then
 				output sub_title "Removing: $i"
-				sudo flatpak uninstall $fp_opt $i -y
+				flatpak uninstall $i -y
 			else
 				output sub_title "Removing: $i"
 				output error "flatpak/remove" "$i is not installed"
@@ -250,8 +246,6 @@ args=($*)
 	declare -A pm_u
 	declare -A pm_g
 	pkg="${args[*]:1}"
-	fp_opt="--system flathub"
-	spm=$pm
 #Package Managers internal database 
 #(it's ugly and huge, but internal)
 ##apt##
@@ -266,12 +260,6 @@ args=($*)
 	pm_l[pacman]="-Qs"
 	pm_u[pacman]="-Syu"
 	pm_g[pacman]=0
-##flatpak##
-	pm_i[flatpak]="install $fp_opt"
-	pm_r[flatpak]="uninstall $fp_opt"
-	pm_l[flatpak]="list | tr [:upper:] [:lower:]"
-	pm_u[flatpak]=@
-	pm_g[flatpak]=0
 ##apk##
 	pm_i[apk]="add"
 	pm_r[apk]="del"
@@ -285,7 +273,22 @@ args=($*)
 	pm_u[dnf]=@
 	pm_g[dnf]=0
 #Package Managers Abstraction
-	if [ $1 = "-i" ]	
+	if [ $1 = "-qpm" ] #Qwerry Package Manager
+	then
+		bin_dirs="$(echo $PATH | tr ':' ' ')"
+		for dir in ${bin_dirs[@]}
+		do
+			bin_list+=($(ls $dir/))
+		done
+		#Package Manager Auto Detect
+		for pmc in ${!pm_l[@]}
+		do
+			if [[ "${bin_list[@]}" = *"$pmc"* ]]
+			then
+				pm_detected=$pmc
+			fi
+		done
+	elif [ $1 = "-i" ]
 	then
 		if [ "${pm_i[$pm]}" = "@" ]
 		then
@@ -375,5 +378,12 @@ enable_extras(){
 		fi
 	done
 exit
+}
+live_shell(){
+	while [ 1 ]
+	do
+		read -p "Live: " cmd
+		$cmd
+	done
 }
 start $*
