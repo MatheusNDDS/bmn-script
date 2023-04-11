@@ -116,7 +116,7 @@ output(){
 	t[bnd_header]="Bundle:$2\nRepo:$repo"
 	t[progress]="\033[00;32m-=- [$2]: $3 -=-\033[00m"
 	t[ok_dialogue]="\033[00m$2: [ $3 ] -Ok\033[00m "
-	t[title]="\033[01;36m-=- $2 -=-\033[00m"
+	t[title]="\033[01;36m\n-=- $2 -=-\n\033[00m"
 	t[sub_title]="\033[00;33m- $2\033[00m"
 	t[dialogue]="\033[00m$2: [ $3 ]\033[00m"
 	t[error]="\033[01;31m[$2]: { $3 }\033[00m"
@@ -186,10 +186,10 @@ pkg_install(){
 		do
 			if [[ "$pkgs_in" = *"$i"* ]]
 			then
-				output sub_title "Installing: $i"
+				output sub_title "$pm/installing: $i"
 				output error "$pm/install" "$i is already installed"
 			else
-				output sub_title "Installing: $i"
+				output sub_title "$pm/installing: $i"
 				pma -i $i
 			fi
 		done
@@ -198,10 +198,10 @@ pkg_install(){
 		do	
 			if [[ "$pkgs_in" = *"$i"* ]]
 			then
-				output sub_title "Removing: $i"
+				output sub_title "$pm/removing: $i"
 				pma -r $i
 			else
-				output sub_title "Removing: $i"
+				output sub_title "$pm/removing: $i"
 				output error "$pm/remove" "$i is not installed"
 			fi
 		done
@@ -223,10 +223,10 @@ pkg_install(){
 		do	
 			if [[ "$pkgs_in" = *"$i "* ]]
 			then
-				output sub_title "Installing: $i"
+				output sub_title "flatpak/nstalling: $i"
 				output error "flatpak/install" "$i is already installed"
 			else
-				output sub_title "Installing: $i"
+				output sub_title "flatpak/installing: $i"
 				sudo flatpak $fp_mode install $fp_remote $i -y
 			fi
 		done
@@ -235,7 +235,7 @@ pkg_install(){
 		do
 			if [[ "$pkgs_in" = *"$i"* ]]
 			then
-				output sub_title "Removing: $i"
+				output sub_title "flatpak/removing: $i"
 				sudo flatpak uninstall $fp_mode $i -y
 			else
 				output sub_title "Removing: $i"
@@ -366,7 +366,7 @@ cook(){
 		export id="$1"
 		bash recipe
 	fi
-	output title "$1 Instaled\n"
+	output title "$1 Instaled"
 	$rm $bnd_dir/$1
 }
 enable_extras(){
