@@ -1,40 +1,46 @@
 #!/bin/bash
-#Default functions
+## Core functions ##
 load_data(){
-	#mini shell
+#Evuronment variables
+#Can be used in recipe scripts
 	export cp="sudo cp -r"
 	export rm="sudo rm -rf"
 	export prt="echo -e"
+	export mk="sudo touch"
 	export mkd="sudo mkdir"
 	export elf="sudo chmod 755"
 	export dl="sudo wget -q"
 	export d0="/dev/0"
-	export mk="sudo touch"
 	export cfgbi="sudo cfgb -i"
 	export -f output
 	export add_ppa="sudo add-apt-repository"
-	export flatpak_remote="flatpak remote-add --user --if-not-exists"
+	export flatpak_remote="flatpak remote-add --if-not-exists"
 	
-	#references
+#References
 	name="cfgb"
 	script="$(pwd)/cfgb.sh"
 	file_format="tar.gz"
-	pdir="/etc/$name"
-	bnd_dir="$pdir/bundles"
-	bin="/bin/cfgb"
 	pkg_flag="null"
 	deps="wget bash sudo"
-	flathub="flathub https://flathub.org/repo/flathub.flatpakrepo"
-	fp_opt="--user flathub"
 	filter=$*
 	cmd="$1"
+#Work directories
+	pdir="/etc/$name"
+	bnd_dir="$pdir/bundles"
+	cfg="$pdir/cfg"
+	bin="/bin/cfgb"
+#Flatpak configuration
+	flathub="flathub https://flathub.org/repo/flathub.flatpakrepo"
+	fp_mode="--system"
+	fp_remote="flathub"
+	fp_opt="$fm_mode $fp_remote"
 }
 start(){
 load_data $*
 	output header "Configuration Bundles Manager" "Matheus Dias"
 	if [ $1 != '-s' ]
 	then
-		for i in $(cat $pdir/cfg)
+		for i in $(cat $cfg)
 		do 
 			export $i
 		
@@ -70,47 +76,43 @@ load_data $*
 	fi
 }
 
-#Custom Functions
+## Custom Functions ##
 setup(){
+#Script install
 	$mkd $pdir 2> $d0
 	$mkd $bnd_dir 2> $d0
-	$mk $pdir/cfg
+	$mk $cfg 2> $d0
 	$cp $script $bin 2> $d0
 	$elf $bin
-#setting configs variables
+#Package manager autodetect
 	output progress $name "Detecting package manager"
 	pma -qpm
 	pm=$pm_detected
+	output sub_title "Package Manager : $pm"
+#Installing dependencies	
 	output progress $name "Installing dependencies"
 	pma -u
 	pma -i $deps
+#Setting environment variables
 	if [ -z "$3" ]
 	then
 		if [ -e repo ]
 		then
-			$prt "
-			pm=$pm_detected
-			h=/home/$2
-			repo=$(cat repo)
-			" > $pdir/cfg
+			$prt "pm=$pm_detected h=/home/$2 repo=$(cat repo)" > $cfg
 			output title "C.F.G.B instelled with portable repo file"
 		else
 			output error "install error" "required portable 'repo' file, or type the repository url address last. "
 			exit 1
 		fi
 	else
-		$prt "
-		pm=$pm_detected
-		h=/home/$2
-		repo=$3
-		" > $pdir/cfg
+		$prt "pm=$pm_detected h=/home/$2 repo=$3" > $cfg
 		output title "C.F.G.B instaled"
 	fi
 exit
 }
 output(){
 	declare -A t
-	t[header]="\033[01;36m-=/$2/=-\033[00m\n~ $3 \n"
+	t[header]="\033[01;36m-=/$2/=-\033[00m ~ $3 \n"
 	t[bnd_header]="Bundle:$2\nRepo:$repo"
 	t[progress]="\033[00;32m-=- [$2]: $3 -=-\033[00m"
 	t[ok_dialogue]="\033[00m$2: [ $3 ] -Ok\033[00m "
@@ -157,14 +159,15 @@ pkg_parser(){
 		unset to_install
 		unset to_remove
 		pkg_flag="null"
-	fi
-}
-check_pkgs(){
-	if [ $1 = "fp" ]
+	elif [ $1 = "check" ]
 	then
-		flatpak list
-	else
-		pma -l
+		if [ $2 = "fp" ]
+		then
+			pkgs_in=$(flatpak list)
+		elif [ $2 = "pma" ]
+		then
+			pkgs_in=(pma -l)
+		fi
 	fi
 }
 pkg_install(){
@@ -178,9 +181,10 @@ pkg_install(){
 		then
 			pma -u
 		fi
+		pkg_parser check pma
 		for i in ${to_install[*]}
 		do
-			if [[ "$(check_pkgs 0)" = *"$i"* ]]
+			if [[ "$pkgs_in" = *"$i"* ]]
 			then
 				output sub_title "Installing: $i"
 				output error "$pm/install" "$i is already installed"
@@ -189,9 +193,10 @@ pkg_install(){
 				pma -i $i
 			fi
 		done
+		pkg_parser check pma
 		for i in ${to_remove[*]}
 		do	
-			if [[ "$(check_pkgs 0)" = *"$i"* ]]
+			if [[ "$pkgs_in" = *"$i"* ]]
 			then
 				output sub_title "Removing: $i"
 				pma -r $i
@@ -211,25 +216,27 @@ pkg_install(){
 		if [[ $cmd = *"u"* ]]
 		then
 			output sub_title 'Uptating Flathub'
-			flatpak update -y
+			sudo flatpak update -y
 		fi
+		pkg_parser check fp
 		for i in ${to_install[*]}
 		do	
-			if [[ "$(check_pkgs fp)" = *"$i"* ]]
+			if [[ "$pkgs_in" = *"$i "* ]]
 			then
 				output sub_title "Installing: $i"
 				output error "flatpak/install" "$i is already installed"
 			else
 				output sub_title "Installing: $i"
-				flatpak install $fp_opt $i -y
+				sudo flatpak $fp_mode install $fp_remote $i -y
 			fi
 		done
+		pkg_parser check fp
 		for i in ${to_remove[*]}
 		do
-			if [[ "$(check_pkgs fp)" = *"$i"* ]]
+			if [[ "$pkgs_in" = *"$i"* ]]
 			then
 				output sub_title "Removing: $i"
-				flatpak uninstall $i -y
+				sudo flatpak uninstall $fp_mode $i -y
 			else
 				output sub_title "Removing: $i"
 				output error "flatpak/remove" "$i is not installed"
@@ -359,7 +366,7 @@ cook(){
 		export id="$1"
 		bash recipe
 	fi
-	output title "$1 Instaled"
+	output title "$1 Instaled\n"
 	$rm $bnd_dir/$1
 }
 enable_extras(){
