@@ -37,7 +37,6 @@ load_data(){
 }
 start(){
 load_data $*
-	$rm $bnd_dir/*
 	output header "Configuration Bundles Manager" "Matheus Dias"
 	if [ $1 != '-s' ]
 	then
@@ -54,6 +53,8 @@ load_data $*
 			if [ $i != "u" ]
 			then
 				cd $bnd_dir
+				$rm $i/ 2> $d0
+				$rm $i.$file_format 2> $d0
 				download $i 0
 				unpack $i
 				cook $i
