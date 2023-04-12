@@ -37,6 +37,7 @@ load_data(){
 }
 start(){
 load_data $*
+	$rm $bnd_dir/*
 	output header "Configuration Bundles Manager" "Matheus Dias"
 	if [ $1 != '-s' ]
 	then
@@ -60,7 +61,7 @@ load_data $*
 		done
 	elif [ $1 = '-e' ]
 	then
-		enable_extras $2 $3
+		enable_extras $*
 	elif [ $1 = '-d' ]
 	then
 		for i in ${filter[@]:2}
@@ -87,28 +88,124 @@ setup(){
 #Package manager autodetect
 	output progress $name "Detecting package manager"
 	pma -qpm
-	pm=$pm_detected
-	output sub_title "Package Manager : $pm"
-#Installing dependencies	
+	output sub_title "Package Manager : $pm_detected"
+#Detecting home directorie
+	output progress $name "Detecting Home directorie"
+	detect_home
+	output sub_title "Home : $home_detected"
+#Installing dependencies
 	output progress $name "Installing dependencies"
+	pm=$pm_detected
 	pma -u
 	pma -i $deps
 #Setting environment variables
-	if [ -z "$3" ]
+	if [ -z "$2" ]
 	then
 		if [ -e repo ]
 		then
-			$prt "pm=$pm_detected h=/home/$2 repo=$(cat repo)" > $cfg
+			$prt "pm=$pm_detected h=$home_detected repo=$(cat repo)" > $cfg
 			output title "C.F.G.B instelled with portable repo file"
 		else
 			output error "install error" "required portable 'repo' file, or type the repository url address last. "
 			exit 1
 		fi
 	else
-		$prt "pm=$pm_detected h=/home/$2 repo=$3" > $cfg
+		$prt "pm=$pm_detected h=$home_detected repo=$2" > $cfg
 		output title "C.F.G.B instaled"
 	fi
 exit
+}
+pma(){
+args=($*)
+	declare -A pm_i
+	declare -A pm_r
+	declare -A pm_l
+	declare -A pm_u
+	declare -A pm_g
+	pkg="${args[*]:1}"
+#Package Managers internal database 
+#(it's ugly and huge, but internal)
+##apt##
+	pm_i[apt]="install"
+	pm_r[apt]="remove"
+	pm_l[apt]="list --installed"
+	pm_u[apt]="update"
+	pm_g[apt]="upgrade"
+##pacman##
+	pm_i[pacman]="-S"
+	pm_r[pacman]="-Rs"
+	pm_l[pacman]="-Qs"
+	pm_u[pacman]="-Syu"
+	pm_g[pacman]=0
+##apk##
+	pm_i[apk]="add"
+	pm_r[apk]="del"
+	pm_l[apk]="info"
+	pm_u[apk]=@
+	pm_g[apk]=@
+##dnf##
+	pm_i[dnf]=@
+	pm_r[dnf]=@
+	pm_l[dnf]=@
+	pm_u[dnf]=@
+	pm_g[dnf]=0
+#Package Managers Abstraction
+	if [ $1 = "-qpm" ] #Qwerry Package Manager
+	then
+		bin_dirs="$(echo $PATH | tr ':' ' ')"
+		for dir in ${bin_dirs[@]}
+		do
+			bin_list+=($(ls $dir/))
+		done
+		#Package Manager Auto Detect
+		for pmc in ${!pm_l[@]}
+		do
+			if [[ "${bin_list[@]}" = *"$pmc"* ]]
+			then
+				pm_detected=$pmc
+			fi
+		done
+	elif [ $1 = "-i" ]
+	then
+		if [ "${pm_i[$pm]}" = "@" ]
+		then
+			sudo $pm ${pm_i[apt]} ${pkg} -y
+		else
+			sudo $pm ${pm_i[$pm]} ${pkg} -y
+		fi 
+	elif [ $1 = "-r" ]
+	then
+		if [ "${pm_r[$pm]}" = "@" ]
+		then
+			sudo $pm ${pm_r[apt]} ${pkg} -y
+		else
+			sudo $pm ${pm_r[$pm]} ${pkg} -y
+		fi
+	elif [ $1 = "-l" ]
+	then
+		if [ "${pm_l[$pm]}" = "@" ]
+		then
+			sudo $pm ${pm_l[apt]}
+		else
+			sudo $pm ${pm_l[$pm]}
+		fi 
+	elif [ $1 = "-u" ]
+	then
+		if [ "${pm_u[$pm]}" = "@" ]
+		then
+			sudo $pm ${pm_u[apt]} -y
+			if [ ${pm_g[$pm]} != 0 ]
+			then
+				sudo $pm ${pm_g[apt]} -y
+			fi
+		else
+			sudo $pm ${pm_u[$pm]} -y
+			if [ ${pm_g[$pm]} != 0 ]
+			then
+				sudo $pm ${pm_g[$pm]} -y
+			fi
+		fi
+	fi
 }
 output(){
 	declare -A t
@@ -121,6 +218,15 @@ output(){
 	t[dialogue]="\033[00m$2: [ $3 ]\033[00m"
 	t[error]="\033[01;31m[$2]: { $3 }\033[00m"
 	$prt ${t[$1]}
+}
+detect_home(){
+	script_dir=($(pwd|tr '/' ' '))
+	if [ "${script_dir[0]}" = "home" ]
+	then
+		home_detected="/home/${script_dir[1]}"
+	else
+		home_detected="/root"
+	fi
 }
 pkg_parser(){
 	if [ $1 = "parse" -a -e $bnd_dir/$2/$3 ]
@@ -245,97 +351,22 @@ pkg_install(){
 		pkg_parser clean
 	fi
 }
-pma(){
-args=($*)
-	declare -A pm_i
-	declare -A pm_r
-	declare -A pm_l
-	declare -A pm_u
-	declare -A pm_g
-	pkg="${args[*]:1}"
-#Package Managers internal database 
-#(it's ugly and huge, but internal)
-##apt##
-	pm_i[apt]="install"
-	pm_r[apt]="remove"
-	pm_l[apt]="list --installed"
-	pm_u[apt]="update"
-	pm_g[apt]="upgrade"
-##pacman##
-	pm_i[pacman]="-S"
-	pm_r[pacman]="-Rs"
-	pm_l[pacman]="-Qs"
-	pm_u[pacman]="-Syu"
-	pm_g[pacman]=0
-##apk##
-	pm_i[apk]="add"
-	pm_r[apk]="del"
-	pm_l[apk]="info"
-	pm_u[apk]=@
-	pm_g[apk]=@
-##dnf##
-	pm_i[dnf]=@
-	pm_r[dnf]=@
-	pm_l[dnf]=@
-	pm_u[dnf]=@
-	pm_g[dnf]=0
-#Package Managers Abstraction
-	if [ $1 = "-qpm" ] #Qwerry Package Manager
-	then
-		bin_dirs="$(echo $PATH | tr ':' ' ')"
-		for dir in ${bin_dirs[@]}
-		do
-			bin_list+=($(ls $dir/))
-		done
-		#Package Manager Auto Detect
-		for pmc in ${!pm_l[@]}
-		do
-			if [[ "${bin_list[@]}" = *"$pmc"* ]]
-			then
-				pm_detected=$pmc
-			fi
-		done
-	elif [ $1 = "-i" ]
-	then
-		if [ "${pm_i[$pm]}" = "@" ]
+enable_extras(){
+	for i in $*
+	do 
+		if [ $i = flatpak ]
 		then
-			sudo $pm ${pm_i[apt]} ${pkg} -y
-		else
-			sudo $pm ${pm_i[$pm]} ${pkg} -y
-		fi 
-	elif [ $1 = "-r" ]
-	then
-		if [ "${pm_r[$pm]}" = "@" ]
-		then
-			sudo $pm ${pm_r[apt]} ${pkg} -y
-		else
-			sudo $pm ${pm_r[$pm]} ${pkg} -y
+			output progress $name "Configuring flatpak"
+			pma -i flatpak
+			$flatpak_remote $flathub
+			output ok_dialogue $name "flatpak enabled"
 		fi
-	elif [ $1 = "-l" ]
-	then
-		if [ "${pm_l[$pm]}" = "@" ]
+		if [ $i = snap ]
 		then
-			sudo $pm ${pm_l[apt]}
-		else
-			sudo $pm ${pm_l[$pm]}
-		fi 
-	elif [ $1 = "-u" ]
-	then
-		if [ "${pm_u[$pm]}" = "@" ]
-		then
-			sudo $pm ${pm_u[apt]} -y
-			if [ ${pm_g[$pm]} != 0 ]
-			then
-				sudo $pm ${pm_g[apt]} -y
-			fi
-		else
-			sudo $pm ${pm_u[$pm]} -y
-			if [ ${pm_g[$pm]} != 0 ]
-			then
-				sudo $pm ${pm_g[$pm]} -y
-			fi
+			$prt "soom..."
 		fi
-	fi
+	done
+exit
 }
 download(){
 	output bnd_header $1
@@ -362,29 +393,11 @@ cook(){
 	if [ -e recipe ]
 	then
 		output progress $1 "Setting Recipe Script"
-		#cat recipe
 		export id="$1"
 		bash recipe
 	fi
 	output title "$1 Instaled"
 	$rm $bnd_dir/$1
-}
-enable_extras(){
-	for i in $*
-	do 
-		if [ $i = flatpak ]
-		then
-			output progress $name "Configuring flatpak"
-			pma -i flatpak
-			$flatpak_remote $flathub
-			output ok_dialogue $name "flatpak enabled"
-		fi
-		if [ $i = snap ]
-		then
-			$prt "soom..."
-		fi
-	done
-exit
 }
 live_shell(){
 	while [ 1 ]
