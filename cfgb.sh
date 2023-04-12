@@ -21,7 +21,7 @@ load_data(){
 	script="$(pwd)/cfgb.sh"
 	file_format="tar.gz"
 	pkg_flag="null"
-	deps="wget bash sudo"
+	deps="wget bash sudo tr"
 	filter=$*
 	cmd="$1"
 #Work directories
@@ -388,7 +388,7 @@ unpack(){
 	output ok_dialogue "files" "$(ls $bnd_dir/$1/)"
 }
 cook(){
-	output title "Setting-up $1"
+	output title "Setting-Up $1"
 	cd $1/
 	pkg_install $1
 	if [ -e recipe ]
