@@ -1,5 +1,5 @@
 # CFGB Script
-It is something like a package manager created to facilitate the post-installation of GNU/Linux systems.
+It is something like a package manager created to facilitate the post-installation of Linux systems.
 
 # Setup instructions
 Syntax:
