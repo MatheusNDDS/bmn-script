@@ -46,6 +46,7 @@ load_data $*
 		
 		done
 	fi
+	detect_home
 	if [[ "$1" = *"-i"* ]]
 	then
 		for i in ${filter[@]:2}
@@ -80,6 +81,7 @@ load_data $*
 
 ## Custom Functions ##
 setup(){
+	output title "CFGB installation"
 #Script install
 	$mkd $pdir 2> $d0
 	$mkd $bnd_dir 2> $d0
@@ -93,7 +95,7 @@ setup(){
 #Detecting home directorie
 	output progress $name "Detecting Home directorie"
 	detect_home
-	output sub_title "Home : $home_detected"
+	output sub_title "Default Home : $home_detected"
 #Installing dependencies
 	output progress $name "Installing dependencies"
 	pm=$pm_detected
@@ -211,7 +213,7 @@ args=($*)
 output(){
 	declare -A t
 	t[header]="\033[01;36m-=/$2/=-\033[00m ~ $3 \n"
-	t[bnd_header]="Bundle:$2\nRepo:$repo"
+	t[info_header]="Home: $h\nRepo: $repo"
 	t[progress]="\033[00;32m-=- [$2]: $3 -=-\033[00m"
 	t[ok_dialogue]="\033[00m$2: [ $3 ] -Ok\033[00m "
 	t[title]="\033[01;36m\n-=- $2 -=-\n\033[00m"
@@ -225,8 +227,11 @@ detect_home(){
 	if [ "${script_dir[0]}" = "home" ]
 	then
 		home_detected="/home/${script_dir[1]}"
-	else
+		h=$home_detected
+	elif [ "${script_dir[0]}" = "root" ]
+	then
 		home_detected="/root"
+		h=$home_detected
 	fi
 }
 pkg_parser(){
@@ -370,7 +375,7 @@ enable_extras(){
 exit
 }
 download(){
-	output bnd_header $1
+	output info_header $1
 	output title "Downloading $1"
 	$dl $repo/$1.$file_format
 	if [ $2 != 1 ]
