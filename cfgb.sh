@@ -95,7 +95,7 @@ setup(){
 #Detecting home directorie
 	output progress $name "Detecting Home directorie"
 	detect_home
-	output sub_title "Default Home : $home_detected"
+	output sub_title "Default Home : $h"
 #Installing dependencies
 	output progress $name "Installing dependencies"
 	pm=$pm_detected
@@ -106,7 +106,7 @@ setup(){
 	then
 		if [ -e repo ]
 		then
-			$prt "pm=$pm_detected h=$home_detected repo=$(cat repo)" > $cfg
+			$prt "pm=$pm_detected h=$h repo=$(cat repo)" > $cfg
 			output title "C.F.G.B instelled with portable repo file"
 		else
 			output error "install error" "required portable 'repo' file, or type the repository url address last. "
@@ -226,11 +226,9 @@ detect_home(){
 	script_dir=($(pwd|tr '/' ' '))
 	if [ "${script_dir[0]}" = "home" ]
 	then
-		home_detected="/home/${script_dir[1]}"
-		h=$home_detected
+		h="/home/${script_dir[1]}"
 	elif [ "${script_dir[0]}" = "root" ]
 	then
-		home_detected="/root"
 		h=$home_detected
 	fi
 }
