@@ -229,7 +229,7 @@ detect_home(){
 		h="/home/${script_dir[1]}"
 	elif [ "${script_dir[0]}" = "root" ]
 	then
-		h=$home_detected
+		h="/root"
 	fi
 }
 pkg_parser(){
