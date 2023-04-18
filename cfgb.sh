@@ -1,8 +1,8 @@
 #!/bin/bash
-## Core functions ##
+### Core functions ###
 load_data(){
-#Evuronment variables
-#Can be used in recipe scripts
+## Evironment Variables : Can be used in recipe scripts ##
+#General commands
 	export cp="sudo cp -r"
 	export rm="sudo rm -rf"
 	export prt="echo -e"
@@ -15,8 +15,18 @@ load_data(){
 	export -f output
 	export add_ppa="sudo add-apt-repository"
 	export flatpak_remote="flatpak remote-add --if-not-exists"
+#directories collection
+	export rshr="/usr/share" #root share
+	export hshr="$h/.local/share" #home share
+	export rlc="/usr/local" #root local
+	export hlc="$h/.local" #home local
+	export cfg="$h/.config"
+	export etc="/etc"
+	export dev="/dev"
+	export mdi="/media"
+	export mnt="/mnt"
 	
-#References
+## References ##
 	name="cfgb"
 	script="$(pwd)/cfgb.sh"
 	file_format="tar.gz"
@@ -24,16 +34,17 @@ load_data(){
 	deps="wget bash sudo tr"
 	filter=$*
 	cmd="$1"
-#Work directories
+	
+## Work Directories ##
 	pdir="/etc/$name"
 	bnd_dir="$pdir/bundles"
-	cfg="$pdir/cfg"
-	bin="/bin/cfgb"
-#Flatpak configuration
+	cfg_dir="$pdir/cfg"
+	bin="/bin/$name"
+	
+## Flatpak Configuration ##
 	flathub="flathub https://flathub.org/repo/flathub.flatpakrepo"
 	fp_mode="--system"
 	fp_remote="flathub"
-	fp_opt="$fm_mode $fp_remote"
 }
 start(){
 load_data $*
@@ -43,7 +54,6 @@ load_data $*
 		for i in $(cat $cfg)
 		do 
 			export $i
-		
 		done
 	fi
 	detect_home
@@ -79,7 +89,7 @@ load_data $*
 	fi
 }
 
-## Custom Functions ##
+### Custom Functions ###
 setup(){
 	output title "CFGB installation"
 #Script install
@@ -106,17 +116,39 @@ setup(){
 	then
 		if [ -e repo ]
 		then
-			$prt "pm=$pm_detected h=$h repo=$(cat repo)" > $cfg
+			$prt "pm=$pm_detected h=$h repo=$(cat repo)" > $cfg_dir
 			output title "C.F.G.B instelled with portable repo file"
 		else
 			output error "install error" "required portable 'repo' file, or type the repository url address last. "
 			exit 1
 		fi
 	else
-		$prt "pm=$pm_detected h=$home_detected repo=$2" > $cfg
+		$prt "pm=$pm_detected h=$home_detected repo=$2" > $cfg_dir
 		output title "C.F.G.B instaled"
 	fi
 exit
+}
+output(){
+	declare -A t
+	t[header]="\033[01;36m-=/$2/=-\033[00m ~ $3 \n"
+	t[info_header]="Home: $h\nRepo: $repo"
+	t[progress]="\033[00;32m-=- [$2]: $3 -=-\033[00m"
+	t[ok_dialogue]="\033[00m$2: [ $3 ] -Ok\033[00m "
+	t[title]="\033[01;36m\n-=- $2 -=-\n\033[00m"
+	t[sub_title]="\033[00;33m- $2\033[00m"
+	t[dialogue]="\033[00m$2: [ $3 ]\033[00m"
+	t[error]="\033[01;31m[$2]: { $3 }\033[00m"
+	$prt ${t[$1]}
+}
+detect_home(){
+	script_dir=($(pwd|tr '/' ' '))
+	if [ "${script_dir[0]}" = "home" ]
+	then
+		h="/home/${script_dir[1]}"
+	elif [ "${script_dir[0]}" = "root" ]
+	then
+		h="/root"
+	fi
 }
 pma(){
 args=($*)
@@ -210,28 +242,6 @@ args=($*)
 		fi
 	fi
 }
-output(){
-	declare -A t
-	t[header]="\033[01;36m-=/$2/=-\033[00m ~ $3 \n"
-	t[info_header]="Home: $h\nRepo: $repo"
-	t[progress]="\033[00;32m-=- [$2]: $3 -=-\033[00m"
-	t[ok_dialogue]="\033[00m$2: [ $3 ] -Ok\033[00m "
-	t[title]="\033[01;36m\n-=- $2 -=-\n\033[00m"
-	t[sub_title]="\033[00;33m- $2\033[00m"
-	t[dialogue]="\033[00m$2: [ $3 ]\033[00m"
-	t[error]="\033[01;31m[$2]: { $3 }\033[00m"
-	$prt ${t[$1]}
-}
-detect_home(){
-	script_dir=($(pwd|tr '/' ' '))
-	if [ "${script_dir[0]}" = "home" ]
-	then
-		h="/home/${script_dir[1]}"
-	elif [ "${script_dir[0]}" = "root" ]
-	then
-		h="/root"
-	fi
-}
 pkg_parser(){
 	if [ $1 = "parse" -a -e $bnd_dir/$2/$3 ]
 	then
@@ -305,7 +315,7 @@ pkg_install(){
 		done
 		pkg_parser check pma
 		for i in ${to_remove[*]}
-		do	
+		do
 			if [[ "$pkgs_in" = *"$i"* ]]
 			then
 				output sub_title "$pm/removing: $i"
@@ -330,7 +340,7 @@ pkg_install(){
 		fi
 		pkg_parser check fp
 		for i in ${to_install[*]}
-		do	
+		do
 			if [[ "$pkgs_in" = *"$i "* ]]
 			then
 				output sub_title "flatpak/nstalling: $i"
@@ -357,7 +367,7 @@ pkg_install(){
 }
 enable_extras(){
 	for i in $*
-	do 
+	do
 		if [ $i = flatpak ]
 		then
 			output progress $name "Configuring flatpak"
@@ -377,7 +387,7 @@ download(){
 	output title "Downloading $1"
 	$dl $repo/$1.$file_format
 	if [ $2 != 1 ]
-	then 
+	then
 		output ok_dialogue "files" "$(ls $bnd_dir/)"
 	else
 		output ok_dialogue "files" "$(ls . | grep $1.$file_format)"
@@ -385,7 +395,7 @@ download(){
 }
 unpack(){
 	output progress "tar" "Unpacking"
-	$mkd $1/  
+	$mkd $1/
 	tar -xf $1.$file_format -C $1/
 	$rm $1.$file_format
 	output ok_dialogue "files" "$(ls $bnd_dir/$1/)"
