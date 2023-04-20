@@ -38,7 +38,7 @@ load_data(){
 ## Work Directories ##
 	pdir="/etc/$name"
 	bnd_dir="$pdir/bundles"
-	cfg_dir="$pdir/cfg"
+	cfg_file="$pdir/cfg"
 	bin="/bin/$name"
 	
 ## Flatpak Configuration ##
@@ -51,7 +51,7 @@ load_data $*
 	output header "Configuration Bundles Manager" "Matheus Dias"
 	if [ $1 != '-s' ]
 	then
-		for i in $(cat $cfg)
+		for i in $(cat $cfg_file)
 		do 
 			export $i
 		done
@@ -116,14 +116,14 @@ setup(){
 	then
 		if [ -e repo ]
 		then
-			$prt "pm=$pm_detected h=$h repo=$(cat repo)" > $cfg_dir
+			$prt "pm=$pm_detected h=$h repo=$(cat repo)" > $cfg_file
 			output title "C.F.G.B instelled with portable repo file"
 		else
 			output error "install error" "required portable 'repo' file, or type the repository url address last. "
 			exit 1
 		fi
 	else
-		$prt "pm=$pm_detected h=$home_detected repo=$2" > $cfg_dir
+		$prt "pm=$pm_detected h=$home_detected repo=$2" > $cfg_file
 		output title "C.F.G.B instaled"
 	fi
 exit
