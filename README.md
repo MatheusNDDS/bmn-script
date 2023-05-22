@@ -5,5 +5,5 @@ It is something like a package manager created to facilitate the post-installati
 Syntax:
 
 ``sudo sh cfgb.sh -s repository``  
-- The repository field can be from github or any other downloadable source.  
+- The repository field can be from github raw content or any other downloadable source.  
 - You can insert the repository in the "repo" file and you won't need to specify this field.
