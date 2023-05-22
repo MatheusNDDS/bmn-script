@@ -1,4 +1,4 @@
-#!/bin/bash
+	#!/bin/bash
 ### Core functions ###
 load_data(){
 ## Evironment Variables : Can be used in recipe scripts ##
@@ -25,7 +25,6 @@ load_data(){
 	export dev="/dev"
 	export mdi="/media"
 	export mnt="/mnt"
-	
 ## References ##
 	name="cfgb"
 	script="$(pwd)/cfgb.sh"
@@ -34,13 +33,13 @@ load_data(){
 	deps="wget bash sudo tr"
 	filter=$*
 	cmd="$1"
-	
+
 ## Work Directories ##
 	pdir="/etc/$name"
 	bnd_dir="$pdir/bundles"
 	cfg_file="$pdir/cfg"
 	bin="/bin/$name"
-	
+
 ## Flatpak Configuration ##
 	flathub="flathub https://flathub.org/repo/flathub.flatpakrepo"
 	fp_mode="--system"
@@ -283,10 +282,10 @@ pkg_parser(){
 	then
 		if [ $2 = "fp" ]
 		then
-			pkgs_in=$(flatpak list)
+			pkgs_in=($(flatpak list))
 		elif [ $2 = "pma" ]
 		then
-			pkgs_in=(pma -l)
+			pkgs_in=($(pma -l))
 		fi
 	fi
 }
