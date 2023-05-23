@@ -15,6 +15,7 @@ load_data(){
 	export -f output
 	export add_ppa="sudo add-apt-repository"
 	export flatpak_remote="flatpak remote-add --if-not-exists"
+	export fp_overide="sudo flatpak override"
 #directories collection
 	export rsr="/usr/share" #root share
 	export hsr="$h/.local/share" #home share
