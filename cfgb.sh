@@ -282,10 +282,10 @@ pkg_parser(){
 	then
 		if [ $2 = "fp" ]
 		then
-			pkgs_in=($(flatpak list))
+			pkgs_in=$(flatpak list)
 		elif [ $2 = "pma" ]
 		then
-			pkgs_in=($(pma -l))
+			pkgs_in=$(pma -l)
 		fi
 	fi
 }
