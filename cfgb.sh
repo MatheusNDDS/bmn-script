@@ -1,4 +1,4 @@
-	#!/bin/bash
+#!/bin/bash
 ### Core functions ###
 load_data(){
 ## Evironment Variables : Can be used in recipe scripts ##
@@ -141,11 +141,11 @@ output(){
 	$prt ${t[$1]}
 }
 detect_home(){
-	script_dir=($(pwd|tr '/' ' '))
-	if [ "${script_dir[0]}" = "home" ]
+	curent_path=($(pwd|tr '/' ' '))
+	if [ "${curent_path[0]}" = "home" ]
 	then
-		h="/home/${script_dir[1]}"
-	elif [ "${script_dir[0]}" = "root" ]
+		h="/home/${curent_path[1]}"
+	elif [ "${curent_path[0]}" = "root" ]
 	then
 		h="/root"
 	fi
