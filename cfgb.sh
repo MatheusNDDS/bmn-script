@@ -90,6 +90,9 @@ load_data $*
 	elif [ $1 = '-s' ]
 	then
 		setup $*
+	elif [ $1 = '-U']
+	then
+		update
 	elif [ $1 = '-l' ]
 	then
 		live_shell
