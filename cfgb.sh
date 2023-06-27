@@ -5,6 +5,7 @@ load_data(){
 	#General commands
 	export cp="sudo cp -r"
 	export rm="sudo rm -rf"
+	export mv="sudo mv"
 	export prt="echo -e"
 	export mk="sudo touch"
 	export mkd="sudo mkdir"
