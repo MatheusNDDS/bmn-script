@@ -2,7 +2,7 @@
 ### Core functions ###
 load_data(){
 ## Evironment Variables : Can be used in recipe scripts ##
-#General commands
+	#General commands
 	export cp="sudo cp -r"
 	export rm="sudo rm -rf"
 	export prt="echo -e"
@@ -12,11 +12,15 @@ load_data(){
 	export dl="sudo wget -q"
 	export d0="/dev/0"
 	export cfgbi="sudo cfgb -i"
-	export -f output
 	export add_ppa="sudo add-apt-repository"
 	export flatpak_remote="flatpak remote-add --if-not-exists"
 	export fp_overide="sudo flatpak override"
-#directories collection
+	
+	#Functions
+	export -f output
+	export -f pma
+	
+	#directories collection
 	export rsr="/usr/share" #root share
 	export hsr="$h/.local/share" #home share
 	export rlc="/usr/local" #root local
@@ -26,6 +30,7 @@ load_data(){
 	export dev="/dev"
 	export mdi="/media"
 	export mnt="/mnt"
+
 ## References ##
 	name="cfgb"
 	script="$(pwd)/cfgb.sh"
@@ -48,7 +53,7 @@ load_data(){
 }
 start(){
 load_data $*
-	output header "Configuration Bundles Manager" "Matheus Dias"
+	output 0 "Configuration Bundles Manager" "Matheus Dias"
 	if [ $1 != '-s' ]
 	then
 		for i in $(cat $cfg_file)
@@ -89,9 +94,9 @@ load_data $*
 	fi
 }
 
-### Custom Functions ###
+### Program Functions ###
 setup(){
-	output title "CFGB installation"
+	output -T "CFGB installation"
 #Script install
 	$mkd $pdir 2> $d0
 	$mkd $bnd_dir 2> $d0
@@ -99,32 +104,32 @@ setup(){
 	$cp $script $bin 2> $d0
 	$elf $bin
 #Package manager autodetect
-	output progress $name "Detecting package manager"
+	output -p $name "Detecting Package "
 	pma -qpm
-	output sub_title "Package Manager : $pm_detected"
+	output -t "Package Manager : $pm_detected"
 #Detecting home directorie
-	output progress $name "Detecting Home directorie"
+	output -p $name "Detecting Home Directorie"
 	detect_home
-	output sub_title "Default Home : $h"
+	output -t "Default Home : $h"
 #Installing dependencies
-	output progress $name "Installing dependencies"
+	output -p $name "Installing Dependencies"
 	pm=$pm_detected
 	pma -u
-	pma -i $deps
+	pma -iu $deps
 #Setting environment variables
 	if [ -z "$2" ]
 	then
 		if [ -e repo ]
 		then
 			$prt "pm=$pm_detected h=$h repo=$(cat repo)" > $cfg_file
-			output title "C.F.G.B instelled with portable repo file"
+			output -T "C.F.G.B instelled with portable repo file"
 		else
-			output error "install error" "required portable 'repo' file, or type the repository url address last. "
+			output -e "install error" "required portable 'repo' file, or type the repository url address last. "
 			exit 1
 		fi
 	else
 		$prt "pm=$pm_detected h=$home_detected repo=$2" > $cfg_file
-		output title "C.F.G.B instaled"
+		output -T "C.F.G.B instaled"
 	fi
 exit
 }
@@ -132,12 +137,25 @@ output(){
 	declare -A t
 	t[header]="\033[01;36m-=/$2/=-\033[00m ~ $3 \n"
 	t[info_header]="Home: $h\nRepo: $repo"
-	t[progress]="\033[00;32m-=- [$2]: $3 -=-\033[00m"
-	t[ok_dialogue]="\033[00m$2: [ $3 ] -Ok\033[00m "
+	t[progress]="\033[01;32m-=- [$2]: $3 -=-\033[00m"
+	t[list]="\033[01m$2: [ $($prt $3|tr ' ' ', ') ]\033[00m "
+	t[dialogue]="\033[01m[$2]: $3\033[00m"
 	t[title]="\033[01;36m\n-=- $2 -=-\n\033[00m"
-	t[sub_title]="\033[00;33m- $2\033[00m"
-	t[dialogue]="\033[00m$2: [ $3 ]\033[00m"
-	t[error]="\033[01;31m[$2]: { $3 }\033[00m"
+	t[sub_title]="\033[01;33m- $2\033[00m"
+	t[error]="\033[01;31m*{$2}: $3\033[00m"
+	t[sucess]="\033[01;32m°($2): $3\033[00m"
+	
+	#Simplification
+	t[0]=${t[header]}
+	t[1]=${t[info_header]}
+	t['-p']=${t[progress]}
+	t['-l']=${t[list]}
+	t['-d']=${t[dialogue]}
+	t['-T']=${t[title]}
+	t['-t']=${t[sub_title]}
+	t['-e']=${t[error]}
+	t['-s']=${t[sucess]}
+	
 	$prt ${t[$1]}
 }
 detect_home(){
@@ -268,11 +286,11 @@ pkg_parser(){
 	then
 		if [ -n "${to_install[*]}" ]
 		then
-			output dialogue "install" "${to_install[*]}"
+			output -d "install" "${to_install[*]}"
 		fi
 		if [ -n "${to_remove[*]}" ]
 		then
-			output dialogue "remove" "${to_remove[*]}"
+			output -d "remove" "${to_remove[*]}"
 		fi
 	elif [ $1 = "clean" ]
 	then
@@ -295,7 +313,7 @@ pkg_install(){
 	pkg_parser parse $1 packages
 	if [ $pkg_flag != "null" ]
 	then
-		output progress $pm "Installing Packages"
+		output -p $pm "Installing Packages"
 		pkg_parser list_pkgs
 		if [[ $cmd = *"u"* ]]
 		then
@@ -306,10 +324,10 @@ pkg_install(){
 		do
 			if [[ "$pkgs_in" = *"$i"* ]]
 			then
-				output sub_title "$pm/installing: $i"
-				output error "$pm/install" "$i is already installed"
+				output -t "$pm/installing: $i"
+				output -e "$pm/install" "$i is already installed"
 			else
-				output sub_title "$pm/installing: $i"
+				output -t "$pm/installing: $i"
 				pma -i $i
 			fi
 		done
@@ -318,11 +336,11 @@ pkg_install(){
 		do
 			if [[ "$pkgs_in" = *"$i"* ]]
 			then
-				output sub_title "$pm/removing: $i"
+				output -t "$pm/removing: $i"
 				pma -r $i
 			else
-				output sub_title "$pm/removing: $i"
-				output error "$pm/remove" "$i is not installed"
+				output -t "$pm/removing: $i"
+				output -e "$pm/remove" "$i is not installed"
 			fi
 		done
 		pkg_parser clean
@@ -331,11 +349,11 @@ pkg_install(){
 	pkg_parser parse $1 flatpaks
 	if [ $pkg_flag != "null" ]
 	then
-		output progress Flatpak "Installing Flatpaks"
+		output -p Flatpak "Installing Flatpaks"
 		pkg_parser list_pkgs
 		if [[ $cmd = *"u"* ]]
 		then
-			output sub_title 'Uptating Flathub'
+			output -t 'Uptating Flathub'
 			sudo flatpak update -y
 		fi
 		pkg_parser check fp
@@ -343,10 +361,10 @@ pkg_install(){
 		do
 			if [[ "$pkgs_in" = *"$i "* ]]
 			then
-				output sub_title "flatpak/nstalling: $i"
-				output error "flatpak/install" "$i is already installed"
+				output -t "flatpak/nstalling: $i"
+				output -e "flatpak/install" "$i is already installed"
 			else
-				output sub_title "flatpak/installing: $i"
+				output -t "flatpak/installing: $i"
 				sudo flatpak $fp_mode install $fp_remote $i -y
 			fi
 		done
@@ -355,11 +373,11 @@ pkg_install(){
 		do
 			if [[ "$pkgs_in" = *"$i"* ]]
 			then
-				output sub_title "flatpak/removing: $i"
+				output -t "flatpak/removing: $i"
 				sudo flatpak uninstall $fp_mode $i -y
 			else
-				output sub_title "Removing: $i"
-				output error "flatpak/remove" "$i is not installed"
+				output -t "Removing: $i"
+				output -e "flatpak/remove" "$i is not installed"
 			fi
 		done
 		pkg_parser clean
@@ -370,10 +388,10 @@ enable_extras(){
 	do
 		if [ $i = flatpak ]
 		then
-			output progress $name "Configuring flatpak"
+			output -p $name "Configuring flatpak"
 			pma -i flatpak
 			$flatpak_remote $flathub
-			output ok_dialogue $name "flatpak enabled"
+			output -s $name "flatpak enabled"
 		fi
 		if [ $i = snap ]
 		then
@@ -383,41 +401,43 @@ enable_extras(){
 exit
 }
 download(){
-	output info_header $1
-	output title "Downloading $1"
+	output 1 $1
+	output -T "Downloading $1"
 	$dl $repo/$1.$file_format
 	if [ $2 != 1 ]
 	then
-		output ok_dialogue "files" "$(ls $bnd_dir/)"
+		output -l "files" "$(ls $bnd_dir/)"
 	else
-		output ok_dialogue "files" "$(ls . | grep $1.$file_format)"
+		output -l "files" "$(ls . | grep $1.$file_format)"
 	fi
 }
 unpack(){
-	output progress "tar" "Unpacking"
+	output -p "tar" "Unpacking"
 	$mkd $1/
 	tar -xf $1.$file_format -C $1/
 	$rm $1.$file_format
-	output ok_dialogue "files" "$(ls $bnd_dir/$1/)"
+	output -l "files" "$(ls $bnd_dir/$1/)"
 }
 cook(){
-	output title "Setting-Up $1"
+	output -T "Setting-Up $1"
 	cd $1/
 	pkg_install $1
 	if [ -e recipe ]
 	then
-		output progress $1 "Setting Recipe Script"
+		output -p $1 "Setting Recipe Script"
 		export id="$1"
 		bash recipe
 	fi
-	output title "$1 Instaled"
+	output -s "$name" "$1 Instaled"
 	$rm $bnd_dir/$1
 }
 live_shell(){
 	while [ 1 ]
 	do
-		read -p "Live: " cmd
+		read -p "$(output -s "cfgb")" cmd
 		$cmd
 	done
 }
+
+### Program Start ###
 start $*
