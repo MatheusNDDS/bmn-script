@@ -136,16 +136,14 @@ exit
 }
 update(){
 	output -T "Updating CFGB Script"
-	cd $pdir
 #Download
 	output -p $name 'Downloading Script'
 	output -d 'Source' $script_src
-	$dl $script_src
+	$dl $script_src $pdir
 #Installation
 	output -p $name 'Installing Script'
-	$cp $script $bin
+	$mv "$pdir/$name.sh" $bin
 	$elf $bin
-	$rm $script
 	
 	output -T 'CFGB Script Updated'
 }
