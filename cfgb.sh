@@ -158,13 +158,13 @@ output(){
 	declare -A t
 	t[header]="\033[01;36m-=/$2/=-\033[00m ~ $3 \n"
 	t[info_header]="Home: $h\nRepo: $repo"
-	t[progress]="\033[01;32m-=- [$2]: $3 -=-\033[00m"
+	t[progress]="\033[01;35m-=- [$2]: $3 -=-\033[00m"
 	t[list]="\033[01m$2: [ $($prt $3|tr ' ' ', ') ]\033[00m "
 	t[dialogue]="\033[01m[$2]: $3\033[00m"
 	t[title]="\033[01;36m\n-=- $2 -=-\n\033[00m"
 	t[sub_title]="\033[01;33m- $2\033[00m"
-	t[error]="\033[01;31m*{$2}: $3\033[00m"
-	t[sucess]="\033[01;32m°($2): $3\033[00m"
+	t[error]="\033[01;31m{$2}: $3\033[00m"
+	t[sucess]="\033[01;32m($2): $3\033[00m"
 	
 	#Simplification
 	t[0]=${t[header]}
@@ -307,11 +307,11 @@ pkg_parser(){
 	then
 		if [ -n "${to_install[*]}" ]
 		then
-			output -d "install" "${to_install[*]}"
+			output -l "install" "${to_install[*]}"
 		fi
 		if [ -n "${to_remove[*]}" ]
 		then
-			output -d "remove" "${to_remove[*]}"
+			output -l "remove" "${to_remove[*]}"
 		fi
 	elif [ $1 = "clean" ]
 	then
@@ -449,7 +449,7 @@ cook(){
 		export id="$1"
 		bash recipe
 	fi
-	output -s "$name" "$1 Instaled"
+	output -T "$name" "$1 Instaled"
 	$rm $bnd_dir/$1
 }
 live_shell(){
