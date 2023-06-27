@@ -449,7 +449,7 @@ cook(){
 		export id="$1"
 		bash recipe
 	fi
-	output -T "$name" "$1 Instaled"
+	output -T "$1 Instaled"
 	$rm $bnd_dir/$1
 }
 live_shell(){
