@@ -380,7 +380,7 @@ pkg_install(){
 		pkg_parser check fp
 		for i in ${to_install[*]}
 		do
-			if [[ "$pkgs_in" = *"$i "* ]]
+			if [[ "$pkgs_in" = *"$i"* ]]
 			then
 				output -t "flatpak/nstalling: $i"
 				output -e "flatpak/install" "$i is already installed"
