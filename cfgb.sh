@@ -115,7 +115,7 @@ setup(){
 	output -p $name "Installing Dependencies"
 	pm=$pm_detected
 	pma -u
-	pma -iu $deps
+	pma -i $deps
 #Setting environment variables
 	if [ -z "$2" ]
 	then
