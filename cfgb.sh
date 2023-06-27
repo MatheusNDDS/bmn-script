@@ -346,7 +346,7 @@ pkg_install(){
 			if [[ "$pkgs_in" = *"$i"* ]]
 			then
 				output -t "$pm/installing: $i"
-				output -e "$pm/install" "$i is already installed"
+				output -s "$pm/install" "$i is already installed"
 			else
 				output -t "$pm/installing: $i"
 				pma -i $i
@@ -361,7 +361,7 @@ pkg_install(){
 				pma -r $i
 			else
 				output -t "$pm/removing: $i"
-				output -e "$pm/remove" "$i is not installed"
+				output -s "$pm/remove" "$i is not installed"
 			fi
 		done
 		pkg_parser clean
