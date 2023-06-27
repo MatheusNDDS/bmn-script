@@ -34,6 +34,7 @@ load_data(){
 ## References ##
 	name="cfgb"
 	script="$(pwd)/cfgb.sh"
+	script_src="https://github.com/MatheusNDDS/cfgb-script/raw/main/${name}.sh"
 	file_format="tar.gz"
 	pkg_flag="null"
 	deps="wget bash sudo tr"
@@ -132,6 +133,21 @@ setup(){
 		output -T "C.F.G.B instaled"
 	fi
 exit
+}
+update(){
+	output -T "Updating CFGB Script"
+	cd $pdir
+#Download
+	output -p $name 'Downloading Script'
+	output -d 'Source' $script_src
+	$dl $script_src
+#Installation
+	output -p $name 'Installing Script'
+	$cp $script $bin
+	$elf $bin
+	$rm $script
+	
+	output -T 'CFGB Script Updated'
 }
 output(){
 	declare -A t
@@ -434,7 +450,7 @@ cook(){
 live_shell(){
 	while [ 1 ]
 	do
-		read -p "$(output -s "cfgb")" cmd
+		read -p "$(output -d "cfgb")" cmd
 		$cmd
 	done
 }
