@@ -346,7 +346,7 @@ pkg_install(){
 			if [[ "$pkgs_in" = *"$i"* ]]
 			then
 				output -t "$pm/installing: $i"
-				output -s "$pm/install" "$i is already installed"
+				output -s "$pm" "$i is already installed"
 			else
 				output -t "$pm/installing: $i"
 				pma -i $i
@@ -361,7 +361,7 @@ pkg_install(){
 				pma -r $i
 			else
 				output -t "$pm/removing: $i"
-				output -s "$pm/remove" "$i is not installed"
+				output -s "$pm" "$i is not installed"
 			fi
 		done
 		pkg_parser clean
@@ -382,8 +382,8 @@ pkg_install(){
 		do
 			if [[ "$pkgs_in" = *"$i"* ]]
 			then
-				output -t "flatpak/nstalling: $i"
-				output -e "flatpak/install" "$i is already installed"
+				output -t "flatpak/installing: $i"
+				output -s "flatpak" "$i is already installed"
 			else
 				output -t "flatpak/installing: $i"
 				sudo flatpak $fp_mode install $fp_remote $i -y
@@ -397,8 +397,8 @@ pkg_install(){
 				output -t "flatpak/removing: $i"
 				sudo flatpak uninstall $fp_mode $i -y
 			else
-				output -t "Removing: $i"
-				output -e "flatpak/remove" "$i is not installed"
+				output -t "flatpak/removing: $i"
+				output -s "flatpak" "$i is not installed"
 			fi
 		done
 		pkg_parser clean
