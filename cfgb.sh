@@ -423,7 +423,7 @@ exit
 }
 download(){
 	output 1 $1
-	output -T "Downloading $1"
+	output -T "Downloading “$1”"
 	$dl $repo/$1.$file_format
 	if [ $2 != 1 ]
 	then
@@ -433,23 +433,23 @@ download(){
 	fi
 }
 unpack(){
-	output -p "tar" "Unpacking"
+	output -p "tar" "Unpacking “$1”"
 	$mkd $1/
 	tar -xf $1.$file_format -C $1/
 	$rm $1.$file_format
 	output -l "files" "$(ls $bnd_dir/$1/)"
 }
 cook(){
-	output -T "Setting-Up $1"
+	output -T "Installing “$1”"
 	cd $1/
 	pkg_install $1
 	if [ -e recipe ]
 	then
-		output -p $1 "Setting Recipe Script"
+		output -p $1 "Setting Recipe"
 		export id="$1"
 		bash recipe
 	fi
-	output -T "$1 Instaled"
+	output -T "“$1” Instaled"
 	$rm $bnd_dir/$1
 }
 live_shell(){
