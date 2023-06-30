@@ -2,7 +2,7 @@
 ### Core functions ###
 load_data(){
 ## Evironment Variables : Can be used in recipe scripts ##
-	#General commands
+	#General commands 
 	export cp="sudo cp -r"
 	export rm="sudo rm -rf"
 	export mv="sudo mv"
@@ -31,6 +31,7 @@ load_data(){
 	export dev="/dev"
 	export mdi="/media"
 	export mnt="/mnt"
+	export tmp="/temp"
 
 ## References ##
 	name="cfgb"
@@ -142,15 +143,12 @@ update(){
 	output -T "Updating CFGB Script"
 	current_dir=$(pwd)
 	cd $pdir
-#Download
 	output -p $name 'Downloading Script'
 	output -d 'Source' $script_src
 	$dl $script_src
-#Installation
 	output -p $name 'Installing Script'
 	$mv "$pdir/$name.sh" $bin
 	$elf $bin
-	
 	output -T 'CFGB Script Updated'
 	cd $current_dir
 }
