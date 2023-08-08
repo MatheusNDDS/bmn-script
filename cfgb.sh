@@ -122,19 +122,19 @@ setup(){
 	pm=$pm_detected
 	pma -u
 	pma -i $deps
-#Setting environment variables
+#Saving environment variables
 	if [ -z "$2" ]
 	then
 		if [ -e repo ]
 		then
-			$prt "pm=$pm_detected h=$h repo=$(cat repo)" > $cfg_file
+			$prt "pm=$pm_detected h=$h u=$u repo=$(cat repo)" > $cfg_file
 			output -T "C.F.G.B instelled with portable repo file"
 		else
 			output -e "install error" "required portable 'repo' file, or type the repository url address last. "
 			exit 1
 		fi
 	else
-		$prt "pm=$pm_detected h=$home_detected repo=$2" > $cfg_file
+		$prt "pm=$pm_detected h=$h u=$u repo=$2" > $cfg_file
 		output -T "C.F.G.B instaled"
 	fi
 exit
@@ -182,9 +182,11 @@ detect_home(){
 	if [ "${curent_path[0]}" = "home" ]
 	then
 		h="/home/${curent_path[1]}"
+		u="${curent_path[1]}"
 	elif [ "${curent_path[0]}" = "root" ]
 	then
 		h="/root"
+		u="root"
 	fi
 }
 pma(){
@@ -196,13 +198,18 @@ args=($*)
 	declare -A pm_g
 	pkg="${args[*]:1}"
 #Package Managers internal database 
-#(it's ugly and huge, but internal)
 ##apt##
 	pm_i[apt]="install"
 	pm_r[apt]="remove"
 	pm_l[apt]="list --installed"
 	pm_u[apt]="update"
 	pm_g[apt]="upgrade"
+##nix-env##
+	pm_i['nix-env']="-iA"
+	pm_r['nix-env']="-e"
+	pm_l['nix-env']="-q"
+	pm_u['nix-env']="-u"
+	pm_g['nix-env']=0
 ##pacman##
 	pm_i[pacman]="-S"
 	pm_r[pacman]="-Rs"
@@ -221,6 +228,13 @@ args=($*)
 	pm_l[dnf]=@
 	pm_u[dnf]=@
 	pm_g[dnf]=0
+##apx##
+	pm_i[apx]=@
+	pm_r[apx]=@
+	pm_l[apx]=@
+	pm_u[apx]=@
+	pm_g[dnf]=@
+
 #Package Managers Abstraction
 	if [ $1 = "-qpm" ] #Qwerry Package Manager
 	then
