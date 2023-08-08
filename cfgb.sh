@@ -110,13 +110,14 @@ setup(){
 	$cp $script $bin 2> $d0
 	$elf $bin
 #Package manager autodetect
-	output -p $name "Detecting Package "
+	output -p $name "Detecting Package Manager"
 	pma -qpm
 	output -t "Package Manager : $pm_detected"
-#Detecting home directorie
-	output -p $name "Detecting Home Directorie"
+#Detecting home and user
+	output -p $name "Detecting Home Directorie and User"
 	detect_home
 	output -t "Default Home : $h"
+	output -t "Default User : $u"
 #Installing dependencies
 	output -p $name "Installing Dependencies"
 	pm=$pm_detected
