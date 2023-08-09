@@ -459,9 +459,9 @@ update(){
 	cd $current_dir
 }
 qwerry_bnd(){
-	$cd $bnd_dir
+	cd $bnd_dir/
 	$dl $repo/release
-	output -T $name "Avaliable Bundles"
+	output -T "Avaliable Bundles"
 	for bnd in $(cat $bnd_dir/release)
 	do
 		output -t $1
