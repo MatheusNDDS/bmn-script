@@ -101,58 +101,7 @@ load_data $*
 }
 
 ### Program Functions ###
-setup(){
-	output -T "CFGB installation"
-#Script install
-	$mkd $pdir 2> $d0
-	$mkd $bnd_dir 2> $d0
-	$mk $cfg 2> $d0
-	$cp $script $bin 2> $d0
-	$elf $bin
-#Package manager autodetect
-	output -p $name "Detecting Package Manager"
-	pma -qpm
-	output -t "Package Manager : $pm_detected"
-#Detecting home and user
-	output -p $name "Detecting Home Directorie and User"
-	detect_home
-	output -t "Default Home : $h"
-	output -t "Default User : $u"
-#Installing dependencies
-	output -p $name "Installing Dependencies"
-	pm=$pm_detected
-	pma -u
-	pma -i $deps
-#Saving environment variables
-	if [ -z "$2" ]
-	then
-		if [ -e repo ]
-		then
-			$prt "pm=$pm_detected h=$h u=$u repo=$(cat repo)" > $cfg_file
-			output -T "C.F.G.B instelled with portable repo file"
-		else
-			output -e "install error" "required portable 'repo' file, or type the repository url address last. "
-			exit 1
-		fi
-	else
-		$prt "pm=$pm_detected h=$h u=$u repo=$2" > $cfg_file
-		output -T "C.F.G.B instaled"
-	fi
-exit
-}
-update(){
-	output -T "Updating CFGB Script"
-	current_dir=$(pwd)
-	cd $pdir
-	output -p $name 'Downloading Script'
-	output -d 'Source' $script_src
-	$dl $script_src
-	output -p $name 'Installing Script'
-	$mv "$pdir/$name.sh" $bin
-	$elf $bin
-	output -T 'CFGB Script Updated'
-	cd $current_dir
-}
+## Utilities
 output(){
 	declare -A t
 	t[header]="\033[01;36m-=/$2/=-\033[00m ~ $3 \n"
@@ -294,6 +243,8 @@ args=($*)
 		fi
 	fi
 }
+
+## Package install
 pkg_parser(){
 	if [ $1 = "parse" -a -e $bnd_dir/$2/$3 ]
 	then
@@ -417,23 +368,8 @@ pkg_install(){
 		pkg_parser clean
 	fi
 }
-enable_extras(){
-	for i in $*
-	do
-		if [ $i = flatpak ]
-		then
-			output -p $name "Configuring flatpak"
-			pma -i flatpak
-			$flatpak_remote $flathub
-			output -s $name "flatpak enabled"
-		fi
-		if [ $i = snap ]
-		then
-			$prt "soom..."
-		fi
-	done
-exit
-}
+
+## Bundle Process
 download(){
 	output 1 $1
 	output -T "Downloading “$1”"
@@ -464,6 +400,77 @@ cook(){
 	fi
 	output -T "“$1” Instaled"
 	$rm $bnd_dir/$1
+}
+
+## Script managment
+setup(){
+	output -T "CFGB installation"
+#Script install
+	$mkd $pdir 2> $d0
+	$mkd $bnd_dir 2> $d0
+	$mk $cfg 2> $d0
+	$cp $script $bin 2> $d0
+	$elf $bin
+#Package manager autodetect
+	output -p $name "Detecting Package Manager"
+	pma -qpm
+	output -t "Package Manager : $pm_detected"
+#Detecting home and user
+	output -p $name "Detecting Home Directorie and User"
+	detect_home
+	output -t "Default Home : $h"
+	output -t "Default User : $u"
+#Installing dependencies
+	output -p $name "Installing Dependencies"
+	pm=$pm_detected
+	pma -u
+	pma -i $deps
+#Saving environment variables
+	if [ -z "$2" ]
+	then
+		if [ -e repo ]
+		then
+			$prt "pm=$pm_detected h=$h u=$u repo=$(cat repo)" > $cfg_file
+			output -T "C.F.G.B instelled with portable repo file"
+		else
+			output -e "install error" "required portable 'repo' file, or type the repository url address last. "
+			exit 1
+		fi
+	else
+		$prt "pm=$pm_detected h=$h u=$u repo=$2" > $cfg_file
+		output -T "C.F.G.B instaled"
+	fi
+exit
+}
+update(){
+	output -T "Updating CFGB Script"
+	current_dir=$(pwd)
+	cd $pdir
+	output -p $name 'Downloading Script'
+	output -d 'Source' $script_src
+	$dl $script_src
+	output -p $name 'Installing Script'
+	$mv "$pdir/$name.sh" $bin
+	$elf $bin
+	output -T 'CFGB Script Updated'
+	cd $current_dir
+}
+enable_extras(){
+	for i in $*
+	do
+		if [ $i = flatpak ]
+		then
+			output -p $name "Configuring flatpak"
+			pma -i flatpak
+			$flatpak_remote $flathub
+			output -s $name "flatpak enabled"
+		fi
+		if [ $i = snap ]
+		then
+			$prt "soom..."
+		fi
+	done
+exit
 }
 live_shell(){
 	while [ 1 ]
