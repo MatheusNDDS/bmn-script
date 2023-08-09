@@ -459,14 +459,17 @@ update(){
 	cd $current_dir
 }
 qwerry_bnd(){
+	# Downloading
 	cd $bnd_dir/
+	rm release
 	$dl $repo/release
 	release=($(sudo cat $bnd_dir/release))
 	
+	# Bundles output
 	output -T "Avaliable Bundles"
 	for bnd in ${release[@]}
 	do
-		output -t $bnd
+		output -t "$bnd"
 	done
 }
 enable_extras(){
