@@ -96,6 +96,9 @@ load_data $*
 		update
 	elif [ $1 = '-l' ]
 	then
+		qwerry_bnd ${filter[@]:2}
+	elif [ $1 = '-lsh' ]
+	then
 		live_shell
 	fi
 }
@@ -454,6 +457,15 @@ update(){
 	$elf $bin
 	output -T 'CFGB Script Updated'
 	cd $current_dir
+}
+qwerry_bnd(){
+	$cd $bnd_dir
+	$dl $repo/release
+	output -T $name "Avaliable Bundles"
+	for bnd in $(cat $bnd_dir/release)
+	do
+		output -t $1
+	done
 }
 enable_extras(){
 	for i in $*
