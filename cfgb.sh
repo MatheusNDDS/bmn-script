@@ -460,13 +460,14 @@ update(){
 }
 qwerry_bnd(){
 	# Downloading
+	output -p $name "Downloading release file"
 	cd $bnd_dir/
-	rm release
+	rm release > $d0
 	$dl $repo/release
 	release=($(sudo cat $bnd_dir/release))
 	
 	# Bundles output
-	output -T "Avaliable Bundles"
+	output -p $name "Listing avaliable bundles"
 	for bnd in ${release[@]}
 	do
 		output -t "$bnd"
