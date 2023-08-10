@@ -40,7 +40,7 @@ load_data(){
 	file_format="tar.gz"
 	pkg_flag="null"
 	deps="wget bash sudo tr"
-	filter=$*
+	args=$*
 	cmd="$1"
 
 ## Work Directories ##
@@ -67,7 +67,7 @@ load_data $*
 	detect_home
 	if [[ "$1" = *"-i"* ]]
 	then
-		for i in ${filter[@]:2}
+		for i in ${args[@]:2}
 		do
 			if [ $i != "u" ]
 			then
@@ -84,7 +84,7 @@ load_data $*
 		enable_extras $*
 	elif [ $1 = '-d' ]
 	then
-		for i in ${filter[@]:2}
+		for i in ${args[@]:2}
 		do
 			download $i 1
 		done
@@ -143,13 +143,13 @@ detect_home(){
 	fi
 }
 pma(){
-args=($*)
+pmaa=($*)
 	declare -A pm_i
 	declare -A pm_r
 	declare -A pm_l
 	declare -A pm_u
 	declare -A pm_g
-	pkg="${args[*]:1}"
+	pkg="${pmaa[*]:1}"
 #Package Managers internal database 
 ##apt##
 	pm_i[apt]="install"
