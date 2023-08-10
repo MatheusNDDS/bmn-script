@@ -96,7 +96,7 @@ load_data $*
 		update
 	elif [ $1 = '-l' ]
 	then
-		qwerry_bnd ${filter[@]:2}
+		qwerry_bnd $2
 	elif [ $1 = '-lsh' ]
 	then
 		live_shell
@@ -459,19 +459,33 @@ update(){
 	cd $current_dir
 }
 qwerry_bnd(){
-	# Downloading
+# Downloading
 	output -p $name "Downloading release file"
 	cd $pdir/
 	rm release > $d0
 	$dl $repo/release
 	release=($(sudo cat $pdir/release))
 	
-	# Bundles output
-	output -p $name "Listing avaliable bundles"
-	for bnd in ${release[@]}
-	do
-		output -t "$bnd"
-	done
+# Bundles output
+	case $1 in
+	"")
+		output -p $name "Listing avaliable bundles"
+		for bnd in ${release[@]}
+		do
+			output -t "$bnd"
+		done
+	;;
+	*)
+		output -p $name "Searching for “$1”"
+		for bnd in ${release[@]}
+		do
+			if [ "$bnd" = *$1* ]
+			then
+				output -t "$bnd"
+			fi
+		done
+	;;
+	esac
 }
 enable_extras(){
 	for i in $*
