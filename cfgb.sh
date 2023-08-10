@@ -97,7 +97,7 @@ load_data $*
 	elif [ $1 = '-l' ]
 	then
 		qwerry_bnd $2
-	elif [ $1 = '-lsh' ]
+	elif [ $1 = '-sh' ]
 	then
 		live_shell
 	fi
