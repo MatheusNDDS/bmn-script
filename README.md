@@ -2,7 +2,7 @@
 It is something like a package manager created to facilitate the post-installation of Linux systems.
 
 # Setup instructions
-Syntax:
+Install Syntax:
 
 ``sudo sh cfgb.sh -s repository``  
 - The repository field can be from github raw content or any other downloadable source.  
