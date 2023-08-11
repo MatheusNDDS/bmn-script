@@ -463,7 +463,6 @@ qwerry_bnd(){
 # Downloading
 	output -p $name "Downloading release file"
 	cd $pdir/
-	rm release 2> /dev/null
 	$dl $repo/release
 	release=($($cat $pdir/release))
 	
@@ -487,6 +486,7 @@ qwerry_bnd(){
 		done
 	;;
 	esac
+	$rm release
 }
 enable_extras(){
 	for i in $*
