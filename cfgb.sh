@@ -10,6 +10,7 @@ load_data(){
 	export mk="sudo touch"
 	export mkd="sudo mkdir"
 	export elf="sudo chmod 755"
+	export cat="sudo cat"
 	export dl="sudo wget -q"
 	export d0="/dev/0"
 	export cfgbi="sudo cfgb -i"
@@ -462,9 +463,9 @@ qwerry_bnd(){
 # Downloading
 	output -p $name "Downloading release file"
 	cd $pdir/
-	rm release > $d0
+	rm release 2> $d0
 	$dl $repo/release
-	release=($(sudo cat $pdir/release))
+	release=($($cat $pdir/release))
 	
 # Bundles output
 	case $1 in
@@ -479,7 +480,7 @@ qwerry_bnd(){
 		output -p $name "Searching for “$1”"
 		for bnd in ${release[@]}
 		do
-			if [ "$bnd" = *$1* ]
+			if [[ $bnd = *"$1"* ]]
 			then
 				output -t "$bnd"
 			fi
