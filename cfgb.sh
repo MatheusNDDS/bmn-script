@@ -463,7 +463,7 @@ qwerry_bnd(){
 # Downloading
 	output -p $name "Downloading release file"
 	cd $pdir/
-	rm release 2> $d0
+	rm release 2> /dev/null
 	$dl $repo/release
 	release=($($cat $pdir/release))
 	
