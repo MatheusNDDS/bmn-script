@@ -135,12 +135,12 @@ detect_home(){
 	curent_path=($(pwd|tr '/' ' '))
 	if [ "${curent_path[0]}" = "home" ]
 	then
-		h="/home/${curent_path[1]}"
-		u="${curent_path[1]}"
+		export h="/home/${curent_path[1]}"
+		export u="${curent_path[1]}"
 	elif [ "${curent_path[0]}" = "root" ]
 	then
-		h="/root"
-		u="root"
+		export h="/root"
+		export u="root"
 	fi
 }
 pma(){
@@ -465,7 +465,6 @@ qwerry_bnd(){
 	cd $pdir/
 	$dl $repo/release
 	release=($($cat $pdir/release))
-	
 # Bundles output
 	case $1 in
 	"")
