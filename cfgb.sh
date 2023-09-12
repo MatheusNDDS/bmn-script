@@ -393,6 +393,7 @@ unpack(){
 	output -l "files" "$(ls $bnd_dir/$1/)"
 }
 cook(){
+load_data
 	output -T "Installing “$1”"
 	cd $1/
 	pkg_install $1
