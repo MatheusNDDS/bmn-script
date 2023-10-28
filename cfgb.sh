@@ -483,11 +483,11 @@ qwerry_bnd(){
 		output -p $name "Searching for “$1”"
 		for bnd in ${release[@]}
 		do
-			for arg in $*
+			for argb in $*
 			do
-				if [[ $bnd = *"$arg"* ]]
+				if [[ $bnd = *"$argb"* ]]
 				then
-					if [[ "$release_h" != *"$arg"* ]]
+					if [[ "${release_h[@]}" != *"$argb"* ]]
 					then
 						output -t "$bnd"
 						release_h=+($bnd)
