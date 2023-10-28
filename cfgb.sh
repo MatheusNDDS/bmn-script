@@ -464,6 +464,10 @@ qwerry_bnd(){
 # Downloading
 	output -p $name "Downloading release file"
 	cd $pdir/
+	if [[ $(ls $pwd) = *"release"* ]]
+	then
+		$rm $pdir/release*
+	fi
 	$dl $repo/release
 	release=($($cat $pdir/release))
 # Bundles output
