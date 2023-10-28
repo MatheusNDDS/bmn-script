@@ -113,7 +113,7 @@ output(){
 	t[progress]="\033[01;35m-=- [$2]: $3 -=-\033[00m"
 	t[list]="\033[01m$2: [ $($prt $3|tr ' ' ', ') ]\033[00m "
 	t[dialogue]="\033[01m[$2]: $3\033[00m"
-	t[title]="\033[01;36m\n-=- $2 -=-\n\033[00m"
+	t[title]="\033[01;36m\n## $2 ##\n\033[00m"
 	t[sub_title]="\033[01;33m- $2\033[00m"
 	t[error]="\033[01;31m{$2}: $3\033[00m"
 	t[sucess]="\033[01;32m($2): $3\033[00m"
@@ -386,7 +386,7 @@ download(){
 	fi
 }
 unpack(){
-	output -T "tar" "Unpacking “$1”"
+	output -T "tar Unpacking “$1”"
 	$mkd $1/
 	tar -xf $1.$file_format -C $1/
 	$rm $1.$file_format
@@ -399,7 +399,7 @@ load_data
 	pkg_install $1
 	if [ -e recipe ]
 	then
-		output -T $1 "Setting Recipe"
+		output -T "Setting “$1” Recipe"
 		export id="$1"
 		bash recipe
 	fi
@@ -470,6 +470,7 @@ qwerry_bnd(){
 	fi
 	$dl $repo/release
 	release=($($cat $pdir/release))
+	rel_h=()
 # Bundles output
 	case $1 in
 	"")
@@ -481,17 +482,14 @@ qwerry_bnd(){
 	;;
 	*)
 		output -p $name "Searching for “$1”"
-		for bnd in ${release[@]}
+		for argb in $*
 		do
-			for argb in $*
+			for bnd in ${release[@]}
 			do
-				if [[ $bnd = *"$argb"* ]]
+				if [[ $bnd = *"$argb"* ]] && [[ ${rel_h[@]} != *"$bnd"* ]]
 				then
-					if [[ "${release_h[@]}" != *"$argb"* ]]
-					then
-						output -t "$bnd"
-						release_h=+($bnd)
-					fi
+					output -t "$bnd"
+					rel_h+=($bnd)
 				fi
 			done
 		done
