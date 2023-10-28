@@ -97,7 +97,7 @@ load_data $*
 		update
 	elif [ $1 = '-l' ]
 	then
-		qwerry_bnd $2
+		qwerry_bnd ${args[@]:2}
 	elif [ $1 = '-sh' ]
 	then
 		live_shell
@@ -483,10 +483,13 @@ qwerry_bnd(){
 		output -p $name "Searching for “$1”"
 		for bnd in ${release[@]}
 		do
-			if [[ $bnd = *"$1"* ]]
-			then
-				output -t "$bnd"
-			fi
+			for arg in $*
+			do
+				if [[ $bnd = *"$arg"* ]]
+				then
+					output -t "$bnd"
+				fi
+			done
 		done
 	;;
 	esac
