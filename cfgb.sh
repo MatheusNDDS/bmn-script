@@ -487,7 +487,11 @@ qwerry_bnd(){
 			do
 				if [[ $bnd = *"$arg"* ]]
 				then
-					output -t "$bnd"
+					if [[ "$release_h" != *"$arg"* ]]
+					then
+						output -t "$bnd"
+						release_h=+($bnd)
+					fi
 				fi
 			done
 		done
