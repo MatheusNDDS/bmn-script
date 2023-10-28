@@ -386,7 +386,7 @@ download(){
 	fi
 }
 unpack(){
-	output -p "tar" "Unpacking “$1”"
+	output -T "tar" "Unpacking “$1”"
 	$mkd $1/
 	tar -xf $1.$file_format -C $1/
 	$rm $1.$file_format
@@ -399,7 +399,7 @@ load_data
 	pkg_install $1
 	if [ -e recipe ]
 	then
-		output -p $1 "Setting Recipe"
+		output -T $1 "Setting Recipe"
 		export id="$1"
 		bash recipe
 	fi
