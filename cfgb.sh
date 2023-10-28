@@ -110,13 +110,13 @@ output(){
 	declare -A t
 	t[header]="\033[01;36m-=/$2/=-\033[00m ~ $3 \n"
 	t[info_header]="User: $u\nHome: $h\nPkgM: $pm\nRepo: $repo"
-	t[progress]="\033[01;35m-=- [$2]: $3 -=-\033[00m"
+	t[progress]="\033[01;35m -=- [$2]: $3 -=-\033[00m"
 	t[list]="\033[01m$2: [ $($prt $3|tr ' ' ', ') ]\033[00m "
 	t[dialogue]="\033[01m[$2]: $3\033[00m"
-	t[title]="\033[01;36m\n## $2 ##\n\033[00m"
+	t[title]="\033[01;36m\n### $2 ###\n\033[00m"
 	t[sub_title]="\033[01;33m- $2\033[00m"
-	t[error]="\033[01;31m{$2}: $3\033[00m"
-	t[sucess]="\033[01;32m($2): $3\033[00m"
+	t[error]="\033[01;31m {$2}: $3\033[00m"
+	t[sucess]="\033[01;32m ($2): $3\033[00m"
 	
 	#Simplification
 	t[0]=${t[header]}
@@ -148,44 +148,52 @@ pmaa=($*)
 	declare -A pm_i
 	declare -A pm_r
 	declare -A pm_l
+	declare -A pm_s
 	declare -A pm_u
 	declare -A pm_g
 	pkg="${pmaa[*]:1}"
+
 #Package Managers internal database 
 ##apt##
 	pm_i[apt]="install"
 	pm_r[apt]="remove"
 	pm_l[apt]="list --installed"
+	pm_s[apt]="search"
 	pm_u[apt]="update"
 	pm_g[apt]="upgrade"
 ##nix-env##
 	pm_i['nix-env']="-iA"
 	pm_r['nix-env']="-e"
 	pm_l['nix-env']="-q"
+	pm_s['nix-env']="@"
 	pm_u['nix-env']="-u"
 	pm_g['nix-env']=0
 ##pacman##
 	pm_i[pacman]="-S"
 	pm_r[pacman]="-Rs"
 	pm_l[pacman]="-Qs"
+	pm_s[pacman]="-Ss"
 	pm_u[pacman]="-Syu"
 	pm_g[pacman]=0
 ##apk##
 	pm_i[apk]="add"
 	pm_r[apk]="del"
 	pm_l[apk]="info"
+	pm_s[apk]=@
 	pm_u[apk]=@
 	pm_g[apk]=@
 ##dnf##
 	pm_i[dnf]=@
 	pm_r[dnf]=@
 	pm_l[dnf]=@
+	pm_s[dnf]=@
 	pm_u[dnf]=@
 	pm_g[dnf]=0
 ##apx##
 	pm_i[apx]=@
 	pm_r[apx]=@
 	pm_l[apx]=@
+	pm_s[apx]=@
 	pm_u[apx]=@
 	pm_g[dnf]=@
 
@@ -386,7 +394,7 @@ download(){
 	fi
 }
 unpack(){
-	output -T "tar Unpacking “$1”"
+	output -T "Unpacking “$1”"
 	$mkd $1/
 	tar -xf $1.$file_format -C $1/
 	$rm $1.$file_format
