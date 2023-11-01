@@ -3,40 +3,36 @@
 load_data(){
 ## Evironment Variables : Can be used in recipe scripts ##
 	#General commands 
-	export cp="sudo cp -r"
-	export rm="sudo rm -rf"
-	export mv="sudo mv"
-	export prt="echo -e"
-	export mk="sudo touch"
-	export mkd="sudo mkdir"
-	export elf="sudo chmod 755"
-	export cat="sudo cat"
-	export dl="sudo wget -q"
-	export d0="/dev/0"
-	export cfgbi="sudo cfgb -i"
-	export add_ppa="sudo add-apt-repository"
-	export flatpak_remote="flatpak remote-add --if-not-exists"
-	export fp_overide="sudo flatpak override"
-	
-	#Functions
-	export -f output
-	export -f pma
+	 cp="sudo cp -r"
+	 rm="sudo rm -rf"
+	 mv="sudo mv"
+	 prt="echo -e"
+	 mk="sudo touch"
+	 mkd="sudo mkdir"
+	 elf="sudo chmod 755"
+	 cat="sudo cat"
+	 dl="sudo wget -q"
+	 d0="/dev/0"
+	 cfgbi="sudo cfgb -i"
+	 add_ppa="sudo add-apt-repository"
+	 flatpak_remote="flatpak remote-add --if-not-exists"
+	 fp_overide="sudo flatpak override"
 	
 	#directories collection
-	export rsr="/usr/share" #root share
-	export hsr="$h/.local/share" #home share
-	export rlc="/usr/local" #root local
-	export hlc="$h/.local" #home local
-	export cfg="$h/.config"
-	export etc="/etc"
-	export dev="/dev"
-	export mdi="/media"
-	export mnt="/mnt"
-	export tmp="/temp"
+	 rsr="/usr/share" #root share
+	 hsr="$h/.local/share" #home share
+	 rlc="/usr/local" #root local
+	 hlc="$h/.local" #home local
+	 cfg="$h/.config"
+	 etc="/etc"
+	 dev="/dev"
+	 mdi="/media"
+	 mnt="/mnt"
+	 tmp="/temp"
 
 ## References ##
 	name="cfgb"
-	script="$(pwd)/cfgb.sh"
+	script="$(pwd)/${name}.sh"
 	script_src="https://github.com/MatheusNDDS/cfgb-script/raw/main/${name}.sh"
 	file_format="tar.gz"
 	pkg_flag="null"
@@ -49,6 +45,7 @@ load_data(){
 	bnd_dir="$pdir/bundles"
 	cfg_file="$pdir/cfg"
 	bin="/bin/$name"
+	source $cfg_file
 
 ## Flatpak Configuration ##
 	flathub="flathub https://flathub.org/repo/flathub.flatpakrepo"
@@ -57,20 +54,16 @@ load_data(){
 }
 start(){
 load_data $*
-	output 0 "Configuration Bundles Manager" "Matheus Dias"
-	if [ $1 != '-s' ]
+	if [[ $1 != "" ]]
 	then
-		for i in $(cat $cfg_file)
-		do 
-			export $i
-		done
+		output 0 "Configuration Bundles Manager" "Matheus Dias"
 	fi
 	detect_home
 	if [[ "$1" = *"-i"* ]]
 	then
 		for i in ${args[@]:2}
 		do
-			if [ $i != "u" ]
+			if [[ $i != "u" ]]
 			then
 				cd $bnd_dir
 				$rm $i/ 2> $d0
@@ -80,25 +73,25 @@ load_data $*
 				cook $i
 			fi
 		done
-	elif [ $1 = '-e' ]
+	elif [[ $1 = '-e' ]]
 	then
 		enable_extras $*
-	elif [ $1 = '-d' ]
+	elif [[ $1 = '-d' ]]
 	then
 		for i in ${args[@]:2}
 		do
 			download $i 1
 		done
-	elif [ $1 = '-s' ]
+	elif [[ $1 = '-s' ]]
 	then
 		setup $*
-	elif [ $1 = '-U' ]
+	elif [[ $1 = '-U' ]]
 	then
 		update
-	elif [ $1 = '-l' ]
+	elif [[ $1 = '-l' ]]
 	then
 		qwerry_bnd ${args[@]:2}
-	elif [ $1 = '-sh' ]
+	elif [[ $1 = '-sh' ]]
 	then
 		live_shell
 	fi
@@ -135,12 +128,12 @@ detect_home(){
 	curent_path=($(pwd|tr '/' ' '))
 	if [ "${curent_path[0]}" = "home" ]
 	then
-		export h="/home/${curent_path[1]}"
-		export u="${curent_path[1]}"
+		 h="/home/${curent_path[1]}"
+		 u="${curent_path[1]}"
 	elif [ "${curent_path[0]}" = "root" ]
 	then
-		export h="/root"
-		export u="root"
+		 h="/root"
+		 u="root"
 	fi
 }
 pma(){
@@ -229,6 +222,14 @@ pmaa=($*)
 		else
 			sudo $pm ${pm_r[$pm]} ${pkg} -y
 		fi
+	elif [ $1 = '-s' ]
+	then
+		if [ "${pm_s[$pm]}" = "@" ]
+		then
+			sudo $pm ${pm_s[apt]} ${pkgs}
+		else
+			sudo $pm ${pm_s[$pm]} ${pkgs}
+		fi 
 	elif [ $1 = "-l" ]
 	then
 		if [ "${pm_l[$pm]}" = "@" ]
@@ -408,7 +409,7 @@ load_data
 	if [ -e recipe ]
 	then
 		output -T "Setting “$1” Recipe"
-		export id="$1"
+		id="$1"
 		bash recipe
 	fi
 	output -T "“$1” Instaled"
