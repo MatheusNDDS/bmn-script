@@ -1,6 +1,9 @@
 #!/bin/bash
 ### Core functions ###
 load_data(){
+## Configure pm,u,h variables
+	detect_user_props
+
 ## Evironment Variables : Can be used in recipe scripts ##
 	#General commands 
 	 cp="sudo cp -r"
@@ -36,7 +39,7 @@ load_data(){
 	script_src="https://github.com/MatheusNDDS/cfgb-script/raw/main/${name}.sh"
 	file_format="tar.gz"
 	pkg_flag="null"
-	deps="wget bash sudo tr"
+	deps="wget bash sudo"
 	args=$*
 	cmd="$1"
 
@@ -57,8 +60,10 @@ load_data $*
 	if [[ $1 != "" ]]
 	then
 		output 0 "Configuration Bundles Manager" "Matheus Dias"
+	else
+		output -t "$name started - \n"
 	fi
-	detect_home
+	#detect_user_props
 	if [[ "$1" = *"-i"* ]]
 	then
 		for i in ${args[@]:2}
@@ -124,7 +129,7 @@ output(){
 	
 	$prt ${t[$1]}
 }
-detect_home(){
+detect_user_props(){
 	curent_path=($(pwd|tr '/' ' '))
 	if [ "${curent_path[0]}" = "home" ]
 	then
@@ -410,7 +415,7 @@ load_data
 	then
 		output -T "Setting “$1” Recipe"
 		id="$1"
-		bash recipe
+		env -i /bin/sh recipe
 	fi
 	output -T "“$1” Instaled"
 	$rm $bnd_dir/$1
@@ -431,7 +436,7 @@ setup(){
 	output -t "Package Manager : $pm_detected"
 #Detecting home and user
 	output -p $name "Detecting Home Directorie and User"
-	detect_home
+	detect_user_props
 	output -t "Default Home : $h"
 	output -t "Default User : $u"
 #Installing dependencies
