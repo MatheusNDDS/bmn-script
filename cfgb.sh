@@ -42,7 +42,7 @@ load_data(){
 	script_src="https://github.com/MatheusNDDS/cfgb-script/raw/main/${name}.sh"
 	file_format="tar.gz"
 	pkg_flag="null"
-	deps="wget bash sudo su"
+	deps="wget bash sudo"
 	args=$*
 	cmd="$1"
 
@@ -66,12 +66,12 @@ load_data $*
 	else
 		output -t "$name started - \n"
 	fi
-	if [[ "$1" = *"u"* ]]
-	then
-		pm_update=1
-	fi
 	if [[ "$1" = *"-i"* ]]
 	then
+		if [[ "$1" = *"u"* ]]
+		then
+			pm_update=1
+		fi
 		for i in ${args[@]:2}
 		do
 			if [[ $i != "u" ]]
@@ -98,12 +98,13 @@ load_data $*
 		setup $*
 	elif [[ $1 = '-U' ]]
 	then
-		update
+		cfgb_update
 	elif [[ $1 = '-l' ]]
 	then
 		qwerry_bnd ${args[@]:2}
-	elif [[ $1 = '-su' ]]
+	elif [[ $1 = '-w' ]]
 	then
+		output -p $name "Adicionando $u ao grupo sudoers"
 		usermod -aG sudo $u
 	elif [[ $1 = '-sh' ]]
 	then
@@ -329,6 +330,7 @@ pkg_install(){
 		pkg_parser list_pkgs
 		if [[ $pn_update = 1 ]]
 		then
+			output -p $pm "Updating Packages"
 			pma -u
 		fi
 		pkg_parser check pma
@@ -470,10 +472,10 @@ setup(){
 	fi
 exit
 }
-update(){
+cfgb_update(){
 	output -T "Updating CFGB Script"
 	current_dir=$(pwd)
-	cd $pdir
+	$r cd $pdir
 	output -p $name 'Downloading Script'
 	output -d 'Source' $script_src
 	$dl $script_src
