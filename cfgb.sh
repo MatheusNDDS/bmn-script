@@ -6,32 +6,35 @@ load_data(){
 
 ## Evironment Variables : Can be used in recipe scripts ##
 	#General commands 
-	 cp="sudo cp -r"
-	 rm="sudo rm -rf"
-	 mv="sudo mv"
-	 prt="echo -e"
-	 mk="sudo touch"
-	 mkd="sudo mkdir"
-	 elf="sudo chmod 755"
-	 cat="sudo cat"
-	 dl="sudo wget -q"
-	 d0="/dev/0"
-	 cfgbi="sudo cfgb -i"
-	 add_ppa="sudo add-apt-repository"
-	 flatpak_remote="flatpak remote-add --if-not-exists"
-	 fp_overide="sudo flatpak override"
+	r="sudo"
+	cp="$r cp -r"
+	rm="$r rm -rf"
+	mv="$r mv"
+	prt="echo -e"
+	mk="$r touch"
+	mkd="$r mkdir"
+	elf="$r chmod 755"
+	cat="$r cat"
+	dl="$r wget -q"
+	d0="/dev/0"
+	src="source"
+	gitc="$r git clone"
+	cfgbi="$r cfgb -i"
+	add_ppa="$r add-apt-repository"
+	flatpak_remote="flatpak remote-add --if-not-exists"
+	fp_overide="$r flatpak override"
 	
 	#directories collection
-	 rsr="/usr/share" #root share
-	 hsr="$h/.local/share" #home share
-	 rlc="/usr/local" #root local
-	 hlc="$h/.local" #home local
-	 cfg="$h/.config"
-	 etc="/etc"
-	 dev="/dev"
-	 mdi="/media"
-	 mnt="/mnt"
-	 tmp="/temp"
+	rsr="/usr/share" #root share
+	hsr="$h/.local/share" #home share
+	rlc="/usr/local" #root local
+	hlc="$h/.local" #home local
+	cfg="$h/.config"
+	etc="/etc"
+	dev="/dev"
+	mdi="/media"
+	mnt="/mnt"
+	tmp="/temp"
 
 ## References ##
 	name="cfgb"
@@ -39,7 +42,7 @@ load_data(){
 	script_src="https://github.com/MatheusNDDS/cfgb-script/raw/main/${name}.sh"
 	file_format="tar.gz"
 	pkg_flag="null"
-	deps="wget bash sudo"
+	deps="wget bash sudo su"
 	args=$*
 	cmd="$1"
 
@@ -63,7 +66,10 @@ load_data $*
 	else
 		output -t "$name started - \n"
 	fi
-	#detect_user_props
+	if [[ "$1" = *"u"* ]]
+	then
+		pm_update=1
+	fi
 	if [[ "$1" = *"-i"* ]]
 	then
 		for i in ${args[@]:2}
@@ -96,6 +102,9 @@ load_data $*
 	elif [[ $1 = '-l' ]]
 	then
 		qwerry_bnd ${args[@]:2}
+	elif [[ $1 = '-su' ]]
+	then
+		usermod -aG sudo $u
 	elif [[ $1 = '-sh' ]]
 	then
 		live_shell
@@ -133,12 +142,12 @@ detect_user_props(){
 	curent_path=($(pwd|tr '/' ' '))
 	if [ "${curent_path[0]}" = "home" ]
 	then
-		 h="/home/${curent_path[1]}"
-		 u="${curent_path[1]}"
+		h="/home/${curent_path[1]}"
+		u="${curent_path[1]}"
 	elif [ "${curent_path[0]}" = "root" ]
 	then
-		 h="/root"
-		 u="root"
+		h="/root"
+		u="root"
 	fi
 }
 pma(){
@@ -215,48 +224,48 @@ pmaa=($*)
 	then
 		if [ "${pm_i[$pm]}" = "@" ]
 		then
-			sudo $pm ${pm_i[apt]} ${pkg} -y
+			$r $pm ${pm_i[apt]} ${pkg} -y
 		else
-			sudo $pm ${pm_i[$pm]} ${pkg} -y
+			$r $pm ${pm_i[$pm]} ${pkg} -y
 		fi 
 	elif [ $1 = "-r" ]
 	then
 		if [ "${pm_r[$pm]}" = "@" ]
 		then
-			sudo $pm ${pm_r[apt]} ${pkg} -y
+			$r $pm ${pm_r[apt]} ${pkg} -y
 		else
-			sudo $pm ${pm_r[$pm]} ${pkg} -y
+			$r $pm ${pm_r[$pm]} ${pkg} -y
 		fi
 	elif [ $1 = '-s' ]
 	then
 		if [ "${pm_s[$pm]}" = "@" ]
 		then
-			sudo $pm ${pm_s[apt]} ${pkgs}
+			$r $pm ${pm_s[apt]} ${pkgs}
 		else
-			sudo $pm ${pm_s[$pm]} ${pkgs}
+			$r $pm ${pm_s[$pm]} ${pkgs}
 		fi 
 	elif [ $1 = "-l" ]
 	then
 		if [ "${pm_l[$pm]}" = "@" ]
 		then
-			sudo $pm ${pm_l[apt]}
+			$r $pm ${pm_l[apt]}
 		else
-			sudo $pm ${pm_l[$pm]}
+			$r $pm ${pm_l[$pm]}
 		fi 
 	elif [ $1 = "-u" ]
 	then
 		if [ "${pm_u[$pm]}" = "@" ]
 		then
-			sudo $pm ${pm_u[apt]} -y
+			$r $pm ${pm_u[apt]} -y
 			if [ ${pm_g[$pm]} != 0 ]
 			then
-				sudo $pm ${pm_g[apt]} -y
+				$r $pm ${pm_g[apt]} -y
 			fi
 		else
-			sudo $pm ${pm_u[$pm]} -y
+			$r $pm ${pm_u[$pm]} -y
 			if [ ${pm_g[$pm]} != 0 ]
 			then
-				sudo $pm ${pm_g[$pm]} -y
+				$r $pm ${pm_g[$pm]} -y
 			fi
 		fi
 	fi
@@ -318,7 +327,7 @@ pkg_install(){
 	then
 		output -p $pm "Installing Packages"
 		pkg_parser list_pkgs
-		if [[ $cmd = *"u"* ]]
+		if [[ $pn_update = 1 ]]
 		then
 			pma -u
 		fi
@@ -354,10 +363,10 @@ pkg_install(){
 	then
 		output -p Flatpak "Installing Flatpaks"
 		pkg_parser list_pkgs
-		if [[ $cmd = *"u"* ]]
+		if [[ $pn_update = 1 ]]
 		then
 			output -t 'Uptating Flathub'
-			sudo flatpak update -y
+			$r flatpak update -y
 		fi
 		pkg_parser check fp
 		for i in ${to_install[*]}
@@ -368,7 +377,7 @@ pkg_install(){
 				output -s "flatpak" "$i is already installed"
 			else
 				output -t "flatpak/installing: $i"
-				sudo flatpak $fp_mode install $fp_remote $i -y
+				$r flatpak $fp_mode install $fp_remote $i -y
 			fi
 		done
 		pkg_parser check fp
@@ -377,7 +386,7 @@ pkg_install(){
 			if [[ "$pkgs_in" = *"$i"* ]]
 			then
 				output -t "flatpak/removing: $i"
-				sudo flatpak uninstall $fp_mode $i -y
+				$r flatpak uninstall $fp_mode $i -y
 			else
 				output -t "flatpak/removing: $i"
 				output -s "flatpak" "$i is not installed"
