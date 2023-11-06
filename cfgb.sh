@@ -108,6 +108,7 @@ load_data $*
 	then
 		output -p $name "Adicionando $u ao grupo sudoers"
 		usermod -aG sudo $u
+		usermod -aG wheel $u
 	elif [[ $1 = '-sh' ]]
 	then
 		live_shell
