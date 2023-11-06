@@ -7,6 +7,8 @@ load_data(){
 ## Evironment Variables : Can be used in recipe scripts ##
 	#General commands 
 	r="sudo"
+	chm="$r chmod"
+	cho="$r chown"
 	cp="$r cp -r"
 	rm="$r rm -rf"
 	mv="$r mv"
