@@ -428,7 +428,7 @@ load_data
 	then
 		output -T "Setting “$1” Recipe"
 		id="$1"
-		env -i /bin/sh recipe
+		$r bash recipe
 	fi
 	output -T "“$1” Instaled"
 	$rm $bnd_dir/$1
