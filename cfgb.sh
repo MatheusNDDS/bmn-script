@@ -478,7 +478,7 @@ exit
 cfgb_update(){
 	output -T "Updating CFGB Script"
 	current_dir=$(pwd)
-	sudo cd $pdir
+	cd $pdir
 	output -p $name 'Downloading Script'
 	output -d 'Source' $script_src
 	$dl $script_src
