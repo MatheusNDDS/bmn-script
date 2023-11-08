@@ -10,7 +10,6 @@ load_data(){
 	chm="$r chmod"
 	cho="$r chown"
 	cp="$r cp -r"
-#	cd="$r cd"
 	rm="$r rm -rf"
 	mv="$r mv"
 	prt="echo -e"
@@ -229,48 +228,48 @@ pmaa=($*)
 	then
 		if [ "${pm_i[$pm]}" = "@" ]
 		then
-			$r $pm ${pm_i[apt]} ${pkg} -y
+			sudo $pm ${pm_i[apt]} ${pkg} -y
 		else
-			$r $pm ${pm_i[$pm]} ${pkg} -y
+			sudo $pm ${pm_i[$pm]} ${pkg} -y
 		fi 
 	elif [ $1 = "-r" ]
 	then
 		if [ "${pm_r[$pm]}" = "@" ]
 		then
-			$r $pm ${pm_r[apt]} ${pkg} -y
+			sudo $pm ${pm_r[apt]} ${pkg} -y
 		else
-			$r $pm ${pm_r[$pm]} ${pkg} -y
+			sudo $pm ${pm_r[$pm]} ${pkg} -y
 		fi
 	elif [ $1 = '-s' ]
 	then
 		if [ "${pm_s[$pm]}" = "@" ]
 		then
-			$r $pm ${pm_s[apt]} ${pkgs}
+			sudo $pm ${pm_s[apt]} ${pkgs}
 		else
-			$r $pm ${pm_s[$pm]} ${pkgs}
+			sudo $pm ${pm_s[$pm]} ${pkgs}
 		fi 
 	elif [ $1 = "-l" ]
 	then
 		if [ "${pm_l[$pm]}" = "@" ]
 		then
-			$r $pm ${pm_l[apt]}
+			sudo $pm ${pm_l[apt]}
 		else
-			$r $pm ${pm_l[$pm]}
+			sudo $pm ${pm_l[$pm]}
 		fi 
 	elif [ $1 = "-u" ]
 	then
 		if [ "${pm_u[$pm]}" = "@" ]
 		then
-			$r $pm ${pm_u[apt]} -y
+			sudo $pm ${pm_u[apt]} -y
 			if [ ${pm_g[$pm]} != 0 ]
 			then
-				$r $pm ${pm_g[apt]} -y
+				sudo $pm ${pm_g[apt]} -y
 			fi
 		else
-			$r $pm ${pm_u[$pm]} -y
+			sudo $pm ${pm_u[$pm]} -y
 			if [ ${pm_g[$pm]} != 0 ]
 			then
-				$r $pm ${pm_g[$pm]} -y
+				sudo $pm ${pm_g[$pm]} -y
 			fi
 		fi
 	fi
@@ -372,7 +371,7 @@ pkg_install(){
 		if [[ $pn_update = 1 ]]
 		then
 			output -t 'Uptating Flathub'
-			$r flatpak update -y
+			sudo flatpak update -y
 		fi
 		pkg_parser check fp
 		for i in ${to_install[*]}
@@ -383,7 +382,7 @@ pkg_install(){
 				output -s "flatpak" "$i is already installed"
 			else
 				output -t "flatpak/installing: $i"
-				$r flatpak $fp_mode install $fp_remote $i -y
+				sudo flatpak $fp_mode install $fp_remote $i -y
 			fi
 		done
 		pkg_parser check fp
@@ -392,7 +391,7 @@ pkg_install(){
 			if [[ "$pkgs_in" = *"$i"* ]]
 			then
 				output -t "flatpak/removing: $i"
-				$r flatpak uninstall $fp_mode $i -y
+				sudo flatpak uninstall $fp_mode $i -y
 			else
 				output -t "flatpak/removing: $i"
 				output -s "flatpak" "$i is not installed"
@@ -430,7 +429,7 @@ load_data
 	then
 		output -T "Setting “$1” Recipe"
 		id="$1"
-		$r bash recipe
+		sudo bash recipe
 	fi
 	output -T "“$1” Instaled"
 	$rm $bnd_dir/$1
