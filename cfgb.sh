@@ -10,7 +10,7 @@ load_data(){
 	chm="$r chmod"
 	cho="$r chown"
 	cp="$r cp -r"
-	cd="$r cd"
+#	cd="$r cd"
 	rm="$r rm -rf"
 	mv="$r mv"
 	prt="echo -e"
@@ -479,7 +479,7 @@ exit
 cfgb_update(){
 	output -T "Updating CFGB Script"
 	current_dir=$(pwd)
-	$r cd $pdir
+	cd $pdir
 	output -p $name 'Downloading Script'
 	output -d 'Source' $script_src
 	$dl $script_src
