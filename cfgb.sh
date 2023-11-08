@@ -10,6 +10,7 @@ load_data(){
 	chm="$r chmod"
 	cho="$r chown"
 	cp="$r cp -r"
+	cd="$r cd"
 	rm="$r rm -rf"
 	mv="$r mv"
 	prt="echo -e"
