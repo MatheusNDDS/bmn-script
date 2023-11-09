@@ -76,6 +76,7 @@ load_data $*
 		fi
 		for i in ${args[@]:2}
 		do
+			cd $pdir
 			$rm $pdir/release
 			output -t "download release"
 			$dl $repo/release
