@@ -76,14 +76,23 @@ load_data $*
 		fi
 		for i in ${args[@]:2}
 		do
+			$rm $pdir/release
+			output -t "download release"
+			$dl $repo/release
+			aval=($(cat $pdir/release))
 			if [[ $i != "u" ]]
 			then
-				cd $bnd_dir
-				$rm $i/ 2> $d0
-				$rm $i.$file_format 2> $d0
-				download $i 0
-				unpack $i
-				cook $i
+				if [[ "${aval[@]}" = *"$i"* ]]
+				then
+					cd $bnd_dir
+					$rm $i/ 2> $d0
+					$rm $i.$file_format 2> $d0
+					download $i 0
+					unpack $i
+					cook $i
+				else
+					output -e $name "“$i” bundle not found"
+				fi
 			fi
 		done
 	elif [[ $1 = '-e' ]]
