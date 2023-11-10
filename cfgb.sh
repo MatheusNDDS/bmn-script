@@ -467,10 +467,8 @@ smk(){
 setup(){
 	output -T "CFGB installation"
 #Script install
-	smk $pdir 
-	smk $bnd_dir
-	smk $cfg
-	$cp $script $bin 2> $d0
+	smk $pdir $bnd_dir $cfg $log
+	$cp $script $bin 2> $log
 	$elf $bin
 #Package manager autodetect
 	output -p $name "Detecting Package Manager"
