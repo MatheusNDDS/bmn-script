@@ -47,6 +47,7 @@ load_data(){
 	deps="wget bash sudo"
 	args=$*
 	cmd="$1"
+	log="$pdir/log"
 
 ## Work Directories ##
 	pdir="/etc/$name"
@@ -77,7 +78,8 @@ load_data $*
 		for i in ${args[@]:2}
 		do
 			cd $pdir
-			$rm $pdir/release
+			$rm $pdir/bundles/* 2> $d0
+			$rm $pdir/release 2> $d0
 			output -t "download release"
 			$dl $repo/release
 			aval=($(cat $pdir/release))
@@ -425,7 +427,7 @@ download(){
 }
 unpack(){
 	output -T "Unpacking “$1”"
-	$mkd $1/
+	smk $1/
 	tar -xf $1.$file_format -C $1/
 	$rm $1.$file_format
 	output -l "files" "$(ls $bnd_dir/$1/)"
@@ -446,12 +448,28 @@ load_data
 }
 
 ## Script managment
+smk(){
+#Secure Directory and File Maker
+	for i in $*
+	do
+		if [[ -e $i ]] | [[ -d $i ]]
+		then
+			null=0
+		elif [[ -e $i ]]
+		then
+			$mk $i
+		elif [[ -d $i ]]
+		then
+			$mkd $i
+		fi
+	done
+}
 setup(){
 	output -T "CFGB installation"
 #Script install
-	$mkd $pdir 2> $d0
-	$mkd $bnd_dir 2> $d0
-	$mk $cfg 2> $d0
+	smk $pdir 
+	smk $bnd_dir
+	smk $cfg
 	$cp $script $bin 2> $d0
 	$elf $bin
 #Package manager autodetect
