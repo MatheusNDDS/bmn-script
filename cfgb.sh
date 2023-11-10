@@ -427,7 +427,7 @@ download(){
 }
 unpack(){
 	output -T "Unpacking “$1”"
-	smk $1/
+	$mkd $1/
 	tar -xf $1.$file_format -C $1/
 	$rm $1.$file_format
 	output -l "files" "$(ls $bnd_dir/$1/)"
@@ -448,32 +448,13 @@ load_data
 }
 
 ## Script managment
-smk(){
-#Secure Directory and File Maker
-	for i in $*
-	do
-		if [[ ! -e $i ]]
-		then
-			$mk $i
-		fi
-	done
-}
-smkd(){
-#Secure Directory and File Maker
-	for i in $*
-	do
-		if [[ ! -d $i ]]
-		then
-			$mk $i
-		fi
-	done
-}
 setup(){
 	output -T "CFGB installation"
 #Script install
-	smkd $pdir $bnd_dir
-	smk $cfg $log
-	$cp $script $bin 2> $log
+	$mkd $pdir 2> $d0
+	$mkd $bnd_dir 2> $d0
+	$mk $cfg 2> $d0
+	$cp $script $bin 2> $d0
 	$elf $bin
 #Package manager autodetect
 	output -p $name "Detecting Package Manager"
