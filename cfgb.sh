@@ -452,22 +452,27 @@ smk(){
 #Secure Directory and File Maker
 	for i in $*
 	do
-		if [[ -e $i ]] | [[ -d $i ]]
-		then
-			null=0
-		elif [[ -e $i ]]
+		if [[ ! -e $i ]]
 		then
 			$mk $i
-		elif [[ -d $i ]]
+		fi
+	done
+}
+smkd(){
+#Secure Directory and File Maker
+	for i in $*
+	do
+		if [[ ! -d $i ]]
 		then
-			$mkd $i
+			$mk $i
 		fi
 	done
 }
 setup(){
 	output -T "CFGB installation"
 #Script install
-	smk $pdir $bnd_dir $cfg $log
+	smkd $pdir $bnd_dir
+	smk $cfg $log
 	$cp $script $bin 2> $log
 	$elf $bin
 #Package manager autodetect
