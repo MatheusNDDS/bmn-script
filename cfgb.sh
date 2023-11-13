@@ -31,7 +31,6 @@ load_data(){
 	srm="sfm -r"
 	smk="sfm -f"
 	smkd="sfm -d"
-	scat="sfm -c"
 	
 	#Directorys collection
 	rsr="/usr/share" #root share
@@ -54,7 +53,7 @@ load_data(){
 	args=$*
 	cmd="$1"
 	log="$pdir/log"
-	release=($($scat $pdir/release))
+	release=($($cat $pdir/release))
 	sfm_verbose=0 #Enable verbose log for SFM
 
 ## Work Directorys ##
@@ -332,12 +331,6 @@ sfm(){
 					if [ $sfm_verbose = 1 ]
 						then
 							output -t "File/Dir “$dof” removed"
-					fi
-				;;
-				'-c')
-					if [ -e $dof ]
-					then
-						$cat $dof
 					fi
 				;;
 			esac
