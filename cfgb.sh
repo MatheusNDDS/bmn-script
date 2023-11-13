@@ -289,8 +289,9 @@ pmaa=($*)
 	fi
 }
 sfm(){
+	arg=($*)
 	## Secure Directory or file Maker ##
-	for dof in $*
+	for dof in ${arg[@]:2}
 	do
 		case $1 in
 			'-d')
