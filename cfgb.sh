@@ -322,13 +322,16 @@ sfm(){
 					fi
 				;;
 				'-r') 
-					if [ -e $dof ] |  [ -d $dof ]
+					if [ -e $dof ]
 					then
 						$rm $dof
-						if [ $sfm_verbose = 1 ]
+					elif [ -d $dof ]
+					then
+						$rm $dof
+					fi
+					if [ $sfm_verbose = 1 ]
 						then
 							output -t "File/Dir “$dof” removed"
-						fi
 					fi
 				;;
 				'-c')
@@ -564,7 +567,7 @@ cfgb_update(){
 	cd $current_dir
 }
 qwerry_bnd(){
-	if [ $1 = '-rU' ]
+	if [[ $1 = '-rU' ]]
 	then
 		current_dir=$(pwd)
 		cd $pdir
