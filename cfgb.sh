@@ -11,13 +11,10 @@ load_data(){
 	cho="$r chown"
 	cp="$r cp -r"
 	rm="$r rm -rf"
-	srm="sfm -r"
 	mv="$r mv"
 	prt="echo -e"
 	mk="$r touch"
 	mkd="$r mkdir"
-	smk="sfm -f"
-	smkd="sfm -d"
 	elf="$r chmod 755"
 	cat="$r cat"
 	dl="$r wget -q"
@@ -28,6 +25,12 @@ load_data(){
 	add_ppa="$r add-apt-repository"
 	flatpak_remote="flatpak remote-add --if-not-exists"
 	fp_overide="$r flatpak override"
+	
+	#Safe File Manager Commands Varariables
+	#SFM prevents accidental removal of the system root directory and prevents conflicts with existing files and directories 
+	srm="sfm -r"
+	smk="sfm -f"
+	smkd="sfm -d"
 	
 	#Directorys collection
 	rsr="/usr/share" #root share
@@ -50,6 +53,7 @@ load_data(){
 	args=$*
 	cmd="$1"
 	log="$pdir/log"
+	sfm_verbose=0 #Enable verbose log for SFM
 
 ## Work Directorys ##
 	pdir="/etc/$name"
@@ -290,32 +294,46 @@ pmaa=($*)
 }
 sfm(){
 	arg=($*)
-	## Secure Directory or file Maker ##
-	for dof in ${arg[@]:2}
+	## Safe or File Manager ##
+	for dof in ${arg[@]:1}
 	do
-		case ${arg[1]} in
-			'-d')
-				if [ ! -d $dof ]
-				then
-					$mkd $dof
-					output -t "Directory “$dof” maked"
-				fi
-			;;
-			'-f') 
-				if [ ! -e $dof ]
-				then
-					$mk $dof
-					output -t "File “$dof” maked"
-				fi
-			;;
-			'-r') 
-				if [ ! -e $dof ] |  [ ! -d $dof ]
-				then
-					$rm $dof
-					output -t "File “$dof” removed"
-				fi
-			;;
-		esac
+		if [ $dof != "/" ]
+		then
+			case ${arg[0]} in
+				'-d')
+					if [ ! -d $dof ]
+					then
+						$mkd $dof
+						if [ $sfm_verbose = 1 ]
+						then
+							output -t "Directory “$dof” maked"
+						fi
+					fi
+				;;
+				'-f') 
+					if [ ! -e $dof ]
+					then
+						$mk $dof
+						if [ $sfm_verbose = 1 ]
+						then
+							output -t "File “$dof” maked"
+						fi
+					fi
+				;;
+				'-r') 
+					if [ ! -e $dof ] |  [ ! -d $dof ]
+					then
+						$rm $dof
+						if [ $sfm_verbose = 1 ]
+						then
+							output -t "File “$dof” removed"
+						fi
+					fi
+				;;
+			esac
+		else
+			output -e "SFM" "cannot remove root directory “/”"
+		fi
 	done
 }
 
@@ -472,7 +490,7 @@ load_data
 	if [ -e recipe ]
 	then
 		output -T "Setting “$1” Recipe"
-		id="$1"
+		export id="$1"
 		sudo bash recipe
 	fi
 	output -T "“$1” Instaled"
