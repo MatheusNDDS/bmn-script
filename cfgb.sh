@@ -292,7 +292,7 @@ sfm(){
 	## Secure Directory or file Maker ##
 	for dof in $*
 	do
-		case in $1
+		case $1 in
 			'-d')
 				if [[ ! -d $dof ]]
 				then
