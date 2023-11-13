@@ -293,7 +293,7 @@ sfm(){
 	## Secure Directory or file Maker ##
 	for dof in ${arg[@]:2}
 	do
-		case $1 in
+		case ${arg[@]:1} in
 			'-d')
 				if [[ ! -d $dof ]]
 				then
@@ -309,7 +309,7 @@ sfm(){
 				fi
 			;;
 			'-r') 
-				if [[ ! -e $dof ]]
+				if [[ ! -e $dof ]] |  [[ ! -d $dof ]]
 				then
 					$rm $dof
 					output -t "File “$dof” removed"
