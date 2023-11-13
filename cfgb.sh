@@ -293,23 +293,23 @@ sfm(){
 	## Secure Directory or file Maker ##
 	for dof in ${arg[@]:2}
 	do
-		case ${arg[@]:1} in
+		case ${arg[1]} in
 			'-d')
-				if [[ ! -d $dof ]]
+				if [ ! -d $dof ]
 				then
 					$mkd $dof
 					output -t "Directory “$dof” maked"
 				fi
 			;;
 			'-f') 
-				if [[ ! -e $dof ]]
+				if [ ! -e $dof ]
 				then
 					$mk $dof
 					output -t "File “$dof” maked"
 				fi
 			;;
 			'-r') 
-				if [[ ! -e $dof ]] |  [[ ! -d $dof ]]
+				if [ ! -e $dof ] |  [ ! -d $dof ]
 				then
 					$rm $dof
 					output -t "File “$dof” removed"
