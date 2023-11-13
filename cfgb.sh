@@ -31,6 +31,7 @@ load_data(){
 	srm="sfm -r"
 	smk="sfm -f"
 	smkd="sfm -d"
+	scat="sfm -c"
 	
 	#Directorys collection
 	rsr="/usr/share" #root share
@@ -53,6 +54,7 @@ load_data(){
 	args=$*
 	cmd="$1"
 	log="$pdir/log"
+	release=($($scat $pdir/release))
 	sfm_verbose=0 #Enable verbose log for SFM
 
 ## Work Directorys ##
@@ -85,13 +87,9 @@ load_data $*
 		do
 			cd $pdir
 			$srm $pdir/bundles/*
-			$srm $pdir/release
-			output -t "download release"
-			$dl $repo/release
-			aval=($(cat $pdir/release))
 			if [[ $i != "u" ]]
 			then
-				if [[ "${aval[@]}" = *"$i"* ]]
+				if [[ "${release[@]}" = *"$i"* ]]
 				then
 					cd $bnd_dir
 					$srm $i/
@@ -119,6 +117,9 @@ load_data $*
 	elif [[ $1 = '-U' ]]
 	then
 		cfgb_update
+	elif [[ $1 = '-rU' ]]
+	then
+		qwerry_bnd $1
 	elif [[ $1 = '-l' ]]
 	then
 		qwerry_bnd ${args[@]:2}
@@ -321,13 +322,19 @@ sfm(){
 					fi
 				;;
 				'-r') 
-					if [ ! -e $dof ] |  [ ! -d $dof ]
+					if [ -e $dof ] |  [ -d $dof ]
 					then
 						$rm $dof
 						if [ $sfm_verbose = 1 ]
 						then
-							output -t "File “$dof” removed"
+							output -t "File/Dir “$dof” removed"
 						fi
+					fi
+				;;
+				'-c')
+					if [ -e $dof ]
+					then
+						$cat $dof
 					fi
 				;;
 			esac
@@ -534,6 +541,7 @@ setup(){
 		$prt "pm=$pm_detected h=$h u=$u repo=$2" > $cfg_file
 		output -T "C.F.G.B instaled"
 	fi
+	qwerry_bnd -rU
 exit
 }
 cfgb_update(){
@@ -556,41 +564,52 @@ cfgb_update(){
 	cd $current_dir
 }
 qwerry_bnd(){
-# Downloading
-	output -p $name "Downloading release file"
-	cd $pdir/
-	if [[ $(ls $pwd) = *"release"* ]]
+	if [ $1 = '-rU' ]
 	then
-		$rm $pdir/release*
-	fi
-	$dl $repo/release
-	release=($($cat $pdir/release))
-	rel_h=()
-# Bundles output
-	case $1 in
-	"")
-		output -p $name "Listing avaliable bundles"
-		for bnd in ${release[@]}
-		do
-			output -t "$bnd"
-		done
-	;;
-	*)
-		output -p $name "Searching for “$1”"
-		for argb in $*
-		do
+		current_dir=$(pwd)
+		cd $pdir
+		$srm $pdir/release
+		output -t "download release"
+		$dl $repo/release
+		cd $current_dir
+	else
+		current_dir=$(pwd)
+		cd $pdir/
+		
+		# Downloading
+		output -p $name "Downloading release file"
+		$srm $pdir/release
+		output -t "download release"
+		$dl $repo/release
+		release=($($cat $pdir/release))
+		rel_h=()
+		
+		cd $current_dir
+	# Bundles output
+		case $1 in
+		"")
+			output -p $name "Listing avaliable bundles"
 			for bnd in ${release[@]}
 			do
-				if [[ $bnd = *"$argb"* ]] && [[ ${rel_h[@]} != *"$bnd"* ]]
-				then
-					output -t "$bnd"
-					rel_h+=($bnd)
-				fi
+				output -t "$bnd"
 			done
-		done
-	;;
-	esac
-	$rm release
+		;;
+		*)
+			output -p $name "Searching for “$1”"
+			for argb in $*
+			do
+				for bnd in ${release[@]}
+				do
+					if [[ $bnd = *"$argb"* ]] && [[ ${rel_h[@]} != *"$bnd"* ]]
+					then
+						output -t "$bnd"
+						rel_h+=($bnd)
+					fi
+				done
+			done
+		;;
+		esac
+	fi
 }
 enable_extras(){
 	for i in $*
