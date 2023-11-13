@@ -11,10 +11,13 @@ load_data(){
 	cho="$r chown"
 	cp="$r cp -r"
 	rm="$r rm -rf"
+	srm="sfm -r"
 	mv="$r mv"
 	prt="echo -e"
 	mk="$r touch"
 	mkd="$r mkdir"
+	smk="sfm -f"
+	smkd="sfm -d"
 	elf="$r chmod 755"
 	cat="$r cat"
 	dl="$r wget -q"
@@ -26,7 +29,7 @@ load_data(){
 	flatpak_remote="flatpak remote-add --if-not-exists"
 	fp_overide="$r flatpak override"
 	
-	#directories collection
+	#Directorys collection
 	rsr="/usr/share" #root share
 	hsr="$h/.local/share" #home share
 	rlc="/usr/local" #root local
@@ -41,7 +44,6 @@ load_data(){
 ## References ##
 	name="cfgb"
 	script="$(pwd)/${name}.sh"
-	script_src="https://github.com/MatheusNDDS/cfgb-script/raw/main/${name}.sh"
 	file_format="tar.gz"
 	pkg_flag="null"
 	deps="wget bash sudo"
@@ -49,7 +51,7 @@ load_data(){
 	cmd="$1"
 	log="$pdir/log"
 
-## Work Directories ##
+## Work Directorys ##
 	pdir="/etc/$name"
 	bnd_dir="$pdir/bundles"
 	cfg_file="$pdir/cfg"
@@ -78,8 +80,8 @@ load_data $*
 		for i in ${args[@]:2}
 		do
 			cd $pdir
-			$rm $pdir/bundles/* 2> $d0
-			$rm $pdir/release 2> $d0
+			$srm $pdir/bundles/*
+			$srm $pdir/release
 			output -t "download release"
 			$dl $repo/release
 			aval=($(cat $pdir/release))
@@ -88,8 +90,8 @@ load_data $*
 				if [[ "${aval[@]}" = *"$i"* ]]
 				then
 					cd $bnd_dir
-					$rm $i/ 2> $d0
-					$rm $i.$file_format 2> $d0
+					$srm $i/
+					$srm $i.$file_format
 					download $i 0
 					unpack $i
 					cook $i
@@ -286,6 +288,35 @@ pmaa=($*)
 		fi
 	fi
 }
+sfm(){
+	## Secure Directory or file Maker ##
+	for dof in $*
+	do
+		case in $1
+			'-d')
+				if [[ ! -d $dof ]]
+				then
+					$mkd $dof
+					output -t "Directory “$dof” maked"
+				fi
+			;;
+			'-f') 
+				if [[ ! -e $dof ]]
+				then
+					$mk $dof
+					output -t "File “$dof” maked"
+				fi
+			;;
+			'-r') 
+				if [[ ! -e $dof ]]
+				then
+					$rm $dof
+					output -t "File “$dof” removed"
+				fi
+			;;
+		esac
+	done
+}
 
 ## Package install
 pkg_parser(){
@@ -427,7 +458,7 @@ download(){
 }
 unpack(){
 	output -T "Unpacking “$1”"
-	$mkd $1/
+	$smkd $1/
 	tar -xf $1.$file_format -C $1/
 	$rm $1.$file_format
 	output -l "files" "$(ls $bnd_dir/$1/)"
@@ -451,17 +482,16 @@ load_data
 setup(){
 	output -T "CFGB installation"
 #Script install
-	$mkd $pdir 2> $d0
-	$mkd $bnd_dir 2> $d0
-	$mk $cfg 2> $d0
-	$cp $script $bin 2> $d0
+	$smkd $pdir $bnd_dir
+	$smk $cfg $log
+	$cp $script $bin
 	$elf $bin
 #Package manager autodetect
 	output -p $name "Detecting Package Manager"
 	pma -qpm
 	output -t "Package Manager : $pm_detected"
 #Detecting home and user
-	output -p $name "Detecting Home Directorie and User"
+	output -p $name "Detecting Home Directory and User"
 	detect_user_props
 	output -t "Default Home : $h"
 	output -t "Default User : $u"
@@ -488,6 +518,12 @@ setup(){
 exit
 }
 cfgb_update(){
+	if [[ -z $1 ]]
+	then
+		script_src="https://github.com/MatheusNDDS/cfgb-script/raw/main/${name}.sh"
+	else
+		script_src="$1"
+	fi
 	output -T "Updating CFGB Script"
 	current_dir=$(pwd)
 	cd $pdir
