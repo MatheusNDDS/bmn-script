@@ -53,7 +53,6 @@ load_data(){
 	args=$*
 	cmd="$1"
 	log="$pdir/log"
-	release=($($cat $pdir/release))
 	sfm_verbose=0 #Enable verbose log for SFM
 
 ## Work Directorys ##
@@ -61,7 +60,10 @@ load_data(){
 	bnd_dir="$pdir/bundles"
 	cfg_file="$pdir/cfg"
 	bin="/bin/$name"
+	
+## External Data Import
 	source $cfg_file
+	release=($($cat $pdir/release))
 
 ## Flatpak Configuration ##
 	flathub="flathub https://flathub.org/repo/flathub.flatpakrepo"
