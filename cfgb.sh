@@ -60,15 +60,15 @@ load_data(){
 	bnd_dir="$pdir/bundles"
 	cfg_file="$pdir/cfg"
 	bin="/bin/$name"
-	
-## External Data Import
-	source $cfg_file
-	release=($($cat $pdir/release))
 
 ## Flatpak Configuration ##
 	flathub="flathub https://flathub.org/repo/flathub.flatpakrepo"
 	fp_mode="--system"
 	fp_remote="flathub"
+	
+## External Data Import
+	source $cfg_file
+	release=($($cat $pdir/release))
 }
 start(){
 load_data $*
@@ -519,6 +519,8 @@ setup(){
 	detect_user_props
 	output -t "Default Home : $h"
 	output -t "Default User : $u"
+#Downloading repository release
+	qwerry_bnd -rU
 #Installing dependencies
 	output -p $name "Installing Dependencies"
 	pm=$pm_detected
@@ -539,7 +541,6 @@ setup(){
 		$prt "pm=$pm_detected h=$h u=$u repo=$2" > $cfg_file
 		output -T "C.F.G.B instaled"
 	fi
-	qwerry_bnd -rU
 exit
 }
 cfgb_update(){
