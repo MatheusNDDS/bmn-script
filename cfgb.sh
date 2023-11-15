@@ -565,26 +565,39 @@ cfgb_update(){
 qwerry_bnd(){
 	if [[ $1 = '-rU' ]]
 	then
+		# saving the current directory
 		current_dir=$(pwd)
+		
+		# downloading release
 		cd $pdir
+		output -p $name "Updating Repository"
 		$srm $pdir/release
-		output -t "download release"
+		output -t "downloading release"
 		$dl $repo/release
+		
+		# end
+		output -p $name "Repository Updated"
 		cd $current_dir
 	else
+		# saving the current directory
 		current_dir=$(pwd)
-		cd $pdir/
 		
-		# Downloading
-		output -p $name "Downloading release file"
+		# downloading
+		output -p $name "Updating Repository"
+		cd $pdir
 		$srm $pdir/release
-		output -t "download release"
+		output -t "downloading release"
 		$dl $repo/release
-		release=($($cat $pdir/release))
-		rel_h=()
 		
+		# updating release array
+		release=($($cat $pdir/release))
+		
+		# end
+		output -p $name "Repository Updated"
 		cd $current_dir
-	# Bundles output
+		
+		# Bundles list output
+		rel_h=()
 		case $1 in
 		"")
 			output -p $name "Listing avaliable bundles"
