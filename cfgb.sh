@@ -569,8 +569,8 @@ qwerry_bnd(){
 		current_dir=$(pwd)
 		
 		# downloading release
-		cd $pdir
 		output -p $name "Updating Repository"
+		cd $pdir
 		$srm $pdir/release
 		output -t "downloading release"
 		$dl $repo/release
