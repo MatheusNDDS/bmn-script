@@ -296,7 +296,7 @@ pmaa=($*)
 }
 sfm(){
 	arg=($*)
-	## Safe or File Manager ##
+	## Safe File Manager ##
 	for dof in ${arg[@]:1}
 	do
 		if [ $dof != "/" ]
