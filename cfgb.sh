@@ -144,7 +144,7 @@ output(){
 	declare -A t
 	t[header]="\033[01;36m-=/$2/=-\033[00m ~ $3 \n"
 	t[info_header]="User: $u\nHome: $h\nPkgM: $pm\nRepo: $repo"
-	t[progress]="\033[01;35m [$2]: -=- $3 -=-\033[00m"
+	t[progress]="\033[01;35m $2: -=- $3 -=-\033[00m"
 	t[list]="\033[01m $2: [ $($prt $3|tr ' ' ', ') ]\033[00m "
 	t[dialogue]="\033[01m [$2]: $3\033[00m"
 	t[high_title]="\033[01;36m\n********* $2 *********\n\033[00m"
