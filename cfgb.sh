@@ -462,7 +462,7 @@ pkg_install(){
 ## Bundle Process
 download(){
 	output 1 $1
-	output -T "Downloading “$1”"
+	output -p $name "Downloading “$1”"
 	$dl $repo/$1.$file_format
 	if [ $2 != 1 ]
 	then
@@ -472,7 +472,7 @@ download(){
 	fi
 }
 unpack(){
-	output -T "Unpacking “$1”"
+	output -p $name "Unpacking “$1”"
 	$smkd $1/
 	tar -xf $1.$file_format -C $1/
 	$rm $1.$file_format
