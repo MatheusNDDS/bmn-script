@@ -144,7 +144,7 @@ output(){
 	declare -A t
 	t[header]="\033[01;36m-=/$2/=-\033[00m ~ $3 \n"
 	t[info_header]="User: $u\nHome: $h\nPkgM: $pm\nRepo: $repo"
-	t[progress]="\033[01;35m $2: -=- $3 -=-\033[00m"
+	t[progress]="\033[01;35m [$2]: -=- $3... -=-\033[00m"
 	t[list]="\033[01m $2: [ $($prt $3|tr ' ' ', ') ]\033[00m "
 	t[dialogue]="\033[01m [$2]: $3\033[00m"
 	t[high_title]="\033[01;36m\n********* $2 *********\n\033[00m"
@@ -495,7 +495,7 @@ load_data
 
 ## Script managment
 setup(){
-	output -T "CFGB installation"
+	output -hT "CFGB installation"
 #Script install
 	sfm -d $pdir $bnd_dir
 	sfm -f $cfg $log
@@ -523,14 +523,14 @@ setup(){
 		if [ -e repo ]
 		then
 			$prt "pm=$pm_detected h=$h u=$u repo=$(cat repo)" > $cfg_file
-			output -T "C.F.G.B instelled with portable repo file"
+			output -hT "C.F.G.B instelled with portable repo file"
 		else
 			output -e "install error" "required portable 'repo' file, or type the repository url address last. "
 			exit 1
 		fi
 	else
 		$prt "pm=$pm_detected h=$h u=$u repo=$2" > $cfg_file
-		output -T "C.F.G.B instaled"
+		output -hT "C.F.G.B instaled"
 	fi
 exit
 }
@@ -541,7 +541,7 @@ cfgb_update(){
 	else
 		script_src="$1"
 	fi
-	output -T "Updating CFGB Script"
+	output -hT "Updating CFGB Script"
 	current_dir=$(pwd)
 	cd $pdir
 	output -p $name 'Downloading Script'
@@ -550,7 +550,7 @@ cfgb_update(){
 	output -p $name 'Installing Script'
 	$mv "$pdir/$name.sh" $bin
 	$elf $bin
-	output -T 'CFGB Script Updated'
+	output -hT 'CFGB Script Updated'
 	cd $current_dir
 }
 qwerry_bnd(){
@@ -614,10 +614,12 @@ enable_extras(){
 	do
 		if [ $i = flatpak ]
 		then
-			output -p $name "Configuring flatpak"
+			output -hT "Configuring flatpak"
+			output -p $name "Installing flatpak"
 			pma -i flatpak
+			output -p $name "Adding Flathub"
 			$flatpak_remote $flathub
-			output -s $name "flatpak enabled"
+			output -hT $name "flatpak enabled"
 		fi
 		if [ $i = snap ]
 		then
