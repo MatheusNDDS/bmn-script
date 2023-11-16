@@ -26,6 +26,7 @@ load_data(){
 	add_ppa="$r add-apt-repository"
 	flatpak_remote="flatpak remote-add --if-not-exists"
 	fp_overide="$r flatpak override"
+	pnl="$prt \n"
 	
 	#Safe File Manager Commands Varariables
 	#SFM prevents accidental removal of the system root directory and prevents conflicts with existing files and directories 
@@ -416,6 +417,7 @@ pkg_install(){
 		done
 		pkg_parser clean
 	fi
+
 #Flatpaks
 	pkg_parser parse $1 flatpaks
 	if [ $pkg_flag != "null" ]
@@ -493,8 +495,8 @@ load_data
 setup(){
 	output -T "CFGB installation"
 #Script install
-	$smkd $pdir $bnd_dir
-	$smk $cfg $log
+	sfm -d $pdir $bnd_dir
+	sfm -f $cfg $log
 	$cp $script $bin
 	$elf $bin
 #Package manager autodetect
