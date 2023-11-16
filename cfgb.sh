@@ -19,6 +19,7 @@ load_data(){
 	cat="$r cat"
 	dl="$r wget -q"
 	d0="/dev/0"
+	jmp="2> $log &"
 	src="source"
 	gitc="$r git clone"
 	cfgbi="$r cfgb -i"
@@ -68,6 +69,7 @@ load_data(){
 	
 ## External Data Import
 	source $cfg_file
+	source /etc/os-release
 	release=($($cat $pdir/release))
 }
 start(){
@@ -162,29 +164,16 @@ output(){
 	
 	$prt ${t[$1]}
 }
-detect_user_props(){
-	curent_path=($(pwd|tr '/' ' '))
-	if [ "${curent_path[0]}" = "home" ]
-	then
-		h="/home/${curent_path[1]}"
-		u="${curent_path[1]}"
-	elif [ "${curent_path[0]}" = "root" ]
-	then
-		h="/root"
-		u="root"
-	fi
-}
 pma(){
-pmaa=($*)
+pma_a=($*)
 	declare -A pm_i
 	declare -A pm_r
 	declare -A pm_l
 	declare -A pm_s
 	declare -A pm_u
 	declare -A pm_g
-	pkg="${pmaa[*]:1}"
+	pkg="${pma_a[*]:1}"
 
-#Package Managers internal database 
 ##apt##
 	pm_i[apt]="install"
 	pm_r[apt]="remove"
@@ -192,13 +181,6 @@ pmaa=($*)
 	pm_s[apt]="search"
 	pm_u[apt]="update"
 	pm_g[apt]="upgrade"
-##nix-env##
-	pm_i['nix-env']="-iA"
-	pm_r['nix-env']="-e"
-	pm_l['nix-env']="-q"
-	pm_s['nix-env']="@"
-	pm_u['nix-env']="-u"
-	pm_g['nix-env']=0
 ##pacman##
 	pm_i[pacman]="-S"
 	pm_r[pacman]="-Rs"
@@ -213,6 +195,13 @@ pmaa=($*)
 	pm_s[apk]=@
 	pm_u[apk]=@
 	pm_g[apk]=@
+##slackpkg##
+	pm_i[slackpkg]=@
+	pm_r[slackpkg]=@
+	pm_l[slackpkg]="$jmp;ls /var/log/packages"
+	pm_s[slackpkg]=@
+	pm_u[slackpkg]="upgrade"
+	pm_g[slackpkg]=0
 ##dnf##
 	pm_i[dnf]=@
 	pm_r[dnf]=@
@@ -226,9 +215,8 @@ pmaa=($*)
 	pm_l[apx]=@
 	pm_s[apx]=@
 	pm_u[apx]=@
-	pm_g[dnf]=@
-
-#Package Managers Abstraction
+	pm_g[apx]=@
+	
 	if [ $1 = "-qpm" ] #Qwerry Package Manager
 	then
 		bin_dirs="$(echo $PATH | tr ':' ' ')"
@@ -236,7 +224,6 @@ pmaa=($*)
 		do
 			bin_list+=($(ls $dir/))
 		done
-		#Package Manager Auto Detect
 		for pmc in ${!pm_l[@]}
 		do
 			if [[ "${bin_list[@]}" = *"$pmc"* ]]
@@ -295,13 +282,13 @@ pmaa=($*)
 	fi
 }
 sfm(){
-	arg=($*)
-	## Safe File Manager ##
-	for dof in ${arg[@]:1}
+	sfm_a=($*)
+	## Safe or File Manager ##
+	for dof in ${sfm_a[@]:1}
 	do
 		if [ $dof != "/" ]
 		then
-			case ${arg[0]} in
+			case ${sfm_a[0]} in
 				'-d')
 					if [ ! -d $dof ]
 					then
@@ -567,31 +554,26 @@ qwerry_bnd(){
 	then
 		# saving the current directory
 		current_dir=$(pwd)
-		
 		# downloading release
 		output -p $name "Updating Repository"
 		cd $pdir
 		$srm $pdir/release
 		output -t "downloading release"
 		$dl $repo/release
-		
 		# end
 		output -p $name "Repository Updated"
 		cd $current_dir
 	else
 		# saving the current directory
 		current_dir=$(pwd)
-		
 		# downloading
 		output -p $name "Updating Repository"
 		cd $pdir
 		$srm $pdir/release
 		output -t "downloading release"
 		$dl $repo/release
-		
 		# updating release array
 		release=($($cat $pdir/release))
-		
 		# end
 		output -p $name "Repository Updated"
 		cd $current_dir
@@ -639,6 +621,18 @@ enable_extras(){
 		fi
 	done
 exit
+}
+detect_user_props(){
+	curent_path=($(pwd|tr '/' ' '))
+	if [ "${curent_path[0]}" = "home" ]
+	then
+		h="/home/${curent_path[1]}"
+		u="${curent_path[1]}"
+	elif [ "${curent_path[0]}" = "root" ]
+	then
+		h="/root"
+		u="root"
+	fi
 }
 live_shell(){
 	while [ 1 ]
