@@ -550,7 +550,7 @@ cfgb_update(){
 	output -p $name 'Installing Script'
 	$mv "$pdir/$name.sh" $bin
 	$elf $bin
-	output -hT 'CFGB Script Updated'
+	output -hT "CFGB Script Updated "
 	cd $current_dir
 }
 qwerry_bnd(){
