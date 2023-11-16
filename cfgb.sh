@@ -95,6 +95,8 @@ load_data $*
 			then
 				if [[ "${release[@]}" = *"$i"* ]]
 				then
+					output -hT "Installing “$i”"
+					output 1 $1 ; $pnl
 					cd $bnd_dir
 					$srm $i/
 					$srm $i.$file_format
@@ -461,7 +463,6 @@ pkg_install(){
 
 ## Bundle Process
 download(){
-	output 1 $1
 	output -p $name "Downloading “$1”"
 	$dl $repo/$1.$file_format
 	if [ $2 != 1 ]
@@ -480,14 +481,12 @@ unpack(){
 }
 cook(){
 load_data
-	output -hT "Installing “$1”"
 	cd $1/
 	pkg_install $1
 	if [ -e recipe ]
 	then
 		output -T "Setting “$1” Recipe"
-		export id="$1"
-		sudo bash recipe
+		sudo bash recipe $1
 	fi
 	output -hT "“$1” Instaled"
 	$rm $bnd_dir/$1
