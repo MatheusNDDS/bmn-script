@@ -144,10 +144,11 @@ output(){
 	declare -A t
 	t[header]="\033[01;36m-=/$2/=-\033[00m ~ $3 \n"
 	t[info_header]="User: $u\nHome: $h\nPkgM: $pm\nRepo: $repo"
-	t[progress]="\033[01;35m -=- [$2]: $3 -=-\033[00m"
+	t[progress]="\033[01;35m [$2]: -=- $3 -=-\033[00m"
 	t[list]="\033[01m $2: [ $($prt $3|tr ' ' ', ') ]\033[00m "
 	t[dialogue]="\033[01m [$2]: $3\033[00m"
-	t[title]="\033[01;36m\n### $2 ###\n\033[00m"
+	t[high_title]="\033[01;36m\n********* $2 *********\n\033[00m"
+	t[title]="\033[01;36m\n ### $2 ###\n\033[00m"
 	t[sub_title]="\033[01;33m - $2\033[00m"
 	t[error]="\033[01;31m {$2}: $3\033[00m"
 	t[sucess]="\033[01;32m ($2): $3\033[00m"
@@ -159,6 +160,7 @@ output(){
 	t['-l']=${t[list]}
 	t['-d']=${t[dialogue]}
 	t['-T']=${t[title]}
+	t['-hT']=${t[high_title]}
 	t['-t']=${t[sub_title]}
 	t['-e']=${t[error]}
 	t['-s']=${t[sucess]}
@@ -478,7 +480,7 @@ unpack(){
 }
 cook(){
 load_data
-	output -T "Installing “$1”"
+	output -hT "Installing “$1”"
 	cd $1/
 	pkg_install $1
 	if [ -e recipe ]
@@ -487,7 +489,7 @@ load_data
 		export id="$1"
 		sudo bash recipe
 	fi
-	output -T "“$1” Instaled"
+	output -hT "“$1” Instaled"
 	$rm $bnd_dir/$1
 }
 
