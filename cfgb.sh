@@ -75,7 +75,7 @@ load_data(){
 }
 start(){
 load_data $*
-	if [[ "$1" = *"-i"* ]] | [[ "$1" = *"--install"* ]]
+	if [[ "$1" = *"-i"* ]] || [[ "$1" = *"--install"* ]]
 	then
 		if [[ "$1" = *"u"* ]]
 		then
@@ -102,32 +102,32 @@ load_data $*
 				fi
 			fi
 		done
-	elif [[ $1 = '-e' ]] | [[ "$1" = '--enable-extras' ]]
+	elif [[ $1 = '-e' ]] || [[ "$1" = '--enable-extras' ]]
 	then
 		enable_extras $*
-	elif [[ $1 = '-d' ]] | [[ "$1" = '--download' ]]
+	elif [[ $1 = '-d' ]] || [[ "$1" = '--download' ]]
 	then
 		for i in ${args[@]:2}
 		do
 			download $i 1
 		done
-	elif [[ $1 = '-s' ]] | [[ "$1" = '--setup' ]]
+	elif [[ $1 = '-s' ]] || [[ "$1" = '--setup' ]]
 	then
 		setup $*
-	elif [[ $1 = '-U' ]] | [[ "$1" = '--cfgb-update' ]]
+	elif [[ $1 = '-U' ]] || [[ "$1" = '--cfgb-update' ]]
 	then
 		cfgb_update
-	elif [[ $1 = '-rU' ]] | [[ "$1" = '--repo-update' ]]
+	elif [[ $1 = '-rU' ]] || [[ "$1" = '--repo-update' ]]
 	then
 		qwerry_bnd $1
-	elif [[ $1 = '-l' ]] | [[ "$1" = '--list-bnds' ]]
+	elif [[ $1 = '-l' ]] || [[ "$1" = '--list-bnds' ]]
 	then
 		qwerry_bnd ${args[@]:2}
-	elif [[ $1 = '-h' ]] | [[ $1 = '--help' ]]
+	elif [[ $1 = '-h' ]] || [[ $1 = '--help' ]]
 	then
 		output 0
 		output 1
-		$prt $prt "\n[Commands]\n--install       -i  : Install bundles from repository, use -iu to update the package manager repositories together.\n--dowload       -d  : Download bundles from repository.\n--repo-update   -rU : Update repository release file, use this regularly.\n--cfgb-update   -U  : Update cfgb script from repo source.\n--list-bnds     -l  : List or search for bundles in repo file.\n--live-shell    -sh : Run live shell for testing cfgb functions.	--help          -h  : Print help text."
+		$prt "\n[Commands]\n--install       -i  : Install bundles from repository, use -iu to update the package manager repositories together.\n--dowload       -d  : Download bundles from repository.\n--repo-update   -rU : Update repository release file, use this regularly.\n--cfgb-update   -U  : Update cfgb script from repo source.\n--list-bnds     -l  : List or search for bundles in repo file.\n--live-shell    -sh : Run live shell for testing cfgb functions.	--help          -h  : Print help text."
 	elif [[ $1 = '-sh' ]]
 	then
 		live_shell
