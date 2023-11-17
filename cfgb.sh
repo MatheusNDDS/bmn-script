@@ -614,7 +614,7 @@ enable_extras(){
 			pma -i flatpak
 			output -p $name "Adding Flathub"
 			$flatpak_remote $flathub
-			output -hT $name "flatpak enabled"
+			output -hT "flatpak enabled"
 		fi
 		if [ $i = snap ]
 		then
