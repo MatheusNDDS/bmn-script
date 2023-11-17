@@ -505,13 +505,13 @@ setup(){
 	detect_user_props
 	output -t "Default Home : $h"
 	output -t "Default User : $u"
-#Downloading repository release
-	qwerry_bnd -rU
 #Installing dependencies
 	output -p $name "Installing Dependencies"
 	pm=$pm_detected
 	pma -u
 	pma -i $deps
+#Downloading repository release
+	qwerry_bnd -rU
 #Saving environment variables
 	if [ -z "$2" ]
 	then
