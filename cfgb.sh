@@ -127,7 +127,6 @@ load_data $*
 	then
 		output 0
 		output 1
-		$pnl
 		$prt "\n[Commands]\n--install,-i : Install bundles from repository, use -iu to update the PkgM repositories.\n--dowload,-d : Download bundles from repository.\n--repo-update,-rU : Update repository release file, use this regularly.\n--cfgb-update,-U : Update cfgb script from repo source.\n--list-bnds,-l : List or search for bundles in repo file.\n--live-shell,-sh : Run live shell for testing cfgb functions.--help,-h : Print help text."
 	elif [[ $1 = '-sh' ]]
 	then
