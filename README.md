@@ -1,5 +1,5 @@
 # CFGB Manager
-It is something like a package manager created to facilitate the post-installation of Linux systems.
+It is something like a package manager created to facilitate the post-installation of Linux based operational systems.
 
 # Setup instructions
 Install syntax:
