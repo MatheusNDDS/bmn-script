@@ -328,7 +328,7 @@ sfm(){
 	done
 }
 
-## Package install
+## Package Install
 pkg_parser(){
 	if [ $1 = "parse" -a -e $bnd_dir/$2/$3 ]
 	then
@@ -485,10 +485,10 @@ load_data
 		sudo bash recipe $1
 	fi
 	output -hT "“$1” Instaled"
-	$rm $bnd_dir/$1
+	$srm $bnd_dir/$1
 }
 
-## Script managment
+## Script Managment
 setup(){
 	output -hT "CFGB installation"
 #Script install
