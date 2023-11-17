@@ -77,7 +77,7 @@ start(){
 load_data $*
 	if [[ "$1" = *"-i"* ]] || [[ "$1" = *"--install"* ]]
 	then
-		if [[ "$1" = *"u"* ]]
+		if [[ "$1" = "-iu" ]]
 		then
 			pm_update=1
 		fi
@@ -127,7 +127,7 @@ load_data $*
 	then
 		output 0
 		output 1
-		$prt "\n[Commands]\n--install,-i : Install bundles from repository, use -iu to update the $pm repositories.\n--dowload,-d : Download bundles from repository.\n--repo-update,-rU : Update repository release file, use this regularly.\n--cfgb-update,-U : Update cfgb script from repo source.\n--list-bnds,-l : List or search for bundles in repo file.\n--live-shell,-sh : Run live shell for testing cfgb functions.\n--help,-h : Print help text."
+		$prt "\n[Commands]\n--install,-i : Install bundles from repository, use -iu to update $pm repositories during installation.\n--dowload,-d : Download bundles from repository.\n--repo-update,-rU : Update repository release file, use this regularly.\n--cfgb-update,-U : Update cfgb script from repo source.\n--list-bnds,-l : List or search for bundles in repo file.\n--live-shell,-sh : Run live shell for testing cfgb functions.\n--help,-h : Print help text."
 	elif [[ $1 = '-sh' ]]
 	then
 		live_shell
