@@ -90,7 +90,6 @@ load_data $*
 				if [[ "${release[@]}" = *"$i"* ]]
 				then
 					output -hT "Installing “$i”"
-					output 1 $1 ; $pnl
 					cd $bnd_dir
 					$srm $i/
 					$srm $i.$file_format
@@ -123,12 +122,15 @@ load_data $*
 	elif [[ $1 = '-l' ]] || [[ "$1" = '--list-bnds' ]]
 	then
 		qwerry_bnd ${args[@]:2}
-	elif [[ $1 = '-h' ]] || [[ $1 = '--help' ]]
+	elif [[ $1 = '-p' ]] || [[ $1 = '--properties' ]]
 	then
 		output 0
 		output 1
-		$prt "\n\033[01;33m[Commands]\033[00m\n --install,-i : Install bundles from repository, use -iu to update $pm repositories during installation.\n --dowload,-d : Download bundles from repository.\n --repo-update,-rU : Update repository release file, use this regularly.\n --cfgb-update,-U : Update cfgb script from repo source.\n --list-bnds,-l : List or search for bundles in repo file.\n --live-shell,-sh : Run live shell for testing cfgb functions.\n --help,-h : Print help text."
-	elif [[ $1 = '-sh' ]]
+	elif [[ $1 = '-h' ]] || [[ $1 = '--help' ]]
+	then
+		output 0
+		output 2
+	elif [[ $1 = '-sh' ]] || [[ $1 = '--live-shell' ]]
 	then
 		live_shell
 	fi
@@ -140,6 +142,7 @@ output(){
 	declare -A t
 	t[header]="\033[01;36m-=/Configuration Bundles Manager/=-\033[00m \n~ MatheusNDDS : https://github.com/MatheusNDDS\n"
 	t[info_header]="\033[01;33m[Properties]\033[00m\n User: $u\n Home: $h\n PkgM: $pm\n Repo: $repo"
+	t[help_text]="\n\033[01;33m[Commands]\033[00m\n --install,-i : Install bundles from repository, use -iu to update $pm repositories during installation.\n --dowload,-d : Download bundles from repository.\n --repo-update,-rU : Update repository release file, use this regularly.\n --cfgb-update,-U : Update cfgb script from repo source.\n --list-bnds,-l : List or search for bundles in repo file.\n --live-shell,-sh : Run live shell for testing cfgb functions.\n --properties,-p : Prints the user information that cfgb uses.\n --help,-h : Print help text."
 	t[progress]="\033[01;35m [$2]: -=- $3 -=-\033[00m"
 	t[list]="\033[01m $2: [ $($prt $3|tr ' ' ', ') ]\033[00m "
 	t[dialogue]="\033[01m [$2]: $3\033[00m"
@@ -149,9 +152,12 @@ output(){
 	t[error]="\033[01;31m {$2}: $3\033[00m"
 	t[sucess]="\033[01;32m ($2): $3\033[00m"
 	
-	#Simplification
+	#Info
 	t[0]=${t[header]}
 	t[1]=${t[info_header]}
+	t[2]=${t[help_text]}
+	
+	#text formatting
 	t['-p']=${t[progress]}
 	t['-l']=${t[list]}
 	t['-d']=${t[dialogue]}
