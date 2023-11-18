@@ -587,7 +587,7 @@ qwerry_bnd(){
 		# Import e verify release file
 		if [[ ! -e $pdir/release ]]
 		then
-			output -e 'error / No Release' 'Use “cfgb -rU” to download.'
+			output -e 'Error / No release file' 'Use “cfgb -rU” to download.'
 			exit
 		fi
 		# Bundles list output
