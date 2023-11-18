@@ -131,11 +131,6 @@ load_data $*
 	then
 		output 0
 		output 2
-	elif [[ $1 = '-ph' ]] || [[ $1 = '--props-help' ]]
-	then
-		output 0
-		output 1
-		output 2
 	elif [[ $1 = '-sh' ]] || [[ $1 = '--live-shell' ]]
 	then
 		live_shell
@@ -160,12 +155,10 @@ output(){
 	t[error]="\033[01;31m {$2}: $3\033[00m"
 	t[sucess]="\033[01;32m ($2): $3\033[00m"
 	
-	#Info
+	#Simplification Redirect
 	t[0]=${t[header]}
 	t[1]=${t[info_header]}
 	t[2]=${t[help_text]}
-	
-	#text formatting
 	t['-p']=${t[progress]}
 	t['-l']=${t[list]}
 	t['-d']=${t[dialogue]}
@@ -296,7 +289,6 @@ pma_a=($*)
 }
 sfm(){
 	sfm_a=($*)
-	## Safe or File Manager ##
 	for dof in ${sfm_a[@]:1}
 	do
 		if [ $dof != "/" ]
