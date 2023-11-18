@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 ### Core functions ###
 load_data(){
 ## Configure pm,u,h variables
