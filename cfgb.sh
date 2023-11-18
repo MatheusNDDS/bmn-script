@@ -134,11 +134,9 @@ load_data $*
 	elif [[ $1 = '-sh' ]] || [[ $1 = '--live-shell' ]]
 	then
 		live_shell
-	else
-		if [[ ! -z $1 ]]
-		then
-			start -h
-		fi
+	elif [[ ! -z $1 ]]
+	then
+		start -h
 	fi
 }
 
