@@ -554,13 +554,13 @@ qwerry_bnd(){
 		# saving the current directory
 		current_dir=$(pwd)
 		# downloading release
-		output -p $name "Updating Repository"
+		output -hT "Updating Repository"
 		cd $pdir
 		$srm $pdir/release
-		output -t "downloading release"
+		output -p $name "downloading release"
 		$dl $repo/release
 		# end
-		output -p $name "Repository Updated"
+		output -hT $name "Repository Updated"
 		cd $current_dir
 	else
 		# saving the current directory
