@@ -429,7 +429,6 @@ pkg_install(){
 		done
 		pkg_parser clean
 	fi
-
 #Flatpaks
 	pkg_parser parse $1 flatpaks
 	if [ $pkg_flag != "null" ]
@@ -504,7 +503,6 @@ load_data
 ## Script Managment
 setup(){
 	output -hT "CFGB installation"
-#Script install
 	sfm -d $pdir $bnd_dir
 	sfm -f $cfg $log
 	$cp $script $bin
@@ -540,7 +538,6 @@ setup(){
 		$prt "pm=$pm_detected h=$h u=$u repo=$2" > $cfg_file
 		output -hT "C.F.G.B instaled"
 	fi
-exit
 }
 cfgb_update(){
 	output -hT "Updating CFGB Script"
@@ -567,9 +564,7 @@ cfgb_update(){
 qwerry_bnd(){
 	if [[ $1 = '-rU' ]]
 	then
-		# saving the current directory
 		current_dir=$(pwd)
-		# downloading release
 		output -hT "Updating Repository"
 		cd $pdir
 		$srm $pdir/release
