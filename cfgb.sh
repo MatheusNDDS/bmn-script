@@ -580,29 +580,29 @@ qwerry_bnd(){
 		# saving the current directory
 		current_dir=$(pwd)
 		# downloading
-		output -p $name "Updating Repository"
+		output -hT "Updating Repository"
 		cd $pdir
 		$srm $pdir/release
-		output -t "downloading release"
+		output -p $name "downloading release"
 		$dl $repo/release
 		# updating release array
 		release=($($cat $pdir/release))
 		# end
-		output -p $name "Repository Updated"
+		#output -hT "Repository Updated"
 		cd $current_dir
 		
 		# Bundles list output
 		rel_h=()
 		case $1 in
 		"")
-			output -p $name "Listing avaliable bundles"
+			output -hT "Avaliable bundles"
 			for bnd in ${release[@]}
 			do
 				output -t "$bnd"
 			done
 		;;
 		*)
-			output -p $name "Searching for “$1”"
+			output -hT "Results for “$1”"
 			for argb in $*
 			do
 				for bnd in ${release[@]}
