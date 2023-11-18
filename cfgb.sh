@@ -135,7 +135,10 @@ load_data $*
 	then
 		live_shell
 	else
-		start -h
+		if [[ -z $1 ]]
+		then
+			start -h
+		fi
 	fi
 }
 
