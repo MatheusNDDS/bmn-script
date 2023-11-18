@@ -62,7 +62,7 @@ load_data(){
 	pdir="/etc/$name"
 	bnd_dir="$pdir/bundles"
 	cfg_file="$pdir/cfg"
-	bin="/bin/$name"
+	cfgb_bin="/bin/$name"
 
 ## Flatpak Configuration ##
 	flathub="flathub https://flathub.org/repo/flathub.flatpakrepo"
@@ -502,8 +502,8 @@ setup(){
 	output -hT "CFGB installation"
 	sfm -d $pdir $bnd_dir
 	sfm -f $cfg $log
-	$cp $script $bin
-	$elf $bin
+	$cp $script $cfgb_bin
+	$elf $cfgb_bin
 #Package manager autodetect
 	output -p $name "Detecting Package Manager"
 	pma -qpm
@@ -554,8 +554,8 @@ cfgb_update(){
 		$cp $1 $pdir/
 	fi
 	output -p $name 'Installing Script'
-	$mv "$pdir/$name.sh" $bin
-	$elf $bin
+	$mv "$pdir/$name.sh" $cfgb_bin
+	$elf $cfgb_bin
 	output -hT "CFGB Script Updated "
 }
 qwerry_bnd(){
