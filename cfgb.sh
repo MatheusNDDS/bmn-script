@@ -500,7 +500,7 @@ load_data
 ## Script Managment
 setup(){
 	output -hT "CFGB installation"
-	sfm -d $pdir $bnd_dir
+	sfm -d $pdir $bnd_dir $cfg $hlc $hsr
 	sfm -f $cfg $log
 	$cp $script $cfgb_bin
 	$elf $cfgb_bin
