@@ -115,7 +115,7 @@ load_data $*
 		setup $*
 	elif [[ $1 = '-U' ]] || [[ "$1" = '--cfgb-update' ]]
 	then
-		cfgb_update
+		cfgb_update $2
 	elif [[ $1 = '-rU' ]] || [[ "$1" = '--repo-update' ]]
 	then
 		qwerry_bnd $1
