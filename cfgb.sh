@@ -578,7 +578,7 @@ qwerry_bnd(){
 		output -hT "Updating Repository"
 		cd $pdir
 		$srm $pdir/release
-		output -p $name "downloading release"
+		output -p $name "Downloading Release"
 		$dl $repo/release
 		# end
 		output -hT $name "Repository Updated"
@@ -587,7 +587,7 @@ qwerry_bnd(){
 		# Import e verify release file
 		if [[ ! -e $pdir/release ]]
 		then
-			output -e 'No Release file' 'Use “cfgb -rU” to download'
+			output -e 'error / No Release' 'Use “cfgb -rU” to download.'
 			exit
 		fi
 		# Bundles list output
