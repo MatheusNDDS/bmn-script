@@ -578,12 +578,12 @@ qwerry_bnd(){
 		cd $current_dir
 	else
 		# Import e verify release file
-		release=($($cat $pdir/release))
-		if [[ -z "${release[@]}" ]]
+		if [[ ! -e $pdir/release ]]
 		then
-			output -e 'No Release' 'Use “cfgb -rU” to download'
+			output -e 'No Release file' 'Use “cfgb -rU” to download'
 			exit
 		fi
+		release=($($cat $pdir/release))
 		# Bundles list output
 		rel_h=()
 		case $1 in
