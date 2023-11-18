@@ -33,6 +33,7 @@ load_data(){
 	srm="sfm -r"
 	smk="sfm -f"
 	smkd="sfm -d"
+	scat="sfm -c"
 	
 	#Directorys collection
 	rsr="/usr/share" #root share
@@ -71,7 +72,7 @@ load_data(){
 ## External Data Import
 	source $cfg_file
 	source /etc/os-release
-	release=($($cat $pdir/release))
+	release=($($scat $pdir/release))
 }
 start(){
 load_data $*
@@ -332,6 +333,12 @@ sfm(){
 							output -t "File/Dir “$dof” removed"
 					fi
 				;;
+				'-c')
+					if [ -e $dof ]
+					then
+						$cat $dof
+					fi
+				;;
 			esac
 		else
 			output -e "SFM" "cannot remove root directory “/”"
@@ -583,7 +590,6 @@ qwerry_bnd(){
 			output -e 'No Release file' 'Use “cfgb -rU” to download'
 			exit
 		fi
-		release=($($cat $pdir/release))
 		# Bundles list output
 		rel_h=()
 		case $1 in
