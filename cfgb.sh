@@ -135,7 +135,7 @@ load_data $*
 	then
 		live_shell
 	else
-		if [[ -z $1 ]]
+		if [[ ! -z $1 ]]
 		then
 			start -h
 		fi
