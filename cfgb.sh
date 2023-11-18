@@ -577,20 +577,13 @@ qwerry_bnd(){
 		output -hT $name "Repository Updated"
 		cd $current_dir
 	else
-		# saving the current directory
-		current_dir=$(pwd)
-		# downloading
-		output -hT "Updating Repository"
-		cd $pdir
-		$srm $pdir/release
-		output -p $name "downloading release"
-		$dl $repo/release
-		# updating release array
+		# Import e verify release file
 		release=($($cat $pdir/release))
-		# end
-		#output -hT "Repository Updated"
-		cd $current_dir
-		
+		if [[ -z "${release[@]}" ]]
+		then
+			output -e 'No Release' 'Use “cfgb -rU” to download'
+			exit
+		fi
 		# Bundles list output
 		rel_h=()
 		case $1 in
