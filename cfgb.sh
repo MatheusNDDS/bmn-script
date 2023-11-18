@@ -581,7 +581,7 @@ qwerry_bnd(){
 		output -p $name "Downloading Release"
 		$dl $repo/release
 		# end
-		output -hT $name "Repository Updated"
+		output -hT "Repository Updated"
 		cd $current_dir
 	else
 		# Import e verify release file
