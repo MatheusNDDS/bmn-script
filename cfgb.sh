@@ -541,23 +541,26 @@ setup(){
 exit
 }
 cfgb_update(){
-	if [[ -z $1 ]]
+	output -hT "Updating CFGB Script"
+	if [[ $1 = "" ]]
 	then
+		current_dir=$(pwd)
 		script_src="https://github.com/MatheusNDDS/cfgb-script/raw/main/${name}.sh"
+		output -p $name 'Downloading Script'
+		output -d 'Source' $script_src
+		cd $pdir
+		$dl $script_src
+		cd $current_dir
 	else
 		script_src="$1"
+		output -p $name 'Installing from local'
+		output -d 'local' $script_src
+		$cp $1 $pdir/
 	fi
-	output -hT "Updating CFGB Script"
-	current_dir=$(pwd)
-	cd $pdir
-	output -p $name 'Downloading Script'
-	output -d 'Source' $script_src
-	$dl $script_src
 	output -p $name 'Installing Script'
 	$mv "$pdir/$name.sh" $bin
 	$elf $bin
 	output -hT "CFGB Script Updated "
-	cd $current_dir
 }
 qwerry_bnd(){
 	if [[ $1 = '-rU' ]]
