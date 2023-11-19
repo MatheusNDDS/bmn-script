@@ -17,7 +17,7 @@ load_data(){
 	mkd="$r mkdir"
 	elf="$r chmod 755"
 	cat="$r cat"
-	dl="$r wget -q"
+	dl="$r wget -nv"
 	d0="/dev/0"
 	jmp="2> $log &"
 	src="source"
@@ -55,7 +55,6 @@ load_data(){
 	deps="wget bash sudo"
 	args=$*
 	cmd="$1"
-	log="$pdir/log"
 	sfm_verbose=0 #Enable verbose log for SFM
 
 ## Work Directorys ##
@@ -63,6 +62,7 @@ load_data(){
 	bnd_dir="$pdir/bundles"
 	cfg_file="$pdir/cfg"
 	cfgb_bin="/bin/$name"
+	log="$pdir/log"
 
 ## Flatpak Configuration ##
 	flathub="flathub https://flathub.org/repo/flathub.flatpakrepo"
@@ -99,6 +99,7 @@ load_data $*
 					cook $i
 				else
 					output -e $name "“$i” bundle not found"
+					output -d i 'Maybe the relese file has outdated, try “cfgb -rU”.'
 				fi
 			fi
 		done
@@ -289,13 +290,13 @@ sfm(){
 	sfm_a=($*)
 	for dof in ${sfm_a[@]:1}
 	do
-		if [ $dof != "/" ]
+		if [ "$dof" != "/" ]
 		then
 			case ${sfm_a[0]} in
 				'-d')
-					if [ ! -d $dof ]
+					if [ ! -d "$dof" ]
 					then
-						$mkd $dof
+						$mkd "$dof"
 						if [ $sfm_verbose = 1 ]
 						then
 							output -t "Directory “$dof” maked"
@@ -303,9 +304,9 @@ sfm(){
 					fi
 				;;
 				'-f') 
-					if [ ! -e $dof ]
+					if [ ! -e "$dof" ]
 					then
-						$mk $dof
+						$mk "$dof"
 						if [ $sfm_verbose = 1 ]
 						then
 							output -t "File “$dof” maked"
@@ -313,12 +314,12 @@ sfm(){
 					fi
 				;;
 				'-r') 
-					if [ -e $dof ]
+					if [ -e "$dof" ]
 					then
-						$rm $dof
-					elif [ -d $dof ]
+						$rm "$dof"
+					elif [ -d "$dof" ]
 					then
-						$rm $dof
+						$rm "$dof"
 					fi
 					if [ $sfm_verbose = 1 ]
 						then
@@ -326,9 +327,9 @@ sfm(){
 					fi
 				;;
 				'-c')
-					if [ -e $dof ]
+					if [ -e "$dof" ]
 					then
-						$cat $dof
+						$cat "$dof"
 					fi
 				;;
 			esac
@@ -501,12 +502,12 @@ load_data
 setup(){
 	output -hT "CFGB installation"
 	sfm -d $pdir $bnd_dir $cfg $hlc $hsr
-	sfm -f $cfg $log
+	sfm -f $cfg_file $log
 	$cp $script $cfgb_bin
 	$elf $cfgb_bin
 #Package manager autodetect
 	output -p $name "Detecting Package Manager"
-	pma -qpm
+	pma -qpm 2> $log
 	output -t "Package Manager : $pm_detected"
 #Detecting home and user
 	output -p $name "Detecting Home Directory and User"
