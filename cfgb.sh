@@ -27,6 +27,7 @@ load_data(){
 	fp_overide="$r flatpak override"
 	pnl="$prt \n"
 	rpath="realpath"
+	pwd="$r pwd"
 	
 	#Safe File Manager Commands Varariables
 	#SFM prevents accidental removal of the system root directory and prevents conflicts with existing files and directories 
@@ -98,15 +99,16 @@ load_data $*
 				if [[ "${release[@]}" = *"$bndf"* ]] || [[ $lc_inst = 1 ]]
 				then
 					output -hT "Installing “$bndf” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
-					cd $bnd_dir/
 					$srm $bndf/
-					$srm $bndf.$file_format
+					$srm $bnd_dir/$bndf.$file_format
 					if [[ $lc_inst = 1 ]]
 					then
 						output -p $name "Importing “$bndf”"
-						$cp $(pwd)/$bndf $bnd_dir/
+						$cp $($pwd)/$bndf $bnd_dir/
 						bndf=$($prt $bndf|tr -d ".$file_format")
+						cd $bnd_dir/
 					else
+						cd $bnd_dir/
 						download $bndf 0
 					fi
 					unpack $bndf
