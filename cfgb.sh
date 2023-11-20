@@ -92,6 +92,10 @@ load_data $*
 				if [[ "${release[@]}" = *"$bndf"* ]]
 				then
 					output -hT "Installing “$bndf”"
+					if [[ ! -z $bnd_flags ]]
+					then
+						output -d "flags" "${bnd_flags[@]}"
+					fi
 					cd $bnd_dir
 					$srm $bndf/
 					$srm $bndf.$file_format
