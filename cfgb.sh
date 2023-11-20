@@ -86,7 +86,7 @@ load_data $*
 		do
 			cd $pdir
 			$srm $pdir/bundles/*
-			bnd_parser "$i"
+			bnd_parser $i
 			if [[ $i != "u" ]]
 			then
 				if [[ "${release[@]}" = *"$bndf"* ]]
