@@ -86,19 +86,20 @@ load_data $*
 		do
 			cd $pdir
 			$srm $pdir/bundles/*
-			if [[ $i != "u" ]]
+			if [[ $bnd != "u" ]]
 			then
-				if [[ "${release[@]}" = *"$i"* ]]
+				if [[ "${release[@]}" = *"$bnd"* ]]
 				then
-					output -hT "Installing “$i”"
+					output -hT "Installing “$bnd”"
+					bnd_parser $bnd
 					cd $bnd_dir
-					$srm $i/
-					$srm $i.$file_format
-					download $i 0
-					unpack $i
-					cook $i
+					$srm $bnd/
+					$srm $bnd.$file_format
+					download $bnd 0
+					unpack $bnd
+					cook $bnd ${bnd_flags[@]}
 				else
-					output -e $name "“$i” bundle not found"
+					output -e $name "“$bnd” bundle not found"
 					output -d i 'Maybe the relese file has outdated, try “cfgb -rU”.'
 				fi
 			fi
@@ -474,6 +475,11 @@ pkg_install(){
 }
 
 ## Bundle Process
+bnd_parser(){
+	bndp_a=($($prt $1|tr '=' ' ')) #learn
+	bnd_flags=($($prt ${bndp_a[1]}|tr ',' ' '))
+	bnd=${bndp_a[0]}
+}
 download(){
 	output -p $name "Downloading “$1”"
 	$dl $repo/$1.$file_format
@@ -498,7 +504,7 @@ load_data
 	if [ -e recipe ]
 	then
 		output -T "Setting “$1” Recipe"
-		sudo bash recipe $1
+		sudo bash recipe $*
 	fi
 	output -hT "“$1” Instaled"
 	$srm $bnd_dir/$1
