@@ -87,7 +87,7 @@ load_data $*
 		fi
 		for i in ${args[@]:2}
 		do
-			cd $pdir
+			#cd $pdir
 			$srm $pdir/bundles/*
 			bnd_parser $i
 			if [[ $bndf = *"$file_format"* ]]
