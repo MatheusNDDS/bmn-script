@@ -91,7 +91,7 @@ load_data $*
 				if [[ "${release[@]}" = *"$i"* ]]
 				then
 					output -hT "Installing “$i”"
-					bnd_parser $i
+					bnd_parser "$i"
 					cd $bnd_dir
 					$srm $bndf/
 					$srm $bndf.$file_format
@@ -99,7 +99,7 @@ load_data $*
 					unpack $bndf
 					cook $bndf ${bnd_flags[@]}
 				else
-					output -e $name "“$bnd” bundle not found"
+					output -e $name "“$i” bundle not found"
 					output -d i 'Maybe the relese file has outdated, try “cfgb -rU”.'
 				fi
 			fi
@@ -483,10 +483,7 @@ pkg_install(){
 bnd_parser(){
 bndp_a=($($prt $1|tr '=' ' '))
 	
-	#reset flags
-	bnd_flags=()
-	
-	#setup flags and bundle name redirect
+	#set flags
 	bndf=${bndp_a[0]}
 	bnd_flags=($($prt ${bndp_a[1]}|tr ',' ' '))
 }
