@@ -57,6 +57,7 @@ load_data(){
 	args=$*
 	cmd="$1"
 	sfm_verbose=0 #Enable verbose log for SFM
+	lc_inst=0
 
 ## Work Directorys ##
 	pdir="/etc/$name"
@@ -88,15 +89,19 @@ load_data $*
 			cd $pdir
 			$srm $pdir/bundles/*
 			bnd_parser $i
+			if [[ $bndf = *"$file_format"* ]]
+			then
+				lc_inst=1
+			fi
 			if [[ $i != "u" ]]
 			then
-				if [[ "${release[@]}" = *"$bndf"* ]]
+				if [[ "${release[@]}" = *"$bndf"* ]] || [[ $lc_inst = 1]]
 				then
 					output -hT "Installing “$bndf” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
 					cd $bnd_dir
 					$srm $bndf/
 					$srm $bndf.$file_format
-					if [[ $bndf = *"$file_format"* ]]
+					if [[ $lc_inst = 1 ]]
 					then
 						output -p $name "Importing “$bndf”"
 						$cp $bndf $bnd_dir/
@@ -105,6 +110,7 @@ load_data $*
 					fi
 					unpack $bndf
 					cook $bndf ${bnd_flags[@]}
+					lc_inst=0
 				else
 					output -e $name "“$i” bundle not found"
 					output -d i 'Maybe the relese file has outdated, try “cfgb -rU”.'
