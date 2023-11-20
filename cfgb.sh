@@ -95,7 +95,7 @@ load_data $*
 			fi
 			if [[ $i != "u" ]]
 			then
-				if [[ "${release[@]}" = *"$bndf"* ]] || [[ $lc_inst = 1]]
+				if [[ "${release[@]}" = *"$bndf"* ]] || [[ $lc_inst = 1 ]]
 				then
 					output -hT "Installing “$bndf” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
 					cd $bnd_dir
