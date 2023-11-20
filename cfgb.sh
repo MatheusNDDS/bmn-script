@@ -82,7 +82,7 @@ load_data $*
 		then
 			pm_update=1
 		fi
-		for i in ${args[@]:2}
+		for bnd in ${args[@]:2}
 		do
 			cd $pdir
 			$srm $pdir/bundles/*
@@ -476,9 +476,9 @@ pkg_install(){
 
 ## Bundle Process
 bnd_parser(){
-	bndp_a=($($prt $1|tr '=' ' ')) #learn
-	bnd_flags=($($prt ${bndp_a[1]}|tr ',' ' '))
+	bndp_a=($($prt $1|tr '=' ' '))
 	bnd=${bndp_a[0]}
+	bnd_flags=($($prt ${bndp_a[1]}|tr ',' ' '))
 }
 download(){
 	output -p $name "Downloading “$1”"
