@@ -86,12 +86,12 @@ load_data $*
 		do
 			cd $pdir
 			$srm $pdir/bundles/*
+			bnd_parser "$i"
 			if [[ $i != "u" ]]
 			then
-				if [[ "${release[@]}" = *"$i"* ]]
+				if [[ "${release[@]}" = *"$bndf"* ]]
 				then
-					output -hT "Installing “$i”"
-					bnd_parser "$i"
+					output -hT "Installing “$bndf”"
 					cd $bnd_dir
 					$srm $bndf/
 					$srm $bndf.$file_format
