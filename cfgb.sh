@@ -26,6 +26,7 @@ load_data(){
 	flatpak_remote="flatpak remote-add --if-not-exists"
 	fp_overide="$r flatpak override"
 	pnl="$prt \n"
+	rpath="realpath"
 	
 	#Safe File Manager Commands Varariables
 	#SFM prevents accidental removal of the system root directory and prevents conflicts with existing files and directories 
@@ -95,7 +96,13 @@ load_data $*
 					cd $bnd_dir
 					$srm $bndf/
 					$srm $bndf.$file_format
-					download $bndf 0
+					if [[ $bndf = *"$file_format"* ]]
+					then
+						output -p $name "Importing “$bndf”"
+						$cp $bndf $bnd_dir/
+					else
+						download $bndf 0
+					fi
 					unpack $bndf
 					cook $bndf ${bnd_flags[@]}
 				else
