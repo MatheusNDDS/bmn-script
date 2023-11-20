@@ -82,22 +82,22 @@ load_data $*
 		then
 			pm_update=1
 		fi
-		for bnd in ${args[@]:2}
+		for i in ${args[@]:2}
 		do
 			cd $pdir
 			$srm $pdir/bundles/*
-			if [[ $bnd != "u" ]]
+			if [[ $i != "u" ]]
 			then
-				if [[ "${release[@]}" = *"$bnd"* ]]
+				if [[ "${release[@]}" = *"$i"* ]]
 				then
-					output -hT "Installing “$bnd”"
-					bnd_parser $bnd
+					output -hT "Installing “$i”"
+					bnd_parser $i
 					cd $bnd_dir
-					$srm $bnd/
-					$srm $bnd.$file_format
-					download $bnd 0
-					unpack $bnd
-					cook $bnd ${bnd_flags[@]}
+					$srm $bndf/
+					$srm $bndf.$file_format
+					download $bndf 0
+					unpack $bndf
+					cook $bndf ${bnd_flags[@]}
 				else
 					output -e $name "“$bnd” bundle not found"
 					output -d i 'Maybe the relese file has outdated, try “cfgb -rU”.'
@@ -132,6 +132,11 @@ load_data $*
 	elif [[ $1 = '-h' ]] || [[ $1 = '--help' ]]
 	then
 		output 0
+		output 2
+	elif [[ $1 = '-ph' ]]
+	then
+		output 0
+		output 1
 		output 2
 	elif [[ $1 = '-sh' ]] || [[ $1 = '--live-shell' ]]
 	then
@@ -476,8 +481,13 @@ pkg_install(){
 
 ## Bundle Process
 bnd_parser(){
-	bndp_a=($($prt $1|tr '=' ' '))
-	bnd=${bndp_a[0]}
+bndp_a=($($prt $1|tr '=' ' '))
+	
+	#reset flags
+	bnd_flags=()
+	
+	#setup flags and bundle name redirect
+	bndf=${bndp_a[0]}
 	bnd_flags=($($prt ${bndp_a[1]}|tr ',' ' '))
 }
 download(){
