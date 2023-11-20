@@ -105,6 +105,7 @@ load_data $*
 					then
 						output -p $name "Importing “$bndf”"
 						$cp $bndf $bnd_dir/
+						bndf=$($prt $bndf|tr -d ".$file_format")
 					else
 						download $bndf 0
 					fi
