@@ -17,7 +17,7 @@ load_data(){
 	mkd="$r mkdir"
 	elf="$r chmod 755"
 	cat="$r cat"
-	dl="$r wget -nv"
+	dl="$r wget"
 	d0="/dev/0"
 	jmp="2> $log &"
 	src="source"
@@ -519,14 +519,15 @@ setup(){
 	pm=$pm_detected
 	pma -u
 	pma -i $deps
-#Downloading repository release
-	qwerry_bnd -rU
 #Saving environment variables
 	if [ -z "$2" ]
 	then
 		if [ -e repo ]
 		then
 			$prt "pm=$pm_detected h=$h u=$u repo=$(cat repo)" > $cfg_file
+#Downloading repository release
+			$src $cfg_file
+			qwerry_bnd -rU
 			output -hT "C.F.G.B instelled with portable repo file"
 		else
 			output -e "install error" "required portable 'repo' file, or type the repository url address last. "
@@ -534,6 +535,9 @@ setup(){
 		fi
 	else
 		$prt "pm=$pm_detected h=$h u=$u repo=$2" > $cfg_file
+#Downloading repository release
+		$src $cfg_file
+		qwerry_bnd -rU
 		output -hT "C.F.G.B instaled"
 	fi
 }
