@@ -20,7 +20,6 @@ load_data(){
 	dl="$r wget"
 	d0="/dev/0"
 	jmp="2> $log &"
-	src="source"
 	gitc="$r git clone"
 	cfgbi="$r cfgb -i"
 	add_ppa="$r add-apt-repository"
@@ -34,6 +33,7 @@ load_data(){
 	smk="sfm -f"
 	smkd="sfm -d"
 	scat="sfm -c"
+	src="sfm -rc"
 	
 	#Directorys collection
 	rsr="/usr/share" #root share
@@ -330,6 +330,12 @@ sfm(){
 					if [ -e "$dof" ]
 					then
 						$cat "$dof"
+					fi
+				;;
+				'-rc')
+					if [ -e "$dof" ]
+					then
+						source "$dof"
 					fi
 				;;
 			esac
