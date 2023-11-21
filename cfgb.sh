@@ -106,8 +106,9 @@ load_data $*
 					then
 						output -p $name "Importing “$bndf”"
 						$cp "$($rpath $bndf)" $bnd_dir/
-						bndf=$($prt $bndf| sed "s/.$file_format//")
+						bndf=$($prt $bndf|sed "s/.$file_format//")
 					else
+						cd $bnd_dir/
 						download $bndf 0
 					fi
 					cd $bnd_dir/
