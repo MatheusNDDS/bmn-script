@@ -551,7 +551,7 @@ load_data
 		output -T "Setting “$1” Recipe"
 		sudo bash recipe $*
 	fi
-	output -hT "“$1” Instaled"
+	output -hT "“$1”$(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi) Instaled"
 	$srm $bnd_dir/$1
 }
 
