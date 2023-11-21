@@ -99,14 +99,13 @@ load_data $*
 				if [[ "${release[@]}" = *"$bndf"* ]] || [[ $lc_inst = 1 ]]
 				then
 					output -hT "Installing “$bndf” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
-					$srm $bndf/
+					$srmd $bnd_dir/$bndf/
 					$srm $bnd_dir/$bndf.$file_format
 					if [[ $lc_inst = 1 ]]
 					then
 						output -p $name "Importing “$bndf”"
-						$cp "$($rpath $bndf)" $pdir/
+						$cp "$($rpath $bndf)" $bnd_dir/
 						bndf=$($prt $bndf|tr ".$file_format" '')
-						cd $bnd_dir/
 					else
 						download $bndf 0
 					fi
