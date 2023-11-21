@@ -11,6 +11,7 @@ load_data(){
 	cho="$r chown"
 	cp="$r cp -r"
 	rm="$r rm -rf"
+	rmd="$r rmdir --ignore-fail-on-non-empty"
 	mv="$r mv"
 	prt="echo -e"
 	mk="$r touch"
@@ -32,6 +33,7 @@ load_data(){
 	#Safe File Manager Commands Varariables
 	#SFM prevents accidental removal of the system root directory and prevents conflicts with existing files and directories 
 	srm="sfm -r"
+	srmd="sfm -rd"
 	smk="sfm -f"
 	smkd="sfm -d"
 	scat="sfm -c"
@@ -99,13 +101,12 @@ load_data $*
 				if [[ "${release[@]}" = *"$bndf"* ]] || [[ $lc_inst = 1 ]]
 				then
 					output -hT "Installing “$bndf” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
-					$srmd $bnd_dir/$bndf/
-					$srm $bnd_dir/$bndf.$file_format
+					$srm $bnd_dir/*
 					if [[ $lc_inst = 1 ]]
 					then
 						output -p $name "Importing “$bndf”"
 						$cp "$($rpath $bndf)" $bnd_dir/
-						bndf=$($prt $bndf|tr ".$file_format" '')
+						bndf=$($prt $bndf|tr ".$file_format" "")
 					else
 						download $bndf 0
 					fi
@@ -341,6 +342,16 @@ sfm(){
 					elif [ -d "$dof" ]
 					then
 						$rm "$dof"
+					fi
+					if [ $sfm_verbose = 1 ]
+						then
+							output -t "File/Dir “$dof” removed"
+					fi
+				;;
+				'-rd') 
+					if [ -d "$dof" ]
+					then
+						$rmd "$dof"
 					fi
 					if [ $sfm_verbose = 1 ]
 						then
