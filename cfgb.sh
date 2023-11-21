@@ -355,7 +355,7 @@ sfm(){
 					fi
 					if [ $sfm_verbose = 1 ]
 						then
-							output -t "File/Dir “$dof” removed"
+							output -t "Dir “$dof” removed"
 					fi
 				;;
 				'-c')
