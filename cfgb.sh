@@ -106,7 +106,7 @@ load_data $*
 					if [[ $lc_inst = 1 ]] #if "tar.gz" file detected change the download mode
 					then
 						output -p $name "Importing “$bndf”"
-						$cp $bndf $bnd_dir/
+						$cp "$($rpath $bndf)" $bnd_dir/
 						output -l imported "$(ls $bnd_dir/)"
 						bndf=$($prt $bndf|sed "s/.$file_format//")
 					else
