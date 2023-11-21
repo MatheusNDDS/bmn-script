@@ -92,16 +92,16 @@ load_data $*
 		for i in ${args[@]:2}
 		do
 			bnd_parser $i
-			if [[ $bndf = *"$file_format"* ]] #detect "tar.gz" file
+			if [[ $bndf = *"$file_format"* ]] #detect "tar.gz" file.
 			then
 				lc_inst=1
 			fi
 			if [[ $i != "u" ]]
 			then
-				if [[ "${release[@]}" = *"$bndf"* ]] || [[ $lc_inst = 1 ]]
+				if [[ "${release[@]}" = *"$bndf"* ]] || [[ $lc_inst = 1 ]] #checks if the bundle exists in the repository.
 				then
 					output -hT "Installing “$bndf” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
-					if [[ $lc_inst = 1 ]] #if "tar.gz" file detected change the download mode
+					if [[ $lc_inst = 1 ]] #if "tar.gz" file detected change the download mode to import mode.
 					then
 						bnd_name=$($prt $bndf|sed "s/.$file_format//")
 						$srm $bnd_dir/$bnd_name/ $bnd_dir/$bndf
@@ -540,7 +540,7 @@ download(){
 	$dl $repo/$1.$file_format
 	if [ $2 != 1 ]
 	then
-		output -l "files" "$(ls $bnd_dir/)"
+		output -l "files" "$(ls $bnd_dir/ | grep $1.$file_format)"
 	else
 		output -l "files" "$(ls . | grep $1.$file_format)"
 	fi
