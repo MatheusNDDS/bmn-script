@@ -117,6 +117,7 @@ load_data $*
 					cd $bnd_dir/
 					unpack $bndf
 					cook $bndf ${bnd_flags[@]}
+					$srm $bnd_dir/$bndf
 					lc_inst=0
 				else
 					output -e $name "“$i” bundle not found"
@@ -554,7 +555,6 @@ load_data
 		$rex $*
 	fi
 	output -hT "“$1” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi) Instaled"
-	$srm $bnd_dir/$1
 }
 
 ## Script Managment
