@@ -531,7 +531,7 @@ bndp_a=($($prt $1|tr '=' ' '))
 bdir_inst(){
 #function to install bundles from a directory.
 	$cp $1 $bnd_dir/
-	output -hT "Installing “$bdir” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
+	output -hT "Installing “$1” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
 	bnd_parser $1
 	cook $bnd_dir/$1 ${bnd_flags[@]}
 }
