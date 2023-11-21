@@ -106,7 +106,7 @@ load_data $*
 						bnd_name=$($prt $bndf|sed "s/.$file_format//")
 						$srm $bnd_name/ $bndf
 						output -p $name "Importing “$bndf”"
-						$cp "$($rpath $bndf)" $bnd_dir/
+						$cp $bndf $bnd_dir/
 						output -l imported "$(ls $bnd_dir/)"
 						bndf=$bnd_name
 					else
