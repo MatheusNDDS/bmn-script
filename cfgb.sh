@@ -534,7 +534,7 @@ bdir_inst(){
 	do
 		bnd_parser $bdir					
 		output -hT "Installing “$bdir” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
-			cd $i/
+			cd $bdir/
 			$pkgi
 		output -T "Setting “$bdir” Recipe"
 			$rex $bdir ${bnd_flags[@]}
