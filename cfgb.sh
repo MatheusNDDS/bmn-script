@@ -574,6 +574,7 @@ setup(){
 			$src $cfg_file
 			qwerry_bnd -rU
 			output -hT "C.F.G.B instelled with portable repo file"
+			output -d 'repository' "$repo"
 		else
 			output -e "install error" "required portable 'repo' file, or type the repository url address last. "
 			exit 1
