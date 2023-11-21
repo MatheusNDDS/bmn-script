@@ -530,17 +530,10 @@ bndp_a=($($prt $1|tr '=' ' '))
 }
 bdir_inst(){
 #function to install bundles from a directory.
-	for bdir in $*
-	do
-		bnd_parser $bdir					
-		output -hT "Installing “$bdir” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
-			cd $bdir/
-			$pkgi
-		output -T "Setting “$bdir” Recipe"
-			$rex $bdir ${bnd_flags[@]}
-			cd ..
-		output -hT "“$bdir” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi) Instaled"
-	done
+	$cp $1 $bnd_dir/
+	output -hT "Installing “$bdir” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
+	bnd_parser $1
+	cook $bnd_dir/$1 ${bnd_flags[@]}
 }
 download(){
 	output -p $name "Downloading “$1”"
