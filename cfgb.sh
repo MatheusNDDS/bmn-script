@@ -105,7 +105,7 @@ load_data $*
 					then
 						output -p $name "Importing “$bndf”"
 						$cp $($rpath $bndf) $bnd_dir/
-						bndf=$($prt $bndf|tr -d ".$file_format")
+						bndf=$($prt $bndf|tr ".$file_format" '')
 						cd $bnd_dir/
 					else
 						cd $bnd_dir/
