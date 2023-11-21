@@ -29,7 +29,6 @@ load_data(){
 	pnl="$prt \n"
 	rpath="realpath"
 	pwd="$r pwd"
-	rex="bash recipe"
 	
 	#Safe File Manager Commands Varariables
 	#SFM prevents accidental removal of the system root directory and prevents conflicts with existing files and directories 
@@ -57,6 +56,7 @@ load_data(){
 	script="$(pwd)/${name}.sh"
 	file_format="tar.gz"
 	pkg_flag="null"
+	rex="$r bash recipe"
 	deps="wget bash sudo"
 	args=$*
 	cmd="$1"
@@ -549,9 +549,9 @@ load_data
 	if [ -e recipe ]
 	then
 		output -T "Setting “$1” Recipe"
-		sudo bash recipe $*
+		$rex $*
 	fi
-	output -hT "“$1”$(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi) Instaled"
+	output -hT "“$1” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi) Instaled"
 	$srm $bnd_dir/$1
 }
 
