@@ -528,6 +528,20 @@ bndp_a=($($prt $1|tr '=' ' '))
 	bndf=${bndp_a[0]}
 	bnd_flags=($($prt ${bndp_a[1]}|tr ',' ' '))
 }
+bdir_inst(){
+#function to install bundles from a directory.
+	for i in $*
+	do
+		bnd_parser $i					
+		output -hT "Installing “$bndf” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
+			cd $i/
+			$pkgi
+		output -T "Setting “$i” Recipe"
+			$rex $i ${bnd_flags[@]}
+			cd ..
+		output -hT "“$1” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi) Instaled"
+	done
+}
 download(){
 	output -p $name "Downloading “$1”"
 	$dl $repo/$1.$file_format
