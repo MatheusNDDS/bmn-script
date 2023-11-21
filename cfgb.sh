@@ -104,13 +104,13 @@ load_data $*
 					if [[ $lc_inst = 1 ]]
 					then
 						output -p $name "Importing “$bndf”"
-						$cp $($rpath $bndf) $bnd_dir/
+						$cp "$($rpath $bndf)" $pdir/
 						bndf=$($prt $bndf|tr ".$file_format" '')
 						cd $bnd_dir/
 					else
-						cd $bnd_dir/
 						download $bndf 0
 					fi
+					cd $bnd_dir/
 					unpack $bndf
 					cook $bndf ${bnd_flags[@]}
 					lc_inst=0
