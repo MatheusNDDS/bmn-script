@@ -87,7 +87,7 @@ load_data $*
 		fi
 		for i in ${args[@]:2}
 		do
-			#cd $pdir
+#			cd $pdir
 			$srm $pdir/bundles/*
 			bnd_parser $i
 			if [[ $bndf = *"$file_format"* ]]
@@ -104,7 +104,7 @@ load_data $*
 					if [[ $lc_inst = 1 ]]
 					then
 						output -p $name "Importing “$bndf”"
-						$cp $($pwd)/$bndf $bnd_dir/
+						$cp $($rpath $bndf) $bnd_dir/
 						bndf=$($prt $bndf|tr -d ".$file_format")
 						cd $bnd_dir/
 					else
