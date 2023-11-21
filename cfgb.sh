@@ -29,6 +29,8 @@ load_data(){
 	pnl="$prt \n"
 	rpath="realpath"
 	pwd="$r pwd"
+	rex="bash recipe"
+	bndi=pkg_install;$rex
 	
 	#Safe File Manager Commands Varariables
 	#SFM prevents accidental removal of the system root directory and prevents conflicts with existing files and directories 
@@ -89,10 +91,9 @@ load_data $*
 		fi
 		for i in ${args[@]:2}
 		do
-#			cd $pdir
 			$srm $pdir/bundles/*
 			bnd_parser $i
-			if [[ $bndf = *"$file_format"* ]]
+			if [[ $bndf = *"$file_format"* ]] #detect "tar.gz" file
 			then
 				lc_inst=1
 			fi
@@ -102,10 +103,11 @@ load_data $*
 				then
 					output -hT "Installing “$bndf” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
 					$srm $bnd_dir/*
-					if [[ $lc_inst = 1 ]]
+					if [[ $lc_inst = 1 ]] #if "tar.gz" file detected change the download mode
 					then
 						output -p $name "Importing “$bndf”"
-						$cp "$($rpath $bndf)" $bnd_dir/
+						$cp $bndf $bnd_dir/
+						output -l imported "$(ls $bnd_dir/)"
 						bndf=$($prt $bndf|sed "s/.$file_format//")
 					else
 						cd $bnd_dir/
@@ -380,9 +382,9 @@ sfm(){
 
 ## Package Install
 pkg_parser(){
-	if [ $1 = "parse" -a -e $bnd_dir/$2/$3 ]
+	if [ $1 = "parse" -a -e $2 ]
 	then
-		for i in $(cat $bnd_dir/$2/$3)
+		for i in $(cat $2)
 		do
 			if [ $i = "#install" ]
 			then
@@ -429,7 +431,12 @@ pkg_parser(){
 }
 pkg_install(){
 #Distro Pkgs
-	pkg_parser parse $1 packages
+	if [[ -z $1 ]]
+	then
+		pkg_parser parse packages
+	else
+		pkg_parser parse $1/packages
+	fi
 	if [ $pkg_flag != "null" ]
 	then
 		$pnl
@@ -467,7 +474,12 @@ pkg_install(){
 		pkg_parser clean
 	fi
 #Flatpaks
-	pkg_parser parse $1 flatpaks
+	if [[ -z $1 ]]
+	then
+		pkg_parser parse flatpaks
+	else
+		pkg_parser parse $1/flatpaks
+	fi
 	if [ $pkg_flag != "null" ]
 	then
 		$pnl
@@ -534,7 +546,7 @@ unpack(){
 cook(){
 load_data
 	cd $1/
-	pkg_install $1
+	pkg_install
 	if [ -e recipe ]
 	then
 		output -T "Setting “$1” Recipe"
