@@ -91,7 +91,6 @@ load_data $*
 		fi
 		for i in ${args[@]:2}
 		do
-			$srm $pdir/bundles/*
 			bnd_parser $i
 			if [[ $bndf = *"$file_format"* ]] #detect "tar.gz" file
 			then
@@ -102,15 +101,17 @@ load_data $*
 				if [[ "${release[@]}" = *"$bndf"* ]] || [[ $lc_inst = 1 ]]
 				then
 					output -hT "Installing “$bndf” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
-					$srm $bnd_dir/*
 					if [[ $lc_inst = 1 ]] #if "tar.gz" file detected change the download mode
 					then
+						bnd_name=$($prt $bndf|sed "s/.$file_format//")
+						$srm $bnd_name/ $bndf
 						output -p $name "Importing “$bndf”"
 						$cp "$($rpath $bndf)" $bnd_dir/
 						output -l imported "$(ls $bnd_dir/)"
-						bndf=$($prt $bndf|sed "s/.$file_format//")
+						bndf=$bnd_name
 					else
 						cd $bnd_dir/
+						$srm $bndf/ $bndf.$file_format
 						download $bndf 0
 					fi
 					cd $bnd_dir/
