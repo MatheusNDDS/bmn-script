@@ -29,6 +29,7 @@ load_data(){
 	pnl="$prt \n"
 	rpath="realpath"
 	pwd="$r pwd"
+	pkgi="pkg_install"
 	
 	#Safe File Manager Commands Varariables
 	#SFM prevents accidental removal of the system root directory and prevents conflicts with existing files and directories 
