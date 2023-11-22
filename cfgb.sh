@@ -317,7 +317,7 @@ sfm(){
 	sfm_a=($*)
 	for dof in ${sfm_a[@]:1}
 	do
-		if [ "$dof" != "/" ]
+		if [ "$dof" != "/" ] ||  [ "$dof" != $pdir/* ]
 		then
 			case ${sfm_a[0]} in
 				'-d')
