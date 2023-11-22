@@ -570,13 +570,13 @@ setup(){
 	bins=($(ls /bin))
 	files=($(ls))
 	output -hT "CFGB installation"
-	if [[ ! -e $script ]] && [[ ! -z $3 ]]
+	if [[ ! -e $(pwd)/$script ]] && [[ ! -z $3 ]]
 	then
 		output -e $name 'it is not possible to run setup in “/bin” without the repository and script file field.'
 		output -d i "sintax: cfgb -s “your repository” “path to script”"
 		exit
 	fi
-	if [[ ! -e $script ]] && [[ -z $3 ]]
+	if [[ ! -e $(pwd)/$script ]] && [[ -z $3 ]]
 	then
 		script="$3"
 	fi
