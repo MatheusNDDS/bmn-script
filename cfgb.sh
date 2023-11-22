@@ -20,7 +20,7 @@ load_data(){
 	cat="$r cat"
 	dl="$r wget"
 	d0="/dev/0"
-	jmp="2> $log &"
+	jmp="2> $LOG &"
 	gitc="$r git clone"
 	cfgbi="$r cfgb -i"
 	add_ppa="$r add-apt-repository"
@@ -30,6 +30,7 @@ load_data(){
 	rpath="realpath"
 	pwd="$r pwd"
 	pkgi="pkg_install"
+	rex="$r bash recipe"
 	
 	#Safe File Manager Commands Varariables
 	#SFM prevents accidental removal of the system root directory and prevents conflicts with existing files and directories 
@@ -53,33 +54,32 @@ load_data(){
 	tmp="/temp"
 
 ## References ##
-	name="cfgb"
-	script="$(pwd)/${name}.sh"
-	file_format="tar.gz"
-	pkg_flag="null"
-	rex="$r bash recipe"
-	deps="wget bash sudo"
-	args=$*
-	cmd="$1"
-	sfm_verbose=0 #Enable verbose log for SFM
-	lc_inst=0
+	NAME="cfgb"
+	SCRIPT="$(pwd)/${NAME}.sh"
+	FILE_FORMAT="tar.gz"
+	PKG_FLAG="null"
+	DEPS="wget bash sudo"
+	ARGS=$*
+	CMD="$1"
+	SFM_VERBOSE=0 #Enable verbose log for SFM
+	LC_INST=0
 
 ## Work Directorys ##
-	pdir="/etc/$name"
-	bnd_dir="$pdir/bundles"
-	cfg_file="$pdir/cfg"
-	cfgb_bin="/bin/$name"
-	log="$pdir/log"
+	PDIR="/etc/$NAME"
+	BND_DIR="$PDIR/bundles"
+	CFG_FILE="$PDIR/cfg"
+	CFGB_BIN="/bin/$NAME"
+	LOG="$PDIR/log"
 
 ## Flatpak Configuration ##
-	flathub="flathub https://flathub.org/repo/flathub.flatpakrepo"
-	fp_mode="--system"
-	fp_remote="flathub"
+	FLATHUB_REPO="flathub https://flathub.org/repo/flathub.flatpakrepo"
+	FP_MODE="--system"
+	FP_REMOTE="flathub"
 	
 ## External Data Import
-	source $cfg_file
+	source $CFG_FILE
 	source /etc/os-release
-	release=($($scat $pdir/release))
+	RELEASE=($($scat $PDIR/release))
 }
 start(){
 load_data $*
@@ -89,37 +89,37 @@ load_data $*
 		then
 			pm_update=1
 		fi
-		for i in ${args[@]:2}
+		for i in ${ARGS[@]:2}
 		do
 			bnd_parser $i
-			if [[ $bndf = *"$file_format"* ]] #detect "tar.gz" file.
+			if [[ $bndf = *"$FILE_FORMAT"* ]] #detect "tar.gz" file.
 			then
-				lc_inst=1
+				LC_INST=1
 			fi
 			if [[ $i != "u" ]]
 			then
-				if [[ "${release[@]}" = *"$bndf"* ]] || [[ $lc_inst = 1 ]] #checks if the bundle exists in the repository.
+				if [[ "${RELEASE[@]}" = *"$bndf"* ]] || [[ $LC_INST = 1 ]] #checks if the bundle exists in the repository.
 				then
 					output -hT "Installing “$bnd_name” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
-					if [[ $lc_inst = 1 ]] #if "tar.gz" file detected change the download mode to import mode.
+					if [[ $LC_INST = 1 ]] #if "tar.gz" file detected change the download mode to import mode.
 					then
-						$srm $bnd_dir/$bnd_name/ $bnd_dir/$bndf
-						output -p $name "Importing “$bnd_name”"
-						$cp $bndf $bnd_dir/
-						output -l imported "$(ls $bnd_dir/ | grep $bnd_name)"
+						$srm $BND_DIR/$bnd_name/ $BND_DIR/$bndf
+						output -p $NAME "Importing “$bnd_name”"
+						$cp $bndf $BND_DIR/
+						output -l imported "$(ls $BND_DIR/ | grep $bnd_name)"
 						bndf=$bnd_name
 					else
-						cd $bnd_dir/
-						$srm $bnd_dir/$bnd_name/ $bnd_dir/$bnd_name.$file_format
+						cd $BND_DIR/
+						$srm $BND_DIR/$bnd_name/ $BND_DIR/$bnd_name.$FILE_FORMAT
 						download $bnd_name 0
 					fi
-					cd $bnd_dir/
+					cd $BND_DIR/
 					unpack $bnd_name
 					cook $bnd_name ${bnd_flags[@]}
-					$srm $bnd_dir/$bnd_name $bnd_dir/$bnd_name.$file_format
-					lc_inst=0
+					$srm $BND_DIR/$bnd_name $BND_DIR/$bnd_name.$FILE_FORMAT
+					LC_INST=0
 				else
-					output -e $name "“$i” bundle not found"
+					output -e $NAME "“$i” bundle not found"
 					output -d i 'Maybe the relese file has outdated, try “cfgb -rU”.'
 				fi
 			fi
@@ -129,7 +129,7 @@ load_data $*
 		enable_extras $*
 	elif [[ $1 = '-d' ]] || [[ "$1" = '--download' ]]
 	then
-		for i in ${args[@]:2}
+		for i in ${ARGS[@]:2}
 		do
 			download $i 1
 		done
@@ -144,7 +144,7 @@ load_data $*
 		qwerry_bnd $1
 	elif [[ $1 = '-l' ]] || [[ "$1" = '--list-bnds' ]]
 	then
-		qwerry_bnd ${args[@]:2}
+		qwerry_bnd ${ARGS[@]:2}
 	elif [[ $1 = '-p' ]] || [[ $1 = '--properties' ]]
 	then
 		output 0
@@ -316,14 +316,14 @@ sfm(){
 	sfm_a=($*)
 	for dof in ${sfm_a[@]:1}
 	do
-		if [ "$dof" != "/" ] || [ "$dof" != "$pdir" ] || [ "$dof" != $pdir/* ]
+		if [ "$dof" != "/" ] || [ "$dof" != "$PDIR" ] || [ "$dof" != $PDIR/* ]
 		then
 			case ${sfm_a[0]} in
 				'-d')
 					if [ ! -d "$dof" ]
 					then
 						$mkd "$dof"
-						if [ $sfm_verbose = 1 ]
+						if [ $SFM_VERBOSE = 1 ]
 						then
 							output -t "Directory “$dof” maked"
 						fi
@@ -333,7 +333,7 @@ sfm(){
 					if [ ! -e "$dof" ]
 					then
 						$mk "$dof"
-						if [ $sfm_verbose = 1 ]
+						if [ $SFM_VERBOSE = 1 ]
 						then
 							output -t "File “$dof” maked"
 						fi
@@ -347,7 +347,7 @@ sfm(){
 					then
 						$rm "$dof"
 					fi
-					if [ $sfm_verbose = 1 ]
+					if [ $SFM_VERBOSE = 1 ]
 						then
 							output -t "File/Dir “$dof” removed"
 					fi
@@ -357,7 +357,7 @@ sfm(){
 					then
 						$rmd "$dof"
 					fi
-					if [ $sfm_verbose = 1 ]
+					if [ $SFM_VERBOSE = 1 ]
 						then
 							output -t "Dir “$dof” removed"
 					fi
@@ -389,16 +389,16 @@ pkg_parser(){
 		do
 			if [ $i = "#install" ]
 			then
-				pkg_flag=$i
+				PKG_FLAG=$i
 			elif [ $i = "#remove" ]
 			then
-				pkg_flag=$i
+				PKG_FLAG=$i
 			else
-				if [ $pkg_flag = "#install" ]
+				if [ $PKG_FLAG = "#install" ]
 				then
 					to_install+=($i)
 				fi
-				if [ $pkg_flag = "#remove" ]
+				if [ $PKG_FLAG = "#remove" ]
 				then
 					to_remove+=($i)
 				fi
@@ -418,7 +418,7 @@ pkg_parser(){
 	then
 		unset to_install
 		unset to_remove
-		pkg_flag="null"
+		PKG_FLAG="null"
 	elif [ $1 = "check" ]
 	then
 		if [ $2 = "fp" ]
@@ -438,7 +438,7 @@ pkg_install(){
 	else
 		pkg_parser parse $1/packages
 	fi
-	if [ $pkg_flag != "null" ]
+	if [ $PKG_FLAG != "null" ]
 	then
 		$pnl
 		output -p $pm "Installing Packages"
@@ -481,7 +481,7 @@ pkg_install(){
 	else
 		pkg_parser parse $1/flatpaks
 	fi
-	if [ $pkg_flag != "null" ]
+	if [ $PKG_FLAG != "null" ]
 	then
 		$pnl
 		output -p Flatpak "Installing Flatpaks"
@@ -500,7 +500,7 @@ pkg_install(){
 				output -s "flatpak" "$i is already installed"
 			else
 				output -t "flatpak/installing: $i"
-				sudo flatpak $fp_mode install $fp_remote $i -y
+				sudo flatpak $FP_MODE install $FP_REMOTE $i -y
 			fi
 		done
 		pkg_parser check fp
@@ -509,7 +509,7 @@ pkg_install(){
 			if [[ "$pkgs_in" = *"$i"* ]]
 			then
 				output -t "flatpak/removing: $i"
-				sudo flatpak uninstall $fp_mode $i -y
+				sudo flatpak uninstall $FP_MODE $i -y
 			else
 				output -t "flatpak/removing: $i"
 				output -s "flatpak" "$i is not installed"
@@ -526,32 +526,32 @@ bndp_a=($($prt $1|tr '=' ' '))
 	#set flags
 	bndf=${bndp_a[0]}
 	bnd_pre_name=($($prt $bndf|tr '/' ' '))
-	bnd_name=$($prt ${bnd_pre_name[-1]}|sed "s/.$file_format//")
+	bnd_name=$($prt ${bnd_pre_name[-1]}|sed "s/.$FILE_FORMAT//")
 	bnd_flags=($($prt ${bndp_a[1]}|tr ',' ' '))
 }
 bdir_inst(){
 #function to install bundles from a directory.
-	$cp $1 $bnd_dir/
+	$cp $1 $BND_DIR/
 	output -hT "Installing “$1” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
 	bnd_parser $1
-	cook $bnd_dir/$1 ${bnd_flags[@]}
+	cook $BND_DIR/$1 ${bnd_flags[@]}
 }
 download(){
-	output -p $name "Downloading “$1”"
-	$dl $repo/$1.$file_format
+	output -p $NAME "Downloading “$1”"
+	$dl $repo/$1.$FILE_FORMAT
 	if [ $2 != 1 ]
 	then
-		output -l "files" "$(ls $bnd_dir/ | grep $1.$file_format)"
+		output -l "files" "$(ls $BND_DIR/ | grep $1.$FILE_FORMAT)"
 	else
-		output -l "files" "$(ls . | grep $1.$file_format)"
+		output -l "files" "$(ls . | grep $1.$FILE_FORMAT)"
 	fi
 }
 unpack(){
-	output -p $name "Unpacking “$1”"
+	output -p $NAME "Unpacking “$1”"
 	$smkd $1/
-	tar -xf $1.$file_format -C $1/
-	$srm $1.$file_format
-	output -l "files" "$(ls $bnd_dir/$1/)"
+	tar -xf $1.$FILE_FORMAT -C $1/
+	$srm $1.$FILE_FORMAT
+	output -l "files" "$(ls $BND_DIR/$1/)"
 }
 cook(){
 load_data
@@ -568,32 +568,32 @@ load_data
 ## Script Managment
 setup(){
 	output -hT "CFGB installation"
-	sfm -d $pdir $bnd_dir $cfg $hlc $hsr
-	sfm -f $cfg_file $log
-	$cp $script $cfgb_bin
-	$elf $cfgb_bin
+	sfm -d $PDIR $BND_DIR $cfg $hlc $hsr
+	sfm -f $CFG_FILE $LOG
+	$cp $SCRIPT $CFGB_BIN
+	$elf $CFGB_BIN
 #Package manager autodetect
-	output -p $name "Detecting Package Manager"
-	pma -qpm 2> $log
+	output -p $NAME "Detecting Package Manager"
+	pma -qpm 2> $LOG
 	output -t "Package Manager : $pm_detected"
 #Detecting home and user
-	output -p $name "Detecting Home Directory and User"
+	output -p $NAME "Detecting Home Directory and User"
 	detect_user_props
 	output -t "Default Home : $h"
 	output -t "Default User : $u"
 #Installing dependencies
-	output -p $name "Installing Dependencies"
+	output -p $NAME "Installing Dependencies"
 	pm=$pm_detected
 	pma -u
-	pma -i $deps
+	pma -i $DEPS
 #Saving environment variables
 	if [ -z "$2" ]
 	then
 		if [ -e repo ]
 		then
-			$prt "pm=$pm_detected h=$h u=$u repo=$(cat repo)" > $cfg_file
+			$prt "pm=$pm_detected h=$h u=$u repo=$(cat repo)" > $CFG_FILE
 #Downloading repository release
-			$src $cfg_file
+			$src $CFG_FILE
 			qwerry_bnd -rU
 			output -hT "C.F.G.B instelled with portable repo file"
 			output -d 'repository' "$repo"
@@ -602,9 +602,9 @@ setup(){
 			exit 1
 		fi
 	else
-		$prt "pm=$pm_detected h=$h u=$u repo=$2" > $cfg_file
+		$prt "pm=$pm_detected h=$h u=$u repo=$2" > $CFG_FILE
 #Downloading repository release
-		$src $cfg_file
+		$src $CFG_FILE
 		qwerry_bnd -rU
 		output -hT "C.F.G.B instaled"
 	fi
@@ -614,21 +614,21 @@ cfgb_update(){
 	if [[ $1 = "" ]]
 	then
 		current_dir=$(pwd)
-		script_src="https://github.com/MatheusNDDS/cfgb-script/raw/main/${name}.sh"
-		output -p $name 'Downloading Script'
+		script_src="https://github.com/MatheusNDDS/cfgb-script/raw/main/${NAME}.sh"
+		output -p $NAME 'Downloading Script'
 		output -d 'Source' $script_src
-		cd $pdir
+		cd $PDIR
 		$dl $script_src
 		cd $current_dir
 	else
 		script_src="$1"
-		output -p $name 'Installing from local'
+		output -p $NAME 'Installing from local'
 		output -d 'local' $script_src
-		$cp $1 $pdir/
+		$cp $1 $PDIR/
 	fi
-	output -p $name 'Installing Script'
-	$mv "$pdir/$name.sh" $cfgb_bin
-	$elf $cfgb_bin
+	output -p $NAME 'Installing Script'
+	$mv "$PDIR/$NAME.sh" $CFGB_BIN
+	$elf $CFGB_BIN
 	output -hT "CFGB Script Updated "
 }
 qwerry_bnd(){
@@ -636,16 +636,16 @@ qwerry_bnd(){
 	then
 		current_dir=$(pwd)
 		output -hT "Updating Repository"
-		cd $pdir
-		$srm $pdir/release
-		output -p $name "Downloading Release"
+		cd $PDIR
+		$srm $PDIR/release
+		output -p $NAME "Downloading Release"
 		$dl $repo/release
 		# end
 		output -hT "Repository Updated"
 		cd $current_dir
 	else
 		# Import e verify release file
-		if [[ ! -e $pdir/release ]]
+		if [[ ! -e $PDIR/release ]]
 		then
 			output -e 'Error / No release file' 'Use “cfgb -rU” to download.'
 			exit
@@ -655,7 +655,7 @@ qwerry_bnd(){
 		case $1 in
 		"")
 			output -hT "Avaliable bundles"
-			for bnd in ${release[@]}
+			for bnd in ${RELEASE[@]}
 			do
 				output -t "$bnd"
 			done
@@ -664,7 +664,7 @@ qwerry_bnd(){
 			output -hT "Results for “$1”"
 			for argb in $*
 			do
-				for bnd in ${release[@]}
+				for bnd in ${RELEASE[@]}
 				do
 					if [[ $bnd = *"$argb"* ]] && [[ ${rel_h[@]} != *"$bnd"* ]]
 					then
@@ -683,10 +683,10 @@ enable_extras(){
 		if [ $i = flatpak ]
 		then
 			output -hT "Configuring flatpak"
-			output -p $name "Installing flatpak"
+			output -p $NAME "Installing flatpak"
 			pma -i flatpak
-			output -p $name "Adding Flathub"
-			$flatpak_remote $flathub
+			output -p $NAME "Adding Flathub"
+			$flatpak_remote $FLATHUB_REPO
 			output -hT "flatpak enabled"
 		fi
 		if [ $i = snap ]
@@ -711,8 +711,8 @@ detect_user_props(){
 live_shell(){
 	while [ 1 ]
 	do
-		read -p "$(output -d "cfgb")" cmd
-		$cmd
+		read -p "$(output -d "cfgb")" CMD
+		$CMD
 	done
 }
 
