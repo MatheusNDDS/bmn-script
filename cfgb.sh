@@ -104,14 +104,22 @@ load_data $*
 					if [[ $lc_inst = 1 ]] #if "tar.gz" file detected change the download mode to import mode.
 					then
 						bnd_name=$($prt $bndf|sed "s/.$file_format//")
-						#$srm $bnd_dir/$bnd_name/ $bnd_dir/$bndf
+						bnd_log+=($bnd_name)
+						if [[ ! $bnd_log =~ (^|[[:space:]])$bnd_name($|[[:space:]]) ]]
+						then
+							$srm $bnd_dir/$bnd_name/ $bnd_dir/$bndf
+						fi
 						output -p $name "Importing “$bndf”"
 						$cp $bndf $bnd_dir/
 						output -l imported "$(ls $bnd_dir/ | grep $bndf)"
 						bndf=$bnd_name
 					else
 						cd $bnd_dir/
-						$srm $bnd_dir/$bndf/ $bnd_dir/$bndf.$file_format
+						bnd_log+=($bndf)
+						if [[ ! $bndf =~ (^|[[:space:]])$bnd_name($|[[:space:]]) ]]
+						then
+							$srm $bnd_dir/$bndf/ $bnd_dir/$bndf.$file_format
+						fi
 						download $bndf 0
 					fi
 					cd $bnd_dir/
