@@ -569,13 +569,13 @@ load_data
 setup(){
 	bins=($(ls /bin))
 	files=($(ls))
-	if [[ ${bins[@]} = *"$name"* ]]  && [[ ${files[@]} = *"$script"* ]] && [[ -z $2 ]] || [[ -z $3 ]]
+	if [[ ${bins[@]} = *"$name"* ]]  && [[ ! -e $script ]] && [[ -z $2 ]] || [[ -z $3 ]]
 	then
 		output -e $name 'it is not possible to run setup in “/bin” without the repository and script file field.'
 		output -d i "sintax: cfgb -s “your repository” “path to script”"
 		exit
 	fi
-	if [[ ! -z $3 ]]
+	if [[ ! -e $script ]] && [[ ! -z $3 ]]
 	then
 		script="$3"
 	fi
