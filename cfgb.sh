@@ -92,6 +92,7 @@ load_data $*
 		for i in ${args[@]:2}
 		do
 			bnd_parser $i
+			bnd_log+=($bndf)
 			if [[ $bndf = *"$file_format"* ]] #detect "tar.gz" file.
 			then
 				lc_inst=1
@@ -103,8 +104,6 @@ load_data $*
 					output -hT "Installing “$bndf” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
 					if [[ $lc_inst = 1 ]] #if "tar.gz" file detected change the download mode to import mode.
 					then
-						bnd_name=$($prt $bndf|sed "s/.$file_format//")
-						bnd_log+=($bnd_name)
 						if [[ ! $bnd_log =~ (^|[[:space:]])$bnd_name($|[[:space:]]) ]]
 						then
 							$srm $bnd_dir/$bnd_name/ $bnd_dir/$bndf
@@ -115,8 +114,7 @@ load_data $*
 						bndf=$bnd_name
 					else
 						cd $bnd_dir/
-						bnd_log+=($bndf)
-						if [[ ! $bndf =~ (^|[[:space:]])$bnd_name($|[[:space:]]) ]]
+						if [[ ! $bnd_log =~ (^|[[:space:]])$bnd_name($|[[:space:]]) ]]
 						then
 							$srm $bnd_dir/$bndf/ $bnd_dir/$bndf.$file_format
 						fi
@@ -534,6 +532,7 @@ bndp_a=($($prt $1|tr '=' ' '))
 	
 	#set flags
 	bndf=${bndp_a[0]}
+	bnd_name=$($prt $bndf|sed "s/.$file_format//")
 	bnd_flags=($($prt ${bndp_a[1]}|tr ',' ' '))
 }
 bdir_inst(){
