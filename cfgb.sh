@@ -110,13 +110,13 @@ load_data $*
 						bndf=$bnd_name
 					else
 						cd $bnd_dir/
-						$srm $bnd_dir/$bndf/ $bnd_dir/$bndf.$file_format
-						download $bndf 0
+						$srm $bnd_dir/$bnd_name/ $bnd_dir/$bnd_name.$file_format
+						download $bnd_name 0
 					fi
 					cd $bnd_dir/
-					unpack $bndf
-					cook $bndf ${bnd_flags[@]}
-					$srm $bnd_dir/$bndf $bnd_dir/$bndf.$file_format
+					unpack $bnd_name
+					cook $bnd_name ${bnd_flags[@]}
+					$srm $bnd_dir/$bnd_name $bnd_dir/$bnd_name.$file_format
 					lc_inst=0
 				else
 					output -e $name "“$i” bundle not found"
