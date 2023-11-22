@@ -567,6 +567,12 @@ load_data
 
 ## Script Managment
 setup(){
+	if [[ $(pwd) = '/bin/' ]] || [[ $pwd = '/usr/bin' ]] && [[ -z $2 ]]
+	then
+		output -e $name 'it is not possible to run setup in “/bin” without the repository field.'
+		output -d i "sintax: cfgb -s “your repository”"
+		exit
+	fi
 	output -hT "CFGB installation"
 	sfm -d $pdir $bnd_dir $cfg $hlc $hsr
 	sfm -f $cfg_file $log
