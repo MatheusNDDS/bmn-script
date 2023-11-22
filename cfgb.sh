@@ -534,7 +534,8 @@ bndp_a=($($prt $1|tr '=' ' '))
 	
 	#set flags
 	bndf=${bndp_a[0]}
-	bnd_name=$($prt $bndf|sed "s/.$file_format//")
+	bnd_pre_name=($($bndf|sed "s/'/'/' '/"))
+	bnd_name=$($prt ${bnd_pre_name[-1]}|sed "s/.$file_format//")
 	bnd_flags=($($prt ${bndp_a[1]}|tr ',' ' '))
 }
 bdir_inst(){
