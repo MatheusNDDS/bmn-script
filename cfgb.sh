@@ -325,7 +325,7 @@ sfm(){
 	sfm_a=($*)
 	for dof in ${sfm_a[@]:1}
 	do
-		if [ "$dof" != "/" ] ||  [ "$dof" != $pdir/* ]
+		if [ "$dof" != "/" ] || [ "$dof" != "$pdir" ] || [ "$dof" != $pdir/* ]
 		then
 			case ${sfm_a[0]} in
 				'-d')
@@ -534,7 +534,7 @@ bndp_a=($($prt $1|tr '=' ' '))
 	
 	#set flags
 	bndf=${bndp_a[0]}
-	bnd_pre_name=($($bndf|tr '/' ' '))
+	bnd_pre_name=($($prt $bndf|tr '/' ' '))
 	bnd_name=$($prt ${bnd_pre_name[-1]}|sed "s/.$file_format//")
 	bnd_flags=($($prt ${bndp_a[1]}|tr ',' ' '))
 }
