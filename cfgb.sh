@@ -104,7 +104,7 @@ load_data $*
 					if [[ $lc_inst = 1 ]] #if "tar.gz" file detected change the download mode to import mode.
 					then
 						bnd_name=$($prt $bndf|sed "s/.$file_format//")
-						#$srm $bnd_dir/$bnd_name/ $bnd_dir/$bndf
+						$srm $bnd_dir/$bnd_name/ $bnd_dir/$bndf
 						output -p $name "Importing “$bndf”"
 						$cp $bndf $bnd_dir/
 						output -l imported "$(ls $bnd_dir/ | grep $bndf)"
@@ -117,7 +117,6 @@ load_data $*
 					cd $bnd_dir/
 					unpack $bndf
 					cook $bndf ${bnd_flags[@]}
-					$srm $bnd_dir/$bndf
 					lc_inst=0
 				else
 					output -e $name "“$i” bundle not found"
