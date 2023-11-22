@@ -107,7 +107,7 @@ load_data $*
 						$srm $bnd_dir/$bnd_name/ $bnd_dir/$bndf
 						output -p $name "Importing “$bndf”"
 						$cp $bndf $bnd_dir/
-						output -l imported "$(ls $bnd_dir/)"
+						output -l imported "$(ls $bnd_dir/ | grep $bndf)"
 						bndf=$bnd_name
 					else
 						cd $bnd_dir/
