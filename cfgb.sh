@@ -103,14 +103,20 @@ load_data $*
 					output -hT "Installing “$bndf” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
 					if [[ $lc_inst = 1 ]] #if "tar.gz" file detected change the download mode to import mode.
 					then
+					if [[ $cfgb_preserve != 1 ]]
+					then
 						$srm $bnd_dir/$bnd_name/ $bnd_dir/$bndf
+					fi
 						output -p $name "Importing “$bndf”"
 						$cp $bndf $bnd_dir/
 						output -l imported "$(ls $bnd_dir/ | grep $bndf)"
 						bndf=$bnd_name
 					else
 						cd $bnd_dir/
+						if [[ $cfgb_preserve != 1 ]]
+					then
 						$srm $bnd_dir/$bndf/ $bnd_dir/$bndf.$file_format
+					fi	
 						download $bndf 0
 					fi
 					cd $bnd_dir/
