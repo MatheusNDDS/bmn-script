@@ -567,7 +567,8 @@ load_data
 
 ## Script Managment
 setup(){
-	if [[ $(ls /bin) = *"$name"* ]] && [[ -z $2 ]] || [[ -z $3 ]]
+	bins=($(ls /bin))
+	if [[ ${bins[@]} = *"$name"* ]] && [[ -z $2 ]] || [[ -z $3 ]]
 	then
 		output -e $name 'it is not possible to run setup in “/bin” without the repository and script file field.'
 		output -d i "sintax: cfgb -s “your repository” “path to script”"
