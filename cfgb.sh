@@ -549,7 +549,7 @@ unpack(){
 	output -p $name "Unpacking “$1”"
 	$smkd $1/
 	tar -xf $1.$file_format -C $1/
-	$rm $1.$file_format
+	$srm $1.$file_format
 	output -l "files" "$(ls $bnd_dir/$1/)"
 }
 cook(){
