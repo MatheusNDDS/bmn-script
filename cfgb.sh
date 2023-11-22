@@ -100,7 +100,7 @@ load_data $*
 			then
 				if [[ "${release[@]}" = *"$bndf"* ]] || [[ $lc_inst = 1 ]] #checks if the bundle exists in the repository.
 				then
-					output -hT "Installing “$bndf” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
+					output -hT "Installing “$bnd_name” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
 					if [[ $lc_inst = 1 ]] #if "tar.gz" file detected change the download mode to import mode.
 					then
 						$srm $bnd_dir/$bnd_name/ $bnd_dir/$bndf
