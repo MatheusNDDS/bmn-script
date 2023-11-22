@@ -54,8 +54,8 @@ load_data(){
 	tmp="/temp"
 
 ## References ##
-	NAME="cfgb"
-	SCRIPT="$(pwd)/${NAME}.sh"
+	SELF="cfgb"
+	SCRIPT="$(pwd)/${SELF}.sh"
 	FILE_FORMAT="tar.gz"
 	PKG_FLAG="null"
 	DEPS="wget bash sudo"
@@ -65,10 +65,10 @@ load_data(){
 	LC_INST=0
 
 ## Work Directorys ##
-	PDIR="/etc/$NAME"
+	PDIR="/etc/$SELF"
 	BND_DIR="$PDIR/bundles"
 	CFG_FILE="$PDIR/cfg"
-	CFGB_BIN="/bin/$NAME"
+	CFGB_BIN="/bin/$SELF"
 	LOG="$PDIR/log"
 
 ## Flatpak Configuration ##
@@ -104,7 +104,7 @@ load_data $*
 					if [[ $LC_INST = 1 ]] #if "tar.gz" file detected change the download mode to import mode.
 					then
 						$srm $BND_DIR/$bnd_name/ $BND_DIR/$bndf
-						output -p $NAME "Importing “$bnd_name”"
+						output -p $SELF "Importing “$bnd_name”"
 						$cp $bndf $BND_DIR/
 						output -l imported "$(ls $BND_DIR/ | grep $bnd_name)"
 						bndf=$bnd_name
@@ -119,7 +119,7 @@ load_data $*
 					$srm $BND_DIR/$bnd_name $BND_DIR/$bnd_name.$FILE_FORMAT
 					LC_INST=0
 				else
-					output -e $NAME "“$i” bundle not found"
+					output -e $SELF "“$i” bundle not found"
 					output -d i 'Maybe the relese file has outdated, try “cfgb -rU”.'
 				fi
 			fi
@@ -537,7 +537,7 @@ bdir_inst(){
 	cook $BND_DIR/$1 ${bnd_flags[@]}
 }
 download(){
-	output -p $NAME "Downloading “$1”"
+	output -p $SELF "Downloading “$1”"
 	$dl $repo/$1.$FILE_FORMAT
 	if [ $2 != 1 ]
 	then
@@ -547,7 +547,7 @@ download(){
 	fi
 }
 unpack(){
-	output -p $NAME "Unpacking “$1”"
+	output -p $SELF "Unpacking “$1”"
 	$smkd $1/
 	tar -xf $1.$FILE_FORMAT -C $1/
 	$srm $1.$FILE_FORMAT
@@ -573,16 +573,16 @@ setup(){
 	$cp $SCRIPT $CFGB_BIN
 	$elf $CFGB_BIN
 #Package manager autodetect
-	output -p $NAME "Detecting Package Manager"
+	output -p $SELF "Detecting Package Manager"
 	pma -qpm 2> $LOG
 	output -t "Package Manager : $pm_detected"
 #Detecting home and user
-	output -p $NAME "Detecting Home Directory and User"
+	output -p $SELF "Detecting Home Directory and User"
 	detect_user_props
 	output -t "Default Home : $h"
 	output -t "Default User : $u"
 #Installing dependencies
-	output -p $NAME "Installing Dependencies"
+	output -p $SELF "Installing Dependencies"
 	pm=$pm_detected
 	pma -u
 	pma -i $DEPS
@@ -614,20 +614,20 @@ cfgb_update(){
 	if [[ $1 = "" ]]
 	then
 		current_dir=$(pwd)
-		script_src="https://github.com/MatheusNDDS/cfgb-script/raw/main/${NAME}.sh"
-		output -p $NAME 'Downloading Script'
+		script_src="https://github.com/MatheusNDDS/cfgb-script/raw/main/${SELF}.sh"
+		output -p $SELF 'Downloading Script'
 		output -d 'Source' $script_src
 		cd $PDIR
 		$dl $script_src
 		cd $current_dir
 	else
 		script_src="$1"
-		output -p $NAME 'Installing from local'
+		output -p $SELF 'Installing from local'
 		output -d 'local' $script_src
 		$cp $1 $PDIR/
 	fi
-	output -p $NAME 'Installing Script'
-	$mv "$PDIR/$NAME.sh" $CFGB_BIN
+	output -p $SELF 'Installing Script'
+	$mv "$PDIR/$SELF.sh" $CFGB_BIN
 	$elf $CFGB_BIN
 	output -hT "CFGB Script Updated "
 }
@@ -638,7 +638,7 @@ qwerry_bnd(){
 		output -hT "Updating Repository"
 		cd $PDIR
 		$srm $PDIR/release
-		output -p $NAME "Downloading Release"
+		output -p $SELF "Downloading Release"
 		$dl $repo/release
 		# end
 		output -hT "Repository Updated"
@@ -683,9 +683,9 @@ enable_extras(){
 		if [ $i = flatpak ]
 		then
 			output -hT "Configuring flatpak"
-			output -p $NAME "Installing flatpak"
+			output -p $SELF "Installing flatpak"
 			pma -i flatpak
-			output -p $NAME "Adding Flathub"
+			output -p $SELF "Adding Flathub"
 			$flatpak_remote $FLATHUB_REPO
 			output -hT "flatpak enabled"
 		fi
