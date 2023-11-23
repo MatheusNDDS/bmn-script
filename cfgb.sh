@@ -55,7 +55,7 @@ load_data(){
 	#functions
 	export -f pma
 	export -f bdir_inst
-	export -f pma
+	export -f bnd_parser
 	export -f output
 	export -f download
 	export -f unpack
