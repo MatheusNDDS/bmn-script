@@ -105,6 +105,7 @@ load_data $*
 					then
 						if [[ $bnd_preserve != $bnd_name ]]
 						then
+							output -d 'i' "$bnd_preserve"
 							$srm $bnd_dir/$bnd_name/ $bnd_dir/$bndf
 						fi
 						output -p $name "Importing “$bnd_name”"
@@ -115,6 +116,7 @@ load_data $*
 						cd $bnd_dir/
 						if [[ $bnd_preserve != $bnd_name ]]
 						then
+							output -d 'i' "$bnd_preserve"
 							$srm $bnd_dir/$bnd_name/ $bnd_dir/$bnd_name.$file_format
 						fi
 						download $bnd_name 0
