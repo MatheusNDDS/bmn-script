@@ -103,14 +103,20 @@ load_data $*
 					output -hT "Installing “$bnd_name” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
 					if [[ $lc_inst = 1 ]] #if "tar.gz" file detected change the download mode to import mode.
 					then
-						$srm $bnd_dir/$bnd_name/ $bnd_dir/$bndf
+						if [[ $bnd_preserve != $bnd_name ]]
+						then
+							$srm $bnd_dir/$bnd_name/ $bnd_dir/$bndf
+						fi
 						output -p $name "Importing “$bnd_name”"
 						$cp $bndf $bnd_dir/
 						output -l imported "$(ls $bnd_dir/ | grep $bnd_name)"
 						bndf=$bnd_name
 					else
 						cd $bnd_dir/
-						$srm $bnd_dir/$bnd_name/ $bnd_dir/$bnd_name.$file_format
+						if [[ $bnd_preserve != $bnd_name ]]
+						then
+							$srm $bnd_dir/$bnd_name/ $bnd_dir/$bnd_name.$file_format
+						fi
 						download $bnd_name 0
 					fi
 					cd $bnd_dir/
@@ -537,21 +543,31 @@ bdir_inst(){
 	cook $bnd_dir/$1 ${bnd_flags[@]}
 }
 download(){
-	output -p $name "Downloading “$1”"
-	$dl $repo/$1.$file_format
-	if [ $2 != 1 ]
+	if [[ ! -e $1 ]]
 	then
-		output -l "files" "$(ls $bnd_dir/ | grep $1.$file_format)"
+		output -p $name "Downloading “$1”"
+		$dl $repo/$1.$file_format
+		if [ $2 != 1 ]
+		then
+			output -l "files" "$(ls $bnd_dir/ | grep $1.$file_format)"
+		else
+			output -l "files" "$(ls . | grep $1.$file_format)"
+		fi
 	else
-		output -l "files" "$(ls . | grep $1.$file_format)"
+		output -d $name "“$1” já existe"
 	fi
 }
 unpack(){
-	output -p $name "Unpacking “$1”"
-	$smkd $1/
-	tar -xf $1.$file_format -C $1/
-	$srm $1.$file_format
-	output -l "files" "$(ls $bnd_dir/$1/)"
+	if [[ ! -e $1 ]]
+	then
+		output -p $name "Unpacking “$1”"
+		$smkd $1/
+		tar -xf $1.$file_format -C $1/
+		$srm $1.$file_format
+		output -l "files" "$(ls $bnd_dir/$1/)"
+	else
+		output -d $name "“$1” já existe"
+	fi
 }
 cook(){
 load_data
