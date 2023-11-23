@@ -103,6 +103,7 @@ load_data $*
 					output -hT "Installing “$bnd_name” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
 					if [[ $lc_inst = 1 ]] #if "tar.gz" file detected change the download mode to import mode.
 					then
+						export protected_bnd=$bnd_name
 						$srm $bnd_dir/$bnd_name/ $bnd_dir/$bndf
 						output -p $name "Importing “$bnd_name”"
 						$cp $bndf $bnd_dir/
@@ -116,7 +117,7 @@ load_data $*
 					cd $bnd_dir/
 					unpack $bnd_name
 					cook $bnd_name ${bnd_flags[@]}
-					if [[ $lc_inst != 1 ]] #if "tar.gz" file detected change the download mode to import mode.
+					if [[ $bnd_name != $protected_bnd ]] #if "tar.gz" file detected change the download mode to import mode.
 					then
 						$srm $bnd_dir/$bnd_name
 					fi
