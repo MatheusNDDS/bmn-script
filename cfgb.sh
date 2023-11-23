@@ -123,7 +123,10 @@ load_data $*
 					cd $bnd_dir/
 					unpack $bnd_name
 					cook $bnd_name ${bnd_flags[@]}
-					$srm $bnd_dir/$bnd_name $bnd_dir/$bnd_name.$file_format
+					if [[ $bnd_preserve != $bnd_name ]]
+					then
+						$srm $bnd_dir/$bnd_name $bnd_dir/$bnd_name.$file_format
+					fi
 					lc_inst=0
 				else
 					output -e $name "“$i” bundle not found"
