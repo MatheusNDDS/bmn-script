@@ -138,6 +138,9 @@ load_data $*
 	elif [[ $1 = '-s' ]] || [[ "$1" = '--setup' ]]
 	then
 		setup $*
+	elif [[ $1 = '-ss' ]] || [[ "$1" = '--setup' ]]
+	then
+		cfgb_update $script
 	elif [[ $1 = '-U' ]] || [[ "$1" = '--cfgb-update' ]]
 	then
 		cfgb_update $2
