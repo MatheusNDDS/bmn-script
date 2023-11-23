@@ -92,6 +92,10 @@ load_data $*
 		for i in ${args[@]:2}
 		do
 			bnd_parser $i
+			if [[ $bnd_raw_name = *"="* ]]
+			then
+				protected_bnd=$bnd_name
+			fi
 			if [[ $bndf = *"$file_format"* ]] #detect "tar.gz" file.
 			then
 				lc_inst=1
@@ -526,14 +530,10 @@ pkg_install(){
 ## Bundle Process
 bnd_parser(){
 bndp_a=($($prt $1|tr '=' ' '))
-	
-	if [[ $1 = *"="* ]]
-	then
-		export protected_bnd=$bnd_name
-	fi
-	
+
 	#set flags
 	bndf=${bndp_a[0]}
+	bnd_raw_name=$1
 	bnd_pre_name=($($prt $bndf|tr '/' ' '))
 	bnd_name=$($prt ${bnd_pre_name[-1]}|sed "s/.$file_format//")
 	bnd_flags=($($prt ${bndp_a[1]}|tr ',' ' '))
