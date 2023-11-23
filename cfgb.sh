@@ -107,14 +107,20 @@ load_data $*
 					output -hT "Installing “$bnd_name” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
 					if [[ $lc_inst = 1 ]] #if "tar.gz" file detected change the download mode to import mode.
 					then
-						$srm $bnd_dir/$bnd_name/ $bnd_dir/$bndf
+						if [[ $bnd_name != $protected_bnd ]] #if "tar.gz" file detected change the download mode to import mode.
+						then
+							$srm $bnd_dir/$bnd_name
+						fi
 						output -p $name "Importing “$bnd_name”"
 						$cp $bndf $bnd_dir/
 						output -l imported "$(ls $bnd_dir/ | grep $bnd_name)"
 						bndf=$bnd_name
 					else
 						cd $bnd_dir/
-						$srm $bnd_dir/$bnd_name/ $bnd_dir/$bnd_name.$file_format
+						if [[ $bnd_name != $protected_bnd ]] #if "tar.gz" file detected change the download mode to import mode.
+						then
+							$srm $bnd_dir/$bnd_name
+						fi
 						download $bnd_name 0
 					fi
 					cd $bnd_dir/
@@ -125,7 +131,6 @@ load_data $*
 						$srm $bnd_dir/$bnd_name
 					fi
 					lc_inst=0
-					$bnd_dir/$bnd_name.$file_format
 				else
 					output -e $name "“$i” bundle not found"
 					output -d i 'Maybe the relese file has outdated, try “cfgb -rU”.'
