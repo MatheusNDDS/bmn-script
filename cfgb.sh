@@ -105,10 +105,11 @@ load_data $*
 		done
 	elif [[ "$1" = '-li' ]] || [[ "$1" = '--lc-install' ]]
 	then
-		for i in ${args[@]:2}
+		output -hT "Importing external bundles"
+		for i in ${args[@]:3}
 		do
 			bnd_parser $i
-			output -hT "Importing “$bnd_name” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
+			output -p $name "Importing “$bnd_name” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
 			$cp $bndf $bnd_dir/
 		done
 		for i in ${args[@]:3}
