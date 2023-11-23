@@ -103,7 +103,6 @@ load_data $*
 					output -hT "Installing “$bnd_name” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
 					if [[ $lc_inst = 1 ]] #if "tar.gz" file detected change the download mode to import mode.
 					then
-						export protected_bnd=$bnd_name
 						$srm $bnd_dir/$bnd_name/ $bnd_dir/$bndf
 						output -p $name "Importing “$bnd_name”"
 						$cp $bndf $bnd_dir/
@@ -527,6 +526,11 @@ pkg_install(){
 ## Bundle Process
 bnd_parser(){
 bndp_a=($($prt $1|tr '=' ' '))
+	
+	if [[ $1 = *"="* ]]
+	then
+		export protected_bnd=$bnd_name
+	fi
 	
 	#set flags
 	bndf=${bndp_a[0]}
