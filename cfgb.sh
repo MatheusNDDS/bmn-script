@@ -136,7 +136,6 @@ load_data $*
 		do
 			bnd_parser $i
 			output -hT "Installing “$bnd_name” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
-			$srm $bnd_dir/$bnd_name
 			cd $bnd_dir/
 			cook $bnd_name ${bnd_flags[@]}
 			$srm $bnd_dir/$bnd_name
