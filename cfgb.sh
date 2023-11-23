@@ -111,12 +111,9 @@ load_data $*
 						then
 							$srm $bnd_dir/$bnd_name
 						fi
-						if [[ $bnd_name != $protected_bnd ]] && [[ ! -d $bnd_name ]] #if "tar.gz" file detected change the download mode to import mode.
-						then
-							output -p $name "Importing “$bnd_name”"
-							$cp $bndf $bnd_dir/
-							output -l imported "$(ls $bnd_dir/ | grep $bnd_name)"
-						fi
+						output -p $name "Importing “$bnd_name”"
+						$cp $bndf $bnd_dir/
+						output -l imported "$(ls $bnd_dir/ | grep $bnd_name)"
 						bndf=$bnd_name
 					else
 						cd $bnd_dir/
@@ -124,10 +121,7 @@ load_data $*
 						then
 							$srm $bnd_dir/$bnd_name
 						fi
-						if [[ $bnd_name != $protected_bnd ]] && [[ ! -d $bnd_name ]] #if "tar.gz" file detected change the download mode to import mode.
-						then
-							download $bnd_name 0
-						fi
+						download $bnd_name 0
 					fi
 					cd $bnd_dir/
 					unpack $bnd_name
@@ -558,6 +552,7 @@ bdir_inst(){
 }
 download(){
 	output -p $name "Downloading “$1”"
+	$srm $1.$file_format
 	$dl $repo/$1.$file_format
 	if [ $2 != 1 ]
 	then
