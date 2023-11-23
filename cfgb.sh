@@ -83,51 +83,49 @@ load_data(){
 }
 start(){
 load_data $*
-	if [[ "$1" = *"-i"* ]] || [[ "$1" = *"--install"* ]]
+	if [[ "$1" = '-i' ]] || [[ "$1" = '--install' ]]
 	then
-		if [[ "$1" = "-iu" ]]
-		then
-			pm_update=1
-		fi
 		for i in ${args[@]:2}
 		do
 			bnd_parser $i
-			if [[ $bnd_raw_name = *"="* ]]
+			if [[ "${release[@]}" = *"$bndf"* ]] || [[ $lc_inst = 1 ]] #checks if the bundle exists in the repository.
 			then
-				protected_bnd=$bnd_name
-			fi
-			if [[ $bndf = *"$file_format"* ]] #detect "tar.gz" file.
-			then
-				lc_inst=1
-			fi
-			if [[ $i != "u" ]]
-			then
-				if [[ "${release[@]}" = *"$bndf"* ]] || [[ $lc_inst = 1 ]] #checks if the bundle exists in the repository.
-				then
-					output -hT "Installing “$bnd_name” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
-					if [[ $lc_inst = 1 ]] #if "tar.gz" file detected change the download mode to import mode.
-					then
-						$srm $bnd_dir/$bnd_name
-						output -p $name "Importing “$bnd_name”"
-						$cp $bndf $bnd_dir/
-						output -l imported "$(ls $bnd_dir/ | grep $bnd_name)"
-						bndf=$bnd_name
-					else
-						cd $bnd_dir/
-						$srm $bnd_dir/$bnd_name
-						download $bnd_name 0
-					fi
-					cd $bnd_dir/
-					unpack $bnd_name
-					cook $bnd_name ${bnd_flags[@]}
-					$srm $bnd_dir/$bnd_name
-					lc_inst=0
-				else
-					output -e $name "“$i” bundle not found"
-					output -d i 'Maybe the relese file has outdated, try “cfgb -rU”.'
-				fi
+				output -hT "Installing “$bnd_name” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
+				$srm $bnd_dir/$bnd_name
+				cd $bnd_dir/
+				download $bnd_name 0
+				unpack $bnd_name
+				cook $bnd_name ${bnd_flags[@]}
+				$srm $bnd_dir/$bnd_name
+				lc_inst=0
+			else
+				output -e $name "“$i” bundle not found"
+				output -d i 'Maybe the relese file has outdated, try “cfgb -rU”.'
 			fi
 		done
+	if [[ "$1" = '-li' ]] || [[ "$1" = '--lc-install' ]]
+	then
+		for i in ${args[@]:2}
+		do
+			bnd_parser $i
+			output -hT "Importing “$bnd_name” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
+			$cp $bndf $bnd_dir/
+		done
+		for i in ${args[@]:2}
+		do
+			bnd_parser $i
+			output -hT "Installing “$bnd_name” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
+			$srm $bnd_dir/$bnd_name
+			cd $bnd_dir/
+			unpack $bnd_name
+			cook $bnd_name ${bnd_flags[@]}
+			$srm $bnd_dir/$bnd_name
+			lc_inst=0
+		done
+	elif [[ "$1" = "-iu" ]]
+	then
+		pm_update=1
+		start -i ${args[@]:2}
 	elif [[ $1 = '-e' ]] || [[ "$1" = '--enable-extras' ]]
 	then
 		enable_extras $*
@@ -363,7 +361,7 @@ sfm(){
 					fi
 					if [ $sfm_verbose = 1 ]
 						then
-							output -t "Dir “$dof” removed"
+						output -t "Dir “$dof” removed"
 					fi
 				;;
 				'-c')
@@ -554,7 +552,7 @@ download(){
 }
 unpack(){
 	output -p $name "Unpacking “$1”"
-	$srmd $1/
+	$srm $1/
 	$smkd $1/
 	tar -xf $1.$file_format -C $1/
 	$srm $1.$file_format
