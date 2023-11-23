@@ -551,31 +551,24 @@ bdir_inst(){
 	cook $bnd_dir/$1 ${bnd_flags[@]}
 }
 download(){
-	if [[ ! -e $1 ]]
+	output -p $name "Downloading “$1”"
+	$dl $repo/$1.$file_format
+	if [ $2 != 1 ]
 	then
-		output -p $name "Downloading “$1”"
-		$dl $repo/$1.$file_format
-		if [ $2 != 1 ]
-		then
-			output -l "files" "$(ls $bnd_dir/ | grep $1.$file_format)"
-		else
-			output -l "files" "$(ls . | grep $1.$file_format)"
-		fi
+		output -l "files" "$(ls $bnd_dir/ | grep $1.$file_format)"
 	else
-		output -d $name "“$1” já existe"
+		output -l "files" "$(ls . | grep $1.$file_format)"
 	fi
+	output -d $name "“$1” já existe"
 }
 unpack(){
-	if [[ ! -e $1 ]]
-	then
-		output -p $name "Unpacking “$1”"
-		$smkd $1/
-		tar -xf $1.$file_format -C $1/
-		$srm $1.$file_format
-		output -l "files" "$(ls $bnd_dir/$1/)"
-	else
-		output -d $name "“$1” já existe"
-	fi
+	output -p $name "Unpacking “$1”"
+	$rmd $1/
+	$smkd $1/
+	tar -xf $1.$file_format -C $1/
+	$srm $1.$file_format
+	output -l "files" "$(ls $bnd_dir/$1/)"
+	output -d $name "“$1” já existe"
 }
 cook(){
 load_data
