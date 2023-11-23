@@ -103,7 +103,7 @@ load_data $*
 				output -d i 'Maybe the relese file has outdated, try “cfgb -rU”.'
 			fi
 		done
-	if [[ "$1" = '-li' ]] || [[ "$1" = '--lc-install' ]]
+	elif [[ "$1" = '-li' ]] || [[ "$1" = '--lc-install' ]]
 	then
 		for i in ${args[@]:2}
 		do
