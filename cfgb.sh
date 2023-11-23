@@ -116,11 +116,12 @@ load_data $*
 					cd $bnd_dir/
 					unpack $bnd_name
 					cook $bnd_name ${bnd_flags[@]}
-					if [[ $lc_inst = 1 ]] #if "tar.gz" file detected change the download mode to import mode.
+					if [[ $lc_inst != 1 ]] #if "tar.gz" file detected change the download mode to import mode.
 					then
 						$srm $bnd_dir/$bnd_name
 					fi
 					lc_inst=0
+					$bnd_dir/$bnd_name.$file_format
 				else
 					output -e $name "“$i” bundle not found"
 					output -d i 'Maybe the relese file has outdated, try “cfgb -rU”.'
@@ -540,21 +541,31 @@ bdir_inst(){
 	cook $bnd_dir/$1 ${bnd_flags[@]}
 }
 download(){
-	output -p $name "Downloading “$1”"
-	$dl $repo/$1.$file_format
-	if [ $2 != 1 ]
+	if [[ ! -e $1 ]]
 	then
-		output -l "files" "$(ls $bnd_dir/ | grep $1.$file_format)"
+		output -p $name "Downloading “$1”"
+		$dl $repo/$1.$file_format
+		if [ $2 != 1 ]
+		then
+			output -l "files" "$(ls $bnd_dir/ | grep $1.$file_format)"
+		else
+			output -l "files" "$(ls . | grep $1.$file_format)"
+		fi
 	else
-		output -l "files" "$(ls . | grep $1.$file_format)"
+		output -d $name "“$1” já existe"
 	fi
 }
 unpack(){
-	output -p $name "Unpacking “$1”"
-	$smkd $1/
-	tar -xf $1.$file_format -C $1/
-	$srm $1.$file_format
-	output -l "files" "$(ls $bnd_dir/$1/)"
+	if [[ ! -e $1 ]]
+	then
+		output -p $name "Unpacking “$1”"
+		$smkd $1/
+		tar -xf $1.$file_format -C $1/
+		$srm $1.$file_format
+		output -l "files" "$(ls $bnd_dir/$1/)"
+	else
+		output -d $name "“$1” já existe"
+	fi
 }
 cook(){
 load_data
@@ -721,4 +732,3 @@ live_shell(){
 
 ### Program Start ###
 start $*
-$srm $bnd_dir/*
