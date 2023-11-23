@@ -104,29 +104,20 @@ load_data $*
 					output -d 'i' $bnd_preserve
 					if [[ $lc_inst = 1 ]] #if "tar.gz" file detected change the download mode to import mode.
 					then
-						if [[ $bnd_preserve != $bnd_name ]]
-						then
-							$srm $bnd_dir/$bnd_name/ $bnd_dir/$bndf
-						fi
+						#$srm $bnd_dir/$bnd_name/ $bnd_dir/$bndf
 						output -p $name "Importing “$bnd_name”"
 						$cp $bndf $bnd_dir/
 						output -l imported "$(ls $bnd_dir/ | grep $bnd_name)"
 						bndf=$bnd_name
 					else
 						cd $bnd_dir/
-						if [[ $bnd_preserve != $bnd_name ]]
-						then
-							$srm $bnd_dir/$bnd_name/ $bnd_dir/$bnd_name.$file_format
-						fi
+						$srm $bnd_dir/$bnd_name/ $bnd_dir/$bnd_name.$file_format
 						download $bnd_name 0
 					fi
 					cd $bnd_dir/
 					unpack $bnd_name
 					cook $bnd_name ${bnd_flags[@]}
-					if [[ $bnd_preserve != $bnd_name ]]
-					then
-						$srm $bnd_dir/$bnd_name $bnd_dir/$bnd_name.$file_format
-					fi
+					$srm $bnd_dir/$bnd_name $bnd_dir/$bnd_name.$file_format
 					lc_inst=0
 				else
 					output -e $name "“$i” bundle not found"
