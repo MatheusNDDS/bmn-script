@@ -101,10 +101,9 @@ load_data $*
 				if [[ "${release[@]}" = *"$bndf"* ]] || [[ $lc_inst = 1 ]] #checks if the bundle exists in the repository.
 				then
 					output -hT "Installing “$bnd_name” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
-					output -d 'i' $bnd_preserve
 					if [[ $lc_inst = 1 ]] #if "tar.gz" file detected change the download mode to import mode.
 					then
-						#$srm $bnd_dir/$bnd_name/ $bnd_dir/$bndf
+						$srm $bnd_dir/$bnd_name/ $bnd_dir/$bndf
 						output -p $name "Importing “$bnd_name”"
 						$cp $bndf $bnd_dir/
 						output -l imported "$(ls $bnd_dir/ | grep $bnd_name)"
@@ -117,7 +116,10 @@ load_data $*
 					cd $bnd_dir/
 					unpack $bnd_name
 					cook $bnd_name ${bnd_flags[@]}
-					$srm $bnd_dir/$bnd_name $bnd_dir/$bnd_name.$file_format
+					if [[ $lc_inst = 1 ]] #if "tar.gz" file detected change the download mode to import mode.
+					then
+						$srm $bnd_dir/$bnd_name $bnd_dir/$bnd_name.$file_format
+					fi
 					lc_inst=0
 				else
 					output -e $name "“$i” bundle not found"
