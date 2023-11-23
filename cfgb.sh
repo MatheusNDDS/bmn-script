@@ -111,9 +111,12 @@ load_data $*
 						then
 							$srm $bnd_dir/$bnd_name
 						fi
-						output -p $name "Importing “$bnd_name”"
-						$cp $bndf $bnd_dir/
-						output -l imported "$(ls $bnd_dir/ | grep $bnd_name)"
+						if [[ $bnd_name != $protected_bnd ]] && [[ ! -d $bnd_name ]] #if "tar.gz" file detected change the download mode to import mode.
+						then
+							output -p $name "Importing “$bnd_name”"
+							$cp $bndf $bnd_dir/
+							output -l imported "$(ls $bnd_dir/ | grep $bnd_name)"
+						fi
 						bndf=$bnd_name
 					else
 						cd $bnd_dir/
@@ -121,7 +124,10 @@ load_data $*
 						then
 							$srm $bnd_dir/$bnd_name
 						fi
-						download $bnd_name 0
+						if [[ $bnd_name != $protected_bnd ]] && [[ ! -d $bnd_name ]] #if "tar.gz" file detected change the download mode to import mode.
+						then
+							download $bnd_name 0
+						fi
 					fi
 					cd $bnd_dir/
 					unpack $bnd_name
@@ -559,7 +565,6 @@ download(){
 	else
 		output -l "files" "$(ls . | grep $1.$file_format)"
 	fi
-	output -d $name "“$1” já existe"
 }
 unpack(){
 	output -p $name "Unpacking “$1”"
@@ -568,7 +573,6 @@ unpack(){
 	tar -xf $1.$file_format -C $1/
 	$srm $1.$file_format
 	output -l "files" "$(ls $bnd_dir/$1/)"
-	output -d $name "“$1” já existe"
 }
 cook(){
 load_data
