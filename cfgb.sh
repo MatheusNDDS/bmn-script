@@ -6,64 +6,56 @@ load_data(){
 
 ## Evironment Variables : Can be used in recipe scripts ##
 	#General commands 
-	export r="sudo"
-	export chm="$r chmod"
-	export cho="$r chown"
-	export cp="$r cp -r"
-	export rm="$r rm -rf"
-	export rmd="$r rmdir --ignore-fail-on-non-empty"
-	export mv="$r mv"
-	export prt="echo -e"
-	export mk="$r touch"
-	export mkd="$r mkdir"
-	export elf="$r chmod 755"
-	export cat="$r cat"
-	export dl="$r wget"
-	export d0="/dev/0"
-	export jmp="2> $log &"
-	export gitc="$r git clone"
-	export cfgbi="$r cfgb -i"
-	export add_ppa="$r add-apt-repository"
-	export flatpak_remote="flatpak remote-add --if-not-exists"
-	export fp_overide="$r flatpak override"
-	export pnl="$prt \n"
-	export rpath="realpath"
-	export pwd="$r pwd"
-	export pkgi="pkg_install"
+	r="sudo"
+	chm="$r chmod"
+	cho="$r chown"
+	cp="$r cp -r"
+	rm="$r rm -rf"
+	rmd="$r rmdir --ignore-fail-on-non-empty"
+	mv="$r mv"
+	prt="echo -e"
+	mk="$r touch"
+	mkd="$r mkdir"
+	elf="$r chmod 755"
+	cat="$r cat"
+	dl="$r wget"
+	d0="/dev/0"
+	jmp="2> $log &"
+	gitc="$r git clone"
+	cfgbi="$r cfgb -i"
+	add_ppa="$r add-apt-repository"
+	flatpak_remote="flatpak remote-add --if-not-exists"
+	fp_overide="$r flatpak override"
+	pnl="$prt \n"
+	rpath="realpath"
+	pwd="$r pwd"
+	pkgi="pkg_install"
 	
 	#Safe File Manager Commands Varariables
 	#SFM prevents accidental removal of the system root directory and prevents conflicts with existing files and directories 
-	export srm="sfm -r"
-	export srmd="sfm -rd"
-	export smk="sfm -f"
-	export smkd="sfm -d"
-	export scat="sfm -c"
-	export src="sfm -rc"
+	srm="sfm -r"
+	srmd="sfm -rd"
+	smk="sfm -f"
+	smkd="sfm -d"
+	scat="sfm -c"
+	src="sfm -rc"
 	
 	#Directorys collection
-	export rsr="/usr/share" #root share
-	export hsr="$h/.local/share" #home share
-	export rlc="/usr/local" #root local
-	export hlc="$h/.local" #home local
-	export cfg="$h/.config"
-	export etc="/etc"
-	export dev="/dev"
-	export mdi="/media"
-	export mnt="/mnt"
-	export tmp="/temp"
-	
-	#functions
-	export -f pma
-	export -f bdir_inst
-	export -f bnd_parser
-	export -f output
-	export -f download
-	export -f unpack
-	export -f cook
+	rsr="/usr/share" #root share
+	hsr="$h/.local/share" #home share
+	rlc="/usr/local" #root local
+	hlc="$h/.local" #home local
+	cfg="$h/.config"
+	etc="/etc"
+	dev="/dev"
+	mdi="/media"
+	mnt="/mnt"
+	tmp="/temp"
 
 ## References ##
 	name="cfgb"
 	script="$(pwd)/${name}.sh"
+	file_format="tar.gz"
 	pkg_flag="null"
 	rex="$r bash recipe"
 	deps="wget bash sudo"
@@ -71,11 +63,10 @@ load_data(){
 	cmd="$1"
 	sfm_verbose=0 #Enable verbose log for SFM
 	lc_inst=0
-	export file_format="tar.gz"
 
 ## Work Directorys ##
-	export pdir="/etc/$name"
-	export bnd_dir="$pdir/bundles"
+	pdir="/etc/$name"
+	bnd_dir="$pdir/bundles"
 	cfg_file="$pdir/cfg"
 	cfgb_bin="/bin/$name"
 	log="$pdir/log"
@@ -563,7 +554,7 @@ download(){
 }
 unpack(){
 	output -p $name "Unpacking “$1”"
-	$rmd $1/
+	$srmd $1/
 	$smkd $1/
 	tar -xf $1.$file_format -C $1/
 	$srm $1.$file_format
@@ -576,7 +567,7 @@ load_data
 	if [ -e recipe ]
 	then
 		output -T "Setting “$1” Recipe"
-		bash recipe $*
+		$rex $*
 	fi
 	output -hT "“$1” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi) Instaled"
 }
@@ -716,12 +707,12 @@ detect_user_props(){
 	curent_path=($(pwd|tr '/' ' '))
 	if [ "${curent_path[0]}" = "home" ]
 	then
-		export h="/home/${curent_path[1]}"
-		export u="${curent_path[1]}"
+		h="/home/${curent_path[1]}"
+		u="${curent_path[1]}"
 	elif [ "${curent_path[0]}" = "root" ]
 	then
-		export h="/root"
-		export u="root"
+		h="/root"
+		u="root"
 	fi
 }
 live_shell(){
