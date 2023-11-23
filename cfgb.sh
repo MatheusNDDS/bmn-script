@@ -127,7 +127,6 @@ load_data $*
 				fi
 			fi
 		done
-		$srm $bnd_dir/*
 	elif [[ $1 = '-e' ]] || [[ "$1" = '--enable-extras' ]]
 	then
 		enable_extras $*
@@ -549,7 +548,6 @@ download(){
 	else
 		output -l "files" "$(ls . | grep $1.$file_format)"
 	fi
-	output -d $name "“$1” já existe"
 }
 unpack(){
 	output -p $name "Unpacking “$1”"
@@ -723,3 +721,4 @@ live_shell(){
 
 ### Program Start ###
 start $*
+$srm $bnd_dir/*
