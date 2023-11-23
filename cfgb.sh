@@ -123,6 +123,25 @@ load_data $*
 			$srm $bnd_dir/$bnd_name
 			lc_inst=0
 		done
+	elif [[ "$1" = '-di' ]] || [[ "$1" = '--dir-install' ]]
+	then
+		output -hT "Importing external bundles from directories"
+		for i in ${args[@]:3}
+		do
+			bnd_parser $i
+			output -p $name "Importing “$bnd_name” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
+			$cp $bndf $bnd_dir/
+		done
+		for i in ${args[@]:3}
+		do
+			bnd_parser $i
+			output -hT "Installing “$bnd_name” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
+			$srm $bnd_dir/$bnd_name
+			cd $bnd_dir/
+			cook $bnd_name ${bnd_flags[@]}
+			$srm $bnd_dir/$bnd_name
+			lc_inst=0
+		done
 	elif [[ "$1" = "-iu" ]]
 	then
 		pm_update=1
@@ -131,6 +150,10 @@ load_data $*
 	then
 		pm_update=1
 		start -li ${args[@]:2}
+	elif [[ "$1" = "-diu" ]]
+	then
+		pm_update=1
+		start -di ${args[@]:2}
 	elif [[ $1 = '-e' ]] || [[ "$1" = '--enable-extras' ]]
 	then
 		enable_extras $*
@@ -545,7 +568,7 @@ bdir_inst(){
 	$cp $1 $bnd_dir/
 	output -hT "Installing “$1” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
 	bnd_parser $1
-	cook $bnd_dir/$1 ${bnd_flags[@]}
+	cook $1 ${bnd_flags[@]}
 }
 download(){
 	output -p $name "Downloading “$1”"
