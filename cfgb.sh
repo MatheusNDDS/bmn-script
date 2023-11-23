@@ -57,11 +57,13 @@ load_data(){
 	export -f bdir_inst
 	export -f pma
 	export -f output
+	export -f download
+	export -f unpack
+	export -f cook
 
 ## References ##
 	name="cfgb"
 	script="$(pwd)/${name}.sh"
-	file_format="tar.gz"
 	pkg_flag="null"
 	rex="$r bash recipe"
 	deps="wget bash sudo"
@@ -69,10 +71,11 @@ load_data(){
 	cmd="$1"
 	sfm_verbose=0 #Enable verbose log for SFM
 	lc_inst=0
+	export file_format="tar.gz"
 
 ## Work Directorys ##
-	pdir="/etc/$name"
-	bnd_dir="$pdir/bundles"
+	export pdir="/etc/$name"
+	export bnd_dir="$pdir/bundles"
 	cfg_file="$pdir/cfg"
 	cfgb_bin="/bin/$name"
 	log="$pdir/log"
@@ -113,29 +116,20 @@ load_data $*
 					output -hT "Installing “$bnd_name” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
 					if [[ $lc_inst = 1 ]] #if "tar.gz" file detected change the download mode to import mode.
 					then
-						if [[ $bnd_name != $protected_bnd ]] #if "tar.gz" file detected change the download mode to import mode.
-						then
-							$srm $bnd_dir/$bnd_name
-						fi
+						$srm $bnd_dir/$bnd_name
 						output -p $name "Importing “$bnd_name”"
 						$cp $bndf $bnd_dir/
 						output -l imported "$(ls $bnd_dir/ | grep $bnd_name)"
 						bndf=$bnd_name
 					else
 						cd $bnd_dir/
-						if [[ $bnd_name != $protected_bnd ]] #if "tar.gz" file detected change the download mode to import mode.
-						then
-							$srm $bnd_dir/$bnd_name
-						fi
+						$srm $bnd_dir/$bnd_name
 						download $bnd_name 0
 					fi
 					cd $bnd_dir/
 					unpack $bnd_name
 					cook $bnd_name ${bnd_flags[@]}
-					if [[ $bnd_name != $protected_bnd ]] #if "tar.gz" file detected change the download mode to import mode.
-					then
-						$srm $bnd_dir/$bnd_name
-					fi
+					$srm $bnd_dir/$bnd_name
 					lc_inst=0
 				else
 					output -e $name "“$i” bundle not found"
