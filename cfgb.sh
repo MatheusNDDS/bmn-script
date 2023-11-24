@@ -69,7 +69,7 @@ load_data(){
 	bnd_dir="$pdir/bundles"
 	cfg_file="$pdir/cfg"
 	init_file="$pdir/init"
-	cfgb_src="/bin"
+	cfgb_srcd="/bin"
 	log="$pdir/log"
 
 ## Flatpak Configuration ##
@@ -636,10 +636,10 @@ setup(){
 #detect custom bin path
 	if [[ $2 = *"srcd="* ]]
 	then
-		cfgb_src=$($prt $2|sed "s/srcd=//g")
+		cfgb_srcd=$($prt $2|sed "s/srcd=//g")
 	elif [[ $3 = *"srcd="* ]]
 	then
-		cfgb_src=$($prt $3|sed "s/srcd=//g")
+		cfgb_srcd=$($prt $3|sed "s/srcd=//g")
 	fi
 #creating directories
 	output -hT "CFGB installation"
