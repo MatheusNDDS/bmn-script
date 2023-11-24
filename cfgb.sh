@@ -148,11 +148,11 @@ load_data $*
 	elif [[ "$1" = "-liu" ]]
 	then
 		pm_update=1
-		start -li ${args[@]:3}
+		start -li ${args[@]:4}
 	elif [[ "$1" = "-diu" ]]
 	then
 		pm_update=1
-		start -di ${args[@]:3}
+		start -di ${args[@]:4}
 	elif [[ $1 = '-e' ]] || [[ "$1" = '--enable-extras' ]]
 	then
 		enable_extras $*
