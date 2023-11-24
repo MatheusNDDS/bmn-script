@@ -655,18 +655,17 @@ setup(){
 #Saving environment variables
 	if [ ! -z $3 ]
 	then
-	
-		$prt "$cfgb_bin" > $init_file
+		$prt "$cfgb_bin" 2> $init_file
 	else
-		$prt "$3" > $init_file
+		$prt "$3" 2> $init_file
 	fi
-	$src $cfg_file
 	if [ -z "$2" ]
 	then
 		if [ -e repo ]
 		then
 			$prt "pm=$pm_detected h=$h u=$u repo=$(cat repo)" > $cfg_file
-#Downloading repository release
+			$src $cfg_file
+#Downloading repository releas
 			qwerry_bnd -rU
 			output -hT "C.F.G.B instelled with portable repo file"
 			output -d 'repository' "$repo"
@@ -676,6 +675,7 @@ setup(){
 		fi
 	else
 		$prt "pm=$pm_detected h=$h u=$u repo=$2" > $cfg_file
+		$src $cfg_file
 #Downloading repository release
 		qwerry_bnd -rU
 		output -hT "C.F.G.B instaled"
