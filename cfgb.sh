@@ -126,17 +126,11 @@ load_data $*
 	elif [[ "$1" = '-di' ]] || [[ "$1" = '--dir-install' ]]
 	then
 		output -hT "Importing bundle from directory"
-		for i in ${!args[@]:3}
+		for i in ${args[@]:3}
 		do
-			if [[ -d ${args[$i]} ]]
-			then
-				bnd_parser ${args[$i]}
-				output -p $name "Importing “$bnd_name”"
-				$cp $bndf $bnd_dir/
-			else
-				output -e $name "“$i” is not a directory or not exists"
-				unset args[$i]
-			fi
+			bnd_parser $i
+			output -p $name "Importing “$bnd_name”"
+			$cp $bndf $bnd_dir/
 		done
 		for i in ${args[@]:3}
 		do
