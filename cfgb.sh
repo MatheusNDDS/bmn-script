@@ -144,7 +144,7 @@ load_data $*
 	elif [[ "$1" = "-iu" ]]
 	then
 		pm_update=1
-		start -i ${args[@]:2}
+		start -i ${args[@]:3}
 	elif [[ "$1" = "-liu" ]]
 	then
 		pm_update=1
