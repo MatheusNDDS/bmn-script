@@ -633,6 +633,10 @@ load_data
 
 ## Script Managment
 setup(){
+	if [ ! -z $3 ]
+	then
+		cfgb_bin=$3
+	fi
 	output -hT "CFGB installation"
 	sfm -d $pdir $bnd_dir $cfg $hlc $hsr
 	sfm -f $cfg_file $init_file $log
@@ -653,12 +657,7 @@ setup(){
 	pma -u
 	pma -i $deps
 #Saving environment variables
-	if [ ! -z $3 ]
-	then
-		$prt "$cfgb_bin" 2> $init_file
-	else
-		$prt "$3" 2> $init_file
-	fi
+	$prt "source $cfgb_bin" > $init_file
 	if [ -z "$2" ]
 	then
 		if [ -e repo ]
