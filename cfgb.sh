@@ -32,7 +32,6 @@ load_data(){
 	pkgi="pkg_install"
 	
 	#Safe File Manager Commands Varariables
-	#SFM prevents accidental removal of the system root directory and prevents conflicts with existing files and directories 
 	srm="sfm -r"
 	srmd="sfm -rd"
 	smk="sfm -f"
@@ -647,6 +646,8 @@ setup(){
 	sfm -f $cfg_file $init_file $log
 	$cp $script $cfgb_srcd/$name
 	$elf $cfgb_srcd/$name
+#set the init file
+	$prt "source $cfgb_srcd/$name" > $init_file
 #Package manager autodetect
 	output -p $name "Detecting Package Manager"
 	pma -qpm 2> $log
@@ -661,8 +662,6 @@ setup(){
 	pm=$pm_detected
 	pma -u
 	pma -i $deps
-#creating the init file
-	$prt "source $cfgb_srcd/$name" > $init_file
 #Saving environment variables
 	if [ -z "$2" ] && [[ $2 != *"srcd="* ]] || [ -z "$3" ] && [[ $3 != *"srcd="* ]]
 	then
@@ -708,7 +707,7 @@ cfgb_update(){
 	output -p $name 'Installing Script'
 	$mv "$pdir/$name.sh" $cfgb_bin
 	$elf $cfgb_bin
-	output -hT "CFGB Script Updated "
+	output -hT "CFGB Script Updated"
 }
 qwerry_bnd(){
 	if [[ $1 = '-rU' ]]
@@ -723,7 +722,7 @@ qwerry_bnd(){
 		output -hT "Repository Updated"
 		cd $current_dir
 	else
-		# Import e verify release file
+		# Import and verify release file
 		if [[ ! -e $pdir/release ]]
 		then
 			output -e 'Error / No release file' 'Use “cfgb -rU” to download.'
