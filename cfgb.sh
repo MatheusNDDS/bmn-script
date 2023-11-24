@@ -57,10 +57,11 @@ load_data(){
 	script="$(pwd)/${name}.sh"
 	file_format="tar.gz"
 	pkg_flag="null"
-	deps="wget bash sudo pico"
 	args=$*
 	cmd="$1"
 	rex="$r bash recipe"
+	editor="nano"
+	deps="wget bash sudo $editor"
 	sfm_verbose=0 #Enable verbose log for SFM
 
 ## Work Directorys ##
@@ -767,7 +768,7 @@ live_shell(){
 			clear
 		elif [[ $cmd = 'c' ]]
 		then
-			pico $pdir/cfg
+			$editor $pdir/cfg
 		elif [[ $cmd = 'h' ]]
 		then
 			$prt "\n c: edit config\n x: clear prompt\n h: help\n q: exit"
