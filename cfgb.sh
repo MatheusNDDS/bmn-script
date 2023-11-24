@@ -68,6 +68,7 @@ load_data(){
 	pdir="/etc/$name"
 	bnd_dir="$pdir/bundles"
 	cfg_file="$pdir/cfg"
+	init_file="$pdir/init"
 	cfgb_bin="/bin/$name"
 	log="$pdir/log"
 
@@ -634,7 +635,7 @@ load_data
 setup(){
 	output -hT "CFGB installation"
 	sfm -d $pdir $bnd_dir $cfg $hlc $hsr
-	sfm -f $cfg_file $log
+	sfm -f $cfg_file $init_file $log
 	$cp $script $cfgb_bin
 	$elf $cfgb_bin
 #Package manager autodetect
@@ -652,13 +653,20 @@ setup(){
 	pma -u
 	pma -i $deps
 #Saving environment variables
+	if [ ! -z $3 ]
+	then
+	
+		$prt "$cfgb_bin" > $init_file
+	else
+		$prt "$3" > $init_file
+	fi
+	$src $cfg_file
 	if [ -z "$2" ]
 	then
 		if [ -e repo ]
 		then
 			$prt "pm=$pm_detected h=$h u=$u repo=$(cat repo)" > $cfg_file
 #Downloading repository release
-			$src $cfg_file
 			qwerry_bnd -rU
 			output -hT "C.F.G.B instelled with portable repo file"
 			output -d 'repository' "$repo"
@@ -669,10 +677,11 @@ setup(){
 	else
 		$prt "pm=$pm_detected h=$h u=$u repo=$2" > $cfg_file
 #Downloading repository release
-		$src $cfg_file
 		qwerry_bnd -rU
 		output -hT "C.F.G.B instaled"
 	fi
+#printing binary location
+	output -d 'bin' "$(cat $init_file)"
 }
 cfgb_update(){
 	output -hT "Updating CFGB Script"
