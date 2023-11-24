@@ -633,9 +633,13 @@ load_data
 
 ## Script Managment
 setup(){
-	if [ ! -z $3 ]
+#detect custom bin path
+	if [[ $2 = *"source="* ]]
 	then
-		cfgb_bin=$3
+		cfgb_bin=$($prt $2|tr '=' ' ')
+	elif [[ $3 = *"source="* ]]
+	then
+		cfgb_bin=$($prt $3|tr '=' ' ')
 	fi
 	output -hT "CFGB installation"
 	sfm -d $pdir $bnd_dir $cfg $hlc $hsr
@@ -680,7 +684,7 @@ setup(){
 		output -hT "C.F.G.B instaled"
 	fi
 #printing binary location
-	output -d 'bin' "$(cat $init_file)"
+	output -d 'init' "$(cat $init_file)"
 }
 cfgb_update(){
 	output -hT "Updating CFGB Script"
