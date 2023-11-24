@@ -56,7 +56,6 @@ load_data(){
 	name="cfgb"
 	script="$(pwd)/${name}.sh"
 	file_format="tar.gz"
-	print_bnd_args="if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi"
 	pkg_flag="null"
 	deps="wget bash sudo pico"
 	args=$*
@@ -90,7 +89,7 @@ load_data $*
 			bnd_parser $i
 			if [[ "${release[@]}" = *"$bndf"* ]] || [[ $lc_inst = 1 ]] #checks if the bundle exists in the repository.
 			then
-				output -hT "Installing “$bnd_name” $($print_bnd_args)"
+				output -hT "Installing “$bnd_name” $(bnd_parser -pbf)"
 				$srm $bnd_dir/$bnd_name
 				cd $bnd_dir/
 				download $bnd_name 0
@@ -115,7 +114,7 @@ load_data $*
 		for i in ${args[@]:3}
 		do
 			bnd_parser $i
-			output -hT "Installing “$bnd_name” $($print_bnd_args)"
+			output -hT "Installing “$bnd_name” $(bnd_parser -pbf)"
 			$srm $bnd_dir/$bnd_name
 			cd $bnd_dir/
 			unpack $bnd_name
@@ -135,7 +134,7 @@ load_data $*
 		for i in ${args[@]:3}
 		do
 			bnd_parser $i
-			output -hT "Installing “$bnd_name” $($print_bnd_args)"
+			output -hT "Installing “$bnd_name” $(bnd_parser -pbf)"
 			cd $bnd_dir/
 			cook $bnd_name ${bnd_flags[@]}
 			$srm $bnd_dir/$bnd_name
@@ -561,13 +560,18 @@ pkg_install(){
 ## Bundle Process
 bnd_parser(){
 bndp_a=($($prt $1|tr '=' ' '))
-
-	#set flags
-	bndf=${bndp_a[0]}
-	bnd_raw_name=$1
-	bnd_pre_name=($($prt $bndf|tr '/' ' '))
-	bnd_name=$($prt ${bnd_pre_name[-1]}|sed "s/.$file_format//")
-	bnd_flags=($($prt ${bndp_a[1]}|tr ',' ' '))
+	if [[ $1 = '-pbf' ]] [[ ! -z $bnd_flags ]]
+	then 
+		#brint bnd flags
+		$prt : ${bnd_flags[@]}
+	else
+		#set flags
+		bndf=${bndp_a[0]}
+		bnd_raw_name=$1
+		bnd_pre_name=($($prt $bndf|tr '/' ' '))
+		bnd_name=$($prt ${bnd_pre_name[-1]}|sed "s/.$file_format//")
+		bnd_flags=($($prt ${bndp_a[1]}|tr ',' ' '))
+	fi
 }
 download(){
 	output -p $name "Downloading “$1”"
@@ -597,7 +601,7 @@ load_data
 		output -T "Setting “$1” Recipe"
 		$rex $*
 	fi
-	output -hT "“$1” $($print_bnd_args) Instaled"
+	output -hT "“$1” $(bnd_parser -pbf) Instaled"
 }
 
 ## Script Managment
