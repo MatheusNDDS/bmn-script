@@ -22,8 +22,8 @@ load_data(){
 	d0="/dev/0"
 	jmp="2> $log &"
 	gitc="$r git clone"
-	bmi="$r bmn_init -i"
-	bmn="bmn_init"
+	bmi="$r bmn -i"
+	bmn="bmn"
 	add_ppa="$r add-apt-repository"
 	flatpak_remote="flatpak remote-add --if-not-exists"
 	fp_overide="$r flatpak override"
@@ -165,15 +165,15 @@ load_data $*
 	elif [[ "$1" = "-iu" ]]
 	then
 		pm_update=1
-		start -i ${args[@]:3}
+		bmn_init -i ${args[@]:3}
 	elif [[ "$1" = "-liu" ]]
 	then
 		pm_update=1
-		start -li ${args[@]:4}
+		bmn_init -li ${args[@]:4}
 	elif [[ "$1" = "-diu" ]]
 	then
 		pm_update=1
-		start -di ${args[@]:4}
+		bmn_init -di ${args[@]:4}
 	elif [[ $1 = '-e' ]] || [[ "$1" = '--enable-extras' ]]
 	then
 		enable_extras $*
