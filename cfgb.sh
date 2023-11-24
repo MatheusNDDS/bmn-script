@@ -560,18 +560,20 @@ pkg_install(){
 ## Bundle Process
 bnd_parser(){
 bndp_a=($($prt $1|tr '=' ' '))
-	if [[ $1 = '-pbf' ]] [[ ! -z $bnd_flags ]]
-	then 
+	case $1 in
+	'-pbf')
 		#brint bnd flags
 		$prt : ${bnd_flags[@]}
-	else
+	;;
+	*)
 		#set flags
 		bndf=${bndp_a[0]}
 		bnd_raw_name=$1
 		bnd_pre_name=($($prt $bndf|tr '/' ' '))
 		bnd_name=$($prt ${bnd_pre_name[-1]}|sed "s/.$file_format//")
 		bnd_flags=($($prt ${bndp_a[1]}|tr ',' ' '))
-	fi
+	;;
+	esac
 }
 download(){
 	output -p $name "Downloading “$1”"
