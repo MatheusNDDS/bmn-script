@@ -1,4 +1,4 @@
-# CFGB Manager
+# Config Bundle Manager (B.M.N)
 It is something like a package manager created to facilitate the post-installation of Linux based operational systems.
 
 # Setup instructions
