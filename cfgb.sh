@@ -804,9 +804,12 @@ live_shell(){
 		elif [[ $cmd = 'c' ]]
 		then
 			$editor $pdir/cfg
+		elif [[ $cmd = 'i' ]]
+		then
+			$editor $pdir/init
 		elif [[ $cmd = 'h' ]]
 		then
-			$prt "\n c: edit config\n x: clear prompt\n h: help\n q: exit"
+			$prt "\n c: edit config\n i: edit init\n x: clear prompt\n h: help\n q: exit"
 		else
 			$cmd
 		fi
