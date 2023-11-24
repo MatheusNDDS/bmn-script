@@ -634,12 +634,12 @@ load_data
 ## Script Managment
 setup(){
 #detect custom bin path
-	if [[ $2 = *"source="* ]]
+	if [[ $2 = *"src="* ]]
 	then
-		cfgb_bin=$($prt $2|tr '=' ' ')
-	elif [[ $3 = *"source="* ]]
+		cfgb_bin=$($prt $2|sed "s/src=/ /g")
+	elif [[ $3 = *"src="* ]]
 	then
-		cfgb_bin=$($prt $3|tr '=' ' ')
+		cfgb_bin=$($prt $3|sed "s/src=/ /g")
 	fi
 	output -hT "CFGB installation"
 	sfm -d $pdir $bnd_dir $cfg $hlc $hsr
@@ -662,7 +662,7 @@ setup(){
 	pma -i $deps
 #Saving environment variables
 	$prt "source $cfgb_bin" > $init_file
-	if [ -z "$2" ]
+	if [ -z "$2" ] && [[ $2 != *"src="* ]] || [ -z "$3" ] && [[ $3 != *"src="* ]]
 	then
 		if [ -e repo ]
 		then
