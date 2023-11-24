@@ -564,7 +564,7 @@ bndp_a=($($prt $1|tr '=' ' '))
 	case $1 in
 	'-pbf')
 		#brint bnd flags
-		if [ ! -z ${bnd_flags[@]} ]
+		if [[ ! -z $bnd_flags ]]
 		then
 			$prt : ${bnd_flags[@]}
 		fi
