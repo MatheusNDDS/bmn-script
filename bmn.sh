@@ -23,7 +23,7 @@ load_data(){
 	jmp="2> $log &"
 	gitc="$r git clone"
 	bmi="$r bmn_init -i"
-	$bmn="bmn_init"
+	bmn="bmn_init"
 	add_ppa="$r add-apt-repository"
 	flatpak_remote="flatpak remote-add --if-not-exists"
 	fp_overide="$r flatpak override"
@@ -69,7 +69,7 @@ load_data(){
 	bnd_dir="$pdir/bundles"
 	cfg_file="$pdir/cfg"
 	init_file="$pdir/init"
-	cfgb_srcd="/bin"
+	bmn_srcd="/bin"
 	log="$pdir/log"
 
 ## Flatpak Configuration ##
@@ -636,19 +636,19 @@ setup(){
 #detect custom bin path
 	if [[ $2 = *"srcd="* ]]
 	then
-		cfgb_srcd=$($prt $2|sed "s/srcd=//g")
+		bmn_srcd=$($prt $2|sed "s/srcd=//g")
 	elif [[ $3 = *"srcd="* ]]
 	then
-		cfgb_srcd=$($prt $3|sed "s/srcd=//g")
+		bmn_srcd=$($prt $3|sed "s/srcd=//g")
 	fi
 #creating directories
-	output -hT "CFGB installation"
+	output -hT "$($prt $name|tr [:lower:] [:upper:]) installation"
 	sfm -d $pdir $bnd_dir $cfg $hlc $hsr
 	sfm -f $cfg_file $init_file $log
-	$cp $script $cfgb_srcd/$name
-	$elf $cfgb_srcd/$name
+	$cp $script $bmn_srcd/$name
+	$elf $bmn_srcd/$name
 #set the init file
-	$prt "source $cfgb_srcd/$name" > $init_file
+	$prt "source $bmn_srcd/$name" > $init_file
 #Package manager autodetect
 	output -p $name "Detecting Package Manager"
 	pma -qpm 2> $log
@@ -689,7 +689,7 @@ setup(){
 	output -d 'init' "$(cat $init_file)"
 }
 cfgb_update(){
-	output -hT "Updating CFGB Script"
+	output -hT "Updating $($prt $name|tr [:lower:] [:upper:]) Script"
 	if [[ $1 = "" ]]
 	then
 		current_dir=$(pwd)
@@ -708,7 +708,7 @@ cfgb_update(){
 	output -p $name 'Installing Script'
 	$mv "$pdir/$name.sh" $cfgb_bin
 	$elf $cfgb_bin
-	output -hT "CFGB Script Updated"
+	output -hT "$($prt $name|tr [:lower:] [:upper:]) Script Updated"
 }
 qwerry_bnd(){
 	if [[ $1 = '-rU' ]]
