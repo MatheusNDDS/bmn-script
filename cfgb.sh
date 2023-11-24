@@ -604,7 +604,7 @@ load_data
 	pkg_install
 	if [ -e recipe ]
 	then
-		output -T "Setting “$1” Recipe"
+		output -hT "Setting “$1” Recipe"
 		$rex $*
 	fi
 	output -hT "“$1” $(bnd_parser -pbf) Instaled"
