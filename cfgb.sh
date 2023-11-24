@@ -578,7 +578,7 @@ pkg_install(){
 	fi
 }
 
-## Bundle Process
+## Bundle Processes
 bnd_parser(){
 bndp_a=($($prt $1|tr '=' ' '))
 	case $1 in
@@ -619,7 +619,7 @@ unpack(){
 	output -l "files" "$(ls $bnd_dir/$1/)"
 }
 cook(){
-load_data
+	load_data
 	cd $1/
 	pkg_install
 	if [ -e recipe ]
