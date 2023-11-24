@@ -70,7 +70,6 @@ load_data(){
 	cfg_file="$pdir/cfg"
 	init_file="$pdir/init"
 	cfgb_src="/bin"
-	cfgb_bin="$cfgb_src/$name"
 	log="$pdir/log"
 
 ## Flatpak Configuration ##
@@ -646,8 +645,8 @@ setup(){
 	output -hT "CFGB installation"
 	sfm -d $pdir $bnd_dir $cfg $hlc $hsr
 	sfm -f $cfg_file $init_file $log
-	$cp $script $cfgb_bin
-	$elf $cfgb_bin
+	$cp $script $cfgb_srcd/$name
+	$elf $cfgb_srcd/$name
 #Package manager autodetect
 	output -p $name "Detecting Package Manager"
 	pma -qpm 2> $log
@@ -663,7 +662,7 @@ setup(){
 	pma -u
 	pma -i $deps
 #creating the init file
-	$prt "source $cfgb_src/$name" > $init_file
+	$prt "source $cfgb_srcd/$name" > $init_file
 #Saving environment variables
 	if [ -z "$2" ] && [[ $2 != *"srcd="* ]] || [ -z "$3" ] && [[ $3 != *"srcd="* ]]
 	then
