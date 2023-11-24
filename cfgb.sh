@@ -482,7 +482,7 @@ pkg_install(){
 		$pnl
 		output -p $pm "Installing Packages"
 		pkg_parser list_pkgs
-		if [[ $pn_update = 1 ]]
+		if [[ $pm_update = 1 ]]
 		then
 			output -p $pm "Updating Packages"
 			pma -u
@@ -525,7 +525,7 @@ pkg_install(){
 		$pnl
 		output -p Flatpak "Installing Flatpaks"
 		pkg_parser list_pkgs
-		if [[ $pn_update = 1 ]]
+		if [[ $pm_update = 1 ]]
 		then
 			output -t 'Uptating Flathub'
 			sudo flatpak update -y
