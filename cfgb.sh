@@ -561,9 +561,12 @@ pkg_install(){
 bnd_parser(){
 bndp_a=($($prt $1|tr '=' ' '))
 	case $1 in
-	'-pbf' && [ ! -z ${bnd_flags}])
+	'-pbf')
 		#brint bnd flags
-		$prt : ${bnd_flags[@]}
+		if [ ! -z ${bnd_flags[@]} ]
+		then
+			$prt : ${bnd_flags[@]}
+		fi
 	;;
 	*)
 		#set flags
