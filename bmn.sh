@@ -693,7 +693,7 @@ cfgb_update(){
 	if [[ $1 = "" ]]
 	then
 		bin_srcd=($(cat $init_file))
-		cmd_bin="${bin_srcd[-1]}/$name"
+		cmd_bin="${bin_srcd[-1]}"
 		current_dir=$(pwd)
 		script_src="https://github.com/MatheusNDDS/${name}-script/raw/main/${name}.sh"
 		
