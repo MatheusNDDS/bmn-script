@@ -56,6 +56,7 @@ load_data(){
 	name="cfgb"
 	script="$(pwd)/${name}.sh"
 	file_format="tar.gz"
+	print_bnd_args="if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi"
 	pkg_flag="null"
 	deps="wget bash sudo pico"
 	args=$*
@@ -75,7 +76,7 @@ load_data(){
 	fp_mode="--system"
 	fp_remote="flathub"
 	
-## External Data Import
+## External Data Import ##
 	source $cfg_file
 	source /etc/os-release
 	release=($($scat $pdir/release))
@@ -89,7 +90,7 @@ load_data $*
 			bnd_parser $i
 			if [[ "${release[@]}" = *"$bndf"* ]] || [[ $lc_inst = 1 ]] #checks if the bundle exists in the repository.
 			then
-				output -hT "Installing “$bnd_name” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
+				output -hT "Installing “$bnd_name” $($print_bnd_args)"
 				$srm $bnd_dir/$bnd_name
 				cd $bnd_dir/
 				download $bnd_name 0
@@ -108,13 +109,13 @@ load_data $*
 		for i in ${args[@]:3}
 		do
 			bnd_parser $i
-			output -p $name "Importing “$bnd_name” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
+			output -p $name "Importing “$bnd_name”"
 			$cp $bndf $bnd_dir/
 		done
 		for i in ${args[@]:3}
 		do
 			bnd_parser $i
-			output -hT "Installing “$bnd_name” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
+			output -hT "Installing “$bnd_name” $($print_bnd_args)"
 			$srm $bnd_dir/$bnd_name
 			cd $bnd_dir/
 			unpack $bnd_name
@@ -128,13 +129,13 @@ load_data $*
 		for i in ${args[@]:3}
 		do
 			bnd_parser $i
-			output -p $name "Importing “$bnd_name” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
+			output -p $name "Importing “$bnd_name”"
 			$cp $bndf $bnd_dir/
 		done
 		for i in ${args[@]:3}
 		do
 			bnd_parser $i
-			output -hT "Installing “$bnd_name” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
+			output -hT "Installing “$bnd_name” $($print_bnd_args)"
 			cd $bnd_dir/
 			cook $bnd_name ${bnd_flags[@]}
 			$srm $bnd_dir/$bnd_name
@@ -596,7 +597,7 @@ load_data
 		output -T "Setting “$1” Recipe"
 		$rex $*
 	fi
-	output -hT "“$1” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi) Instaled"
+	output -hT "“$1” $($print_bnd_args) Instaled"
 }
 
 ## Script Managment
