@@ -69,7 +69,8 @@ load_data(){
 	bnd_dir="$pdir/bundles"
 	cfg_file="$pdir/cfg"
 	init_file="$pdir/init"
-	cfgb_bin="/bin/$name"
+	cfgb_src="/bin"
+	cfgb_bin="$cfgb_src/$name"
 	log="$pdir/log"
 
 ## Flatpak Configuration ##
@@ -634,13 +635,14 @@ load_data
 ## Script Managment
 setup(){
 #detect custom bin path
-	if [[ $2 = *"src="* ]]
+	if [[ $2 = *"srcd="* ]]
 	then
-		cfgb_bin=$($prt $2|sed "s/src=/ /g")
-	elif [[ $3 = *"src="* ]]
+		cfgb_src=$($prt $2|sed "s/srcd=//g")
+	elif [[ $3 = *"srcd="* ]]
 	then
-		cfgb_bin=$($prt $3|sed "s/src=/ /g")
+		cfgb_src=$($prt $3|sed "s/srcd=//g")
 	fi
+#creating directories
 	output -hT "CFGB installation"
 	sfm -d $pdir $bnd_dir $cfg $hlc $hsr
 	sfm -f $cfg_file $init_file $log
@@ -660,9 +662,10 @@ setup(){
 	pm=$pm_detected
 	pma -u
 	pma -i $deps
+#creating the init file
+	$prt "source $cfgb_src/$name" > $init_file
 #Saving environment variables
-	$prt "source $cfgb_bin" > $init_file
-	if [ -z "$2" ] && [[ $2 != *"src="* ]] || [ -z "$3" ] && [[ $3 != *"src="* ]]
+	if [ -z "$2" ] && [[ $2 != *"srcd="* ]] || [ -z "$3" ] && [[ $3 != *"srcd="* ]]
 	then
 		if [ -e repo ]
 		then
