@@ -57,12 +57,11 @@ load_data(){
 	script="$(pwd)/${name}.sh"
 	file_format="tar.gz"
 	pkg_flag="null"
-	rex="$r bash recipe"
-	deps="wget bash sudo"
+	deps="wget bash sudo pico"
 	args=$*
 	cmd="$1"
+	rex="$r bash recipe"
 	sfm_verbose=0 #Enable verbose log for SFM
-	lc_inst=0
 
 ## Work Directorys ##
 	pdir="/etc/$name"
@@ -105,7 +104,7 @@ load_data $*
 		done
 	elif [[ "$1" = '-li' ]] || [[ "$1" = '--lc-install' ]]
 	then
-		output -hT "Importing external bundles"
+		output -hT "Importing bundle from $file_format"
 		for i in ${args[@]:3}
 		do
 			bnd_parser $i
@@ -125,7 +124,7 @@ load_data $*
 		done
 	elif [[ "$1" = '-di' ]] || [[ "$1" = '--dir-install' ]]
 	then
-		output -hT "Importing external bundles from directories"
+		output -hT "Importing bundle from directory"
 		for i in ${args[@]:3}
 		do
 			bnd_parser $i
@@ -181,6 +180,11 @@ load_data $*
 	then
 		output 0
 		output 1
+	elif [[ ! -z $2 ]] && [[ $1 = '-bp' ]] || [[ $1 = '--bp-properties' ]]
+	then
+		output -hT "$2"
+		bnd_parser $2
+		output 3
 	elif [[ $1 = '-h' ]] || [[ $1 = '--help' ]]
 	then
 		output 0
@@ -203,6 +207,7 @@ output(){
 	t[header]="\033[01;36m-=/Configuration Bundles Manager/=-\033[00m \n~ MatheusNDDS : https://github.com/MatheusNDDS\n"
 	t[info_header]="\033[01;33m[Properties]\033[00m\n User: $u\n Home: $h\n PkgM: $pm\n Repo: $repo"
 	t[help_text]="\033[01;33m[Commands]\033[00m\n --install,-i : Install bundles from repository, use -iu to update $pm repositories during installation.\n --lc-install,-li : Install bundles from $file_format file path, use -liu to update $pm repositories during installation.\n --dir-install,-di : Install bundles from unpacked dir path, use -diu to update $pm repositories during installation.\n --dowload,-d : Download bundles from repository.\n --repo-update,-rU : Update repository release file, use this regularly.\n --cfgb-update,-U : Update cfgb script from Repo source or local script.\n --list-bnds,-l : List or search for bundles in repo file.\n --live-shell,-sh : Run live shell for testing cfgb functions.\n --properties,-p : Prints the user information that cfgb uses.\n --help,-h : Print help text."
+	t[bnd_parser_data]="bndp_a=(${bndp_a[@]})\nbndf=$bndf\nbnd_raw_name=$bnd_raw_name\nbnd_pre_name=(${bnd_pre_name[@]})\nbnd_name=$bnd_name\nflags=(${bnd_flags[@]})"
 	t[progress]="\033[01;35m [$2]: -=- $3 -=-\033[00m"
 	t[list]="\033[01m $2: [ $($prt $3|tr ' ' ', ') ]\033[00m "
 	t[dialogue]="\033[01m [$2]: $3\033[00m"
@@ -216,6 +221,7 @@ output(){
 	t[0]=${t[header]}
 	t[1]=${t[info_header]}
 	t[2]=${t[help_text]}
+	t[3]=${t[bnd_parser_data]}
 	t['-p']=${t[progress]}
 	t['-l']=${t[list]}
 	t['-d']=${t[dialogue]}
@@ -562,13 +568,6 @@ bndp_a=($($prt $1|tr '=' ' '))
 	bnd_name=$($prt ${bnd_pre_name[-1]}|sed "s/.$file_format//")
 	bnd_flags=($($prt ${bndp_a[1]}|tr ',' ' '))
 }
-bdir_inst(){
-#function to install bundles from a directory.
-	$cp $1 $bnd_dir/
-	output -hT "Installing “$1” $(if [[ ! -z $bnd_flags ]];then $prt : ${bnd_flags[@]};fi)"
-	bnd_parser $1
-	cook $1 ${bnd_flags[@]}
-}
 download(){
 	output -p $name "Downloading “$1”"
 	$srm $1.$file_format
@@ -744,11 +743,29 @@ detect_user_props(){
 	fi
 }
 live_shell(){
+	current_dir=$(pwd)
+	cd $pdir
+	$pnl; output -d 'i' 'type h for help.'
 	while [ 1 ]
 	do
-		read -p "$(output -d "cfgb")" cmd
-		$cmd
+		read -p "$($prt "\n“$(pwd)”";output -d "cfgb")" cmd
+		if [[ $cmd = 'q' ]]
+		then
+			exit 0
+		elif [[ $cmd = 'x' ]]
+		then
+			clear
+		elif [[ $cmd = 'c' ]]
+		then
+			pico $pdir/cfg
+		elif [[ $cmd = 'h' ]]
+		then
+			$prt "\n c: edit config\n x: clear prompt\n h: help\n q: exit"
+		else
+			$cmd
+		fi
 	done
+	cd $current_dir
 }
 
 ### Program Start ###
