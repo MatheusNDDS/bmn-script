@@ -69,7 +69,7 @@ load_data(){
 	bnd_dir="$pdir/bundles"
 	cfg_file="$pdir/cfg"
 	init_file="$pdir/init"
-	bmn_srcd="/bin"
+	cmd_srcd="/bin"
 	log="$pdir/log"
 
 ## Flatpak Configuration ##
@@ -636,19 +636,19 @@ setup(){
 #detect custom bin path
 	if [[ $2 = *"srcd="* ]]
 	then
-		bmn_srcd=$($prt $2|sed "s/srcd=//g")
+		cmd_srcd=$($prt $2|sed "s/srcd=//g")
 	elif [[ $3 = *"srcd="* ]]
 	then
-		bmn_srcd=$($prt $3|sed "s/srcd=//g")
+		cmd_srcd=$($prt $3|sed "s/srcd=//g")
 	fi
 #creating directories
 	output -hT "$($prt $name|tr [:lower:] [:upper:]) installation"
 	sfm -d $pdir $bnd_dir $cfg $hlc $hsr
 	sfm -f $cfg_file $init_file $log
-	$cp $script $bmn_srcd/$name
-	$elf $bmn_srcd/$name
+	$cp $script $cmd_srcd/$name
+	$elf $cmd_srcd/$name
 #set the init file
-	$prt "source $bmn_srcd/$name" > $init_file
+	$prt "source $cmd_srcd/$name" > $init_file
 #Package manager autodetect
 	output -p $name "Detecting Package Manager"
 	pma -qpm 2> $log
@@ -692,8 +692,11 @@ cfgb_update(){
 	output -hT "Updating $($prt $name|tr [:lower:] [:upper:]) Script"
 	if [[ $1 = "" ]]
 	then
+		bin_srcd=($(cat $init_file))
+		cmd_bin="${bin_srcd[-1]}/$name"
 		current_dir=$(pwd)
-		script_src="https://github.com/MatheusNDDS/$name-script/raw/main/${name}.sh"
+		script_src="https://github.com/MatheusNDDS/${name}-script/raw/main/${name}.sh"
+		
 		output -p $name 'Downloading Script'
 		output -d 'Source' $script_src
 		cd $pdir
@@ -706,8 +709,8 @@ cfgb_update(){
 		$cp $1 $pdir/
 	fi
 	output -p $name 'Installing Script'
-	$mv "$pdir/$name.sh" $cfgb_bin
-	$elf $cfgb_bin
+	$mv "$pdir/$name.sh" $cmd_bin
+	$elf $cmd_bin
 	output -hT "$($prt $name|tr [:lower:] [:upper:]) Script Updated"
 }
 qwerry_bnd(){
