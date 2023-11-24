@@ -105,41 +105,61 @@ load_data $*
 		done
 	elif [[ "$1" = '-li' ]] || [[ "$1" = '--lc-install' ]]
 	then
+		bnd_ignore=()
 		output -hT "Importing bundle from $file_format"
 		for i in ${args[@]:3}
 		do
-			bnd_parser $i
-			output -p $name "Importing “$bnd_name”"
-			$cp $bndf $bnd_dir/
+			if [ -f $i ]
+			then
+				bnd_parser $i
+				output -p $name "Importing “$bnd_name”"
+				$cp $bndf $bnd_dir/
+			else
+				output -e $name "File “$i” does not exists"
+				bnd_ignore+=($i)
+			fi
 		done
 		for i in ${args[@]:3}
 		do
-			bnd_parser $i
-			output -hT "Installing “$bnd_name” $(bnd_parser -pbf)"
-			$srm $bnd_dir/$bnd_name
-			cd $bnd_dir/
-			unpack $bnd_name
-			cook $bnd_name ${bnd_flags[@]}
-			$srm $bnd_dir/$bnd_name
-			lc_inst=0
+			if [[ ${bnd_ignore[*]} != *"$i"* ]]
+			then
+				bnd_parser $i
+				output -hT "Installing “$bnd_name” $(bnd_parser -pbf)"
+				$srm $bnd_dir/$bnd_name
+				cd $bnd_dir/
+				unpack $bnd_name
+				cook $bnd_name ${bnd_flags[@]}
+				$srm $bnd_dir/$bnd_name
+				lc_inst=0
+			fi
 		done
 	elif [[ "$1" = '-di' ]] || [[ "$1" = '--dir-install' ]]
 	then
+		bnd_ignore=()
 		output -hT "Importing bundle from directory"
 		for i in ${args[@]:3}
 		do
-			bnd_parser $i
-			output -p $name "Importing “$bnd_name”"
-			$cp $bndf $bnd_dir/
+			if [ -d $i ]
+			then
+				bnd_parser $i
+				output -p $name "Importing “$bnd_name”"
+				$cp $bndf $bnd_dir/
+			else
+				output -e $name "Directory “$i” does not exists"
+				bnd_ignore+=($i)
+			fi
 		done
 		for i in ${args[@]:3}
 		do
-			bnd_parser $i
-			output -hT "Installing “$bnd_name” $(bnd_parser -pbf)"
-			cd $bnd_dir/
-			cook $bnd_name ${bnd_flags[@]}
-			$srm $bnd_dir/$bnd_name
-			lc_inst=0
+			if [[ ${bnd_ignore[*]} != *"$i"* ]]
+			then
+				bnd_parser $i
+				output -hT "Installing “$bnd_name” $(bnd_parser -pbf)"
+				cd $bnd_dir/
+				cook $bnd_name ${bnd_flags[@]}
+				$srm $bnd_dir/$bnd_name
+				lc_inst=0
+			fi
 		done
 	elif [[ "$1" = "-iu" ]]
 	then
