@@ -1,0 +1,8 @@
+PS1="$pnl;output -d $name"
+alias q=exit 0
+alias x=clear
+alias c=$editor $cfg_file
+alias i=$editor $init_file
+alias s=$editor $bmnshrc
+alias r=$editor $pdir/release
+alias h=$prt '\n c: edit config\n i: edit init\n s: edit lsh init\n r: edit release\n x: clear prompt\n h: help\n q: exit'
