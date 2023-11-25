@@ -626,7 +626,6 @@ unpack(){
 }
 cook(){
 	load_data
-	errmsg=""
 	cd $1/
 	pkg_install
 	if [ -e recipe ]
@@ -634,12 +633,11 @@ cook(){
 		output -hT "Setting “$1” Recipe"
 		$rex $*
 	fi
-	if [ -z $errmsg ]
+	if [ $? >= 1 ]
 	then
 		output -hT "“$1” $(bnd_parser -pbf) Instaled"
 	else
 		output -eT "“$1” $(bnd_parser -pbf) Not Instaled"
-		$prt $errmsg
 	fi
 }
 
