@@ -56,6 +56,7 @@ load_data(){
 	name="bmn"
 	name_upper="$($prt $name|tr [:lower:] [:upper:])"
 	script="$(pwd)/${name}.sh"
+	lshrc="$(pwd)/.lshrc"
 	file_format="tar.gz"
 	pkg_flag="null"
 	args=$*
@@ -650,6 +651,7 @@ setup(){
 	$elf $cmd_srcd/$name
 #Set the init file
 	$prt "source $cmd_srcd/$name" > $init_file
+	$scat $lshrc >> $init_file
 #Package manager autodetect
 	output -p $name "Detecting Package Manager"
 	pma -qpm 2> $log
@@ -793,32 +795,7 @@ detect_user_props(){
 live_shell(){
 	current_dir=$(pwd)
 	cd $pdir
-	$pnl; output -d 'i' 'type h for help.'
-	while [ 1 ]
-	do
-		read -p "$($prt "\n“$(pwd)”";output -d "$name")" cmd
-		if [[ $cmd = 'q' ]]
-		then
-			exit 0
-		elif [[ $cmd = 'x' ]]
-		then
-			clear
-		elif [[ $cmd = 'c' ]]
-		then
-			$editor $pdir/cfg
-		elif [[ $cmd = 'i' ]]
-		then
-			$editor $pdir/init
-		elif [[ $cmd = 'r' ]]
-		then
-			$editor $pdir/release
-		elif [[ $cmd = 'h' ]]
-		then
-			$prt "\n c: edit config\n i: edit init\n r: edit release\n x: clear prompt\n h: help\n q: exit"
-		else
-			$cmd
-		fi
-	done
+	$r bash --init-file $init_file
 	cd $current_dir
 }
 
