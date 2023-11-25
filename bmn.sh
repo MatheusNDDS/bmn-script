@@ -71,6 +71,7 @@ load_data(){
 	bnd_dir="$pdir/bundles"
 	cfg_file="$pdir/cfg"
 	init_file="$pdir/init"
+	lsh_init="$pdir/.lshrc"
 	cmd_srcd="/bin"
 	log="$pdir/log"
 
@@ -651,7 +652,8 @@ setup(){
 	$elf $cmd_srcd/$name
 #Set the init file
 	$prt "source $cmd_srcd/$name" > $init_file
-	$scat $lshrc >> $init_file
+	#$scat $lshrc >> $init_file
+	$cp $lshrc $lsh_init
 #Package manager autodetect
 	output -p $name "Detecting Package Manager"
 	pma -qpm 2> $log
@@ -795,7 +797,7 @@ detect_user_props(){
 live_shell(){
 	current_dir=$(pwd)
 	cd $pdir
-	$r bash --init-file $init_file
+	$r bash --init-file $lsh_init
 	cd $current_dir
 }
 
