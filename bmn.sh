@@ -652,7 +652,7 @@ setup(){
 	$elf $cmd_srcd/$name
 #Set the init file
 	$prt "source $cmd_srcd/$name" > $init_file
-	$prt 'export PS1="\n“\w”X$(output -d $name)"Xalias q="exit 0"' | sed "s/X/'\\n'/g" >> $init_file
+	$scat $lshrc >> $init_file
 #Package manager autodetect
 	output -p $name "Detecting Package Manager"
 	pma -qpm 2> $log
