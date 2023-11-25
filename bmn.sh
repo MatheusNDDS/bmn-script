@@ -652,7 +652,7 @@ setup(){
 	$elf $cmd_srcd/$name
 #Set the init file
 	$prt "source $cmd_srcd/$name" > $init_file
-	$prt 'export PS1="\\n“\w”\\n$(output -d $name)\\nalias q="exit 0"\\nalias x="clear"\\nalias c="$editor $cfg_file"\\nalias i="$editor $init_file"\\nalias s="$editor $bmnshrc"\\nalias r="$editor $pdir/release"\\nalias h="$prt \\n c: edit config\\n i: edit init\\n s: edit lsh init\\n r: edit release\\n x: clear prompt\\n h: help\\n q: exit"'  >> $init_file
+	$prt 'export PS1="\\n“\w”\\n$(output -d $name)\nalias q="exit 0"\nalias x="clear"\nalias c="$editor $cfg_file"\nalias i="$editor $init_file"\nalias s="$editor $bmnshrc"\nalias r="$editor $pdir/release"\nalias h="$prt \\n c: edit config\\n i: edit init\\n s: edit lsh init\\n r: edit release\\n x: clear prompt\\n h: help\\n q: exit"'  >> $init_file
 #Package manager autodetect
 	output -p $name "Detecting Package Manager"
 	pma -qpm 2> $log
