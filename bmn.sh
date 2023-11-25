@@ -113,9 +113,9 @@ load_data $*
 		output -hT "Importing bundle from $file_format"
 		for i in ${args[@]:3}
 		do
-			if [ -f $i ]
+			bnd_parser $i
+			if [ -f $bndf ]
 			then
-				bnd_parser $i
 				output -p $name "Importing “$bnd_name”"
 				$cp $bndf $bnd_dir/
 			else
@@ -143,13 +143,13 @@ load_data $*
 		output -hT "Importing bundle from directory"
 		for i in ${args[@]:3}
 		do
-			if [ -d $i ]
+			bnd_parser $i
+			if [ -d $bndf ]
 			then
-				bnd_parser $i
 				output -p $name "Importing “$bnd_name”"
 				$cp $bndf $bnd_dir/
 			else
-				output -e $name "Directory “$i” does not exists"
+				output -e $name "Directory “$bnd_name” does not exists"
 				bnd_ignore+=($i)
 			fi
 		done
