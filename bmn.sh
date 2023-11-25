@@ -54,6 +54,7 @@ load_data(){
 
 ## References ##
 	name="bmn"
+	name_upper="$($prt $name|tr [:lower:] [:upper:])"
 	script="$(pwd)/${name}.sh"
 	file_format="tar.gz"
 	pkg_flag="null"
@@ -633,7 +634,7 @@ cook(){
 
 ## Script Managment
 setup(){
-#detect custom bin path
+#Detect custom bin path
 	if [[ $2 = *"srcd="* ]]
 	then
 		cmd_srcd=$($prt $2|sed "s/srcd=//g")
@@ -641,13 +642,13 @@ setup(){
 	then
 		cmd_srcd=$($prt $3|sed "s/srcd=//g")
 	fi
-#creating directories
-	output -hT "$($prt $name|tr [:lower:] [:upper:]) installation"
+#Creating directories
+	output -hT "$name_upper installation"
 	sfm -d $pdir $bnd_dir $cfg $hlc $hsr
 	sfm -f $cfg_file $init_file $log
 	$cp $script $cmd_srcd/$name
 	$elf $cmd_srcd/$name
-#set the init file
+#Set the init file
 	$prt "source $cmd_srcd/$name" > $init_file
 #Package manager autodetect
 	output -p $name "Detecting Package Manager"
@@ -672,7 +673,7 @@ setup(){
 			$src $cfg_file
 #Downloading repository releas
 			qwerry_bnd -rU
-			output -hT "C.F.G.B instelled with portable repo file"
+			output -hT "$name_upper instelled with portable repo file"
 			output -d 'repository' "$repo"
 		else
 			output -e "install error" "required portable 'repo' file, or type the repository url address last. "
@@ -683,20 +684,19 @@ setup(){
 		$src $cfg_file
 #Downloading repository release
 		qwerry_bnd -rU
-		output -hT "C.F.G.B instaled"
+		output -hT "$name_upper instaled"
 	fi
 #printing binary location
 	output -d 'init' "$(cat $init_file)"
 }
 cfgb_update(){
-	output -hT "Updating $($prt $name|tr [:lower:] [:upper:]) Script"
+	output -hT "Updating $name_upper Script"
+	bin_srcd=($(cat $init_file))
+	cmd_bin=${bin_srcd[-1]}
 	if [[ $1 = "" ]]
 	then
-		bin_srcd=($(cat $init_file))
-		cmd_bin="${bin_srcd[-1]}"
 		current_dir=$(pwd)
 		script_src="https://github.com/MatheusNDDS/${name}-script/raw/main/${name}.sh"
-		
 		output -p $name 'Downloading Script'
 		output -d 'Source' $script_src
 		cd $pdir
@@ -706,12 +706,12 @@ cfgb_update(){
 		script_src="$1"
 		output -p $name 'Installing from local'
 		output -d 'local' $script_src
-		$cp $1 $pdir/
+		$cp $script_src $pdir/
 	fi
 	output -p $name 'Installing Script'
 	$mv "$pdir/$name.sh" $cmd_bin
 	$elf $cmd_bin
-	output -hT "$($prt $name|tr [:lower:] [:upper:]) Script Updated"
+	output -hT "$name_upper Script Updated"
 }
 qwerry_bnd(){
 	if [[ $1 = '-rU' ]]
@@ -809,9 +809,12 @@ live_shell(){
 		elif [[ $cmd = 'i' ]]
 		then
 			$editor $pdir/init
+		elif [[ $cmd = 'r' ]]
+		then
+			$editor $pdir/release
 		elif [[ $cmd = 'h' ]]
 		then
-			$prt "\n c: edit config\n i: edit init\n x: clear prompt\n h: help\n q: exit"
+			$prt "\n c: edit config\n i: edit init\n r: edit release\n x: clear prompt\n h: help\n q: exit"
 		else
 			$cmd
 		fi
