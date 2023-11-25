@@ -672,7 +672,7 @@ setup(){
 	then
 		if [ -e repo ]
 		then
-			$prt "pm=$pm_detected h=$h u=$u repo=$(cat repo)" > $cfg_file
+			$prt "pm=$pm_detected h=$h u=$u \nrepo=$(cat repo)" > $cfg_file
 			$src $cfg_file
 #Downloading repository releas
 			qwerry_bnd -rU
@@ -683,7 +683,7 @@ setup(){
 			exit 1
 		fi
 	else
-		$prt "pm=$pm_detected h=$h u=$u repo=$2" > $cfg_file
+		$prt "pm=$pm_detected h=$h u=$u \nrepo=$2" > $cfg_file
 		$src $cfg_file
 #Downloading repository release
 		qwerry_bnd -rU
