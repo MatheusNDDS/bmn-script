@@ -652,7 +652,7 @@ setup(){
 	$elf $cmd_srcd/$name
 #Set the init file
 	$prt "source $cmd_srcd/$name" > $init_file
-	$prt'export PS1="::“\w”::$(output -d $name)' | sed 's/::/\\n/g'  >> $init_file
+	$prt 'export PS1="\\n“\w”\\n$(output -d $name)' | sed 's/::/\\n/g'  >> $init_file
 #Package manager autodetect
 	output -p $name "Detecting Package Manager"
 	pma -qpm 2> $log
