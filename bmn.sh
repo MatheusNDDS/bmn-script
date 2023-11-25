@@ -101,7 +101,7 @@ load_data $*
 				$srm $bnd_dir/$bnd_name
 				lc_inst=0
 			else
-				output -e $name "“$i” bundle not found"
+				output -e $name "“$bnd_name” bundle not found"
 				output -d i "Maybe the relese file has outdated, try “$name -rU”."
 			fi
 		done
