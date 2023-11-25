@@ -652,8 +652,7 @@ setup(){
 	$elf $cmd_srcd/$name
 #Set the init file
 	$prt "source $cmd_srcd/$name" > $init_file
-	#$scat $lshrc >> $init_file
-	$cp $lshrc $lsh_init
+	$scat $lshrc >> $init_file
 #Package manager autodetect
 	output -p $name "Detecting Package Manager"
 	pma -qpm 2> $log
@@ -691,7 +690,8 @@ setup(){
 		output -hT "$name_upper instaled"
 	fi
 #printing binary location
-	output -d 'init' "$(cat $init_file)"
+	initlist=($(cat $init_file))
+	output -d 'init' "${initlist[0]} ${initlist[1]}"
 }
 cfgb_update(){
 	output -hT "Updating $name_upper Script"
@@ -797,7 +797,7 @@ detect_user_props(){
 live_shell(){
 	current_dir=$(pwd)
 	cd $pdir
-	$r bash --init-file $lsh_init
+	$r bash --init-file $init_file
 	cd $current_dir
 }
 
