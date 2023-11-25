@@ -237,6 +237,7 @@ output(){
 	t[list]="\033[01m $2: [ $($prt $3|tr ' ' ', ') ]\033[00m "
 	t[dialogue]="\033[01m [$2]: $3\033[00m"
 	t[high_title]="\033[01;36m\n******** $2 ********\n\033[00m"
+	t[error_title]="\033[01;31m\n******** $2 ********\n\033[00m"
 	t[title]="\033[01;36m\n ### $2 ###\n\033[00m"
 	t[sub_title]="\033[01;33m - $2\033[00m"
 	t[error]="\033[01;31m {$2}: $3\033[00m"
@@ -252,6 +253,7 @@ output(){
 	t['-d']=${t[dialogue]}
 	t['-T']=${t[title]}
 	t['-hT']=${t[high_title]}
+	t['-eT']=${t[error_title]}
 	t['-t']=${t[sub_title]}
 	t['-e']=${t[error]}
 	t['-s']=${t[sucess]}
@@ -624,6 +626,7 @@ unpack(){
 }
 cook(){
 	load_data
+	errmsg=""
 	cd $1/
 	pkg_install
 	if [ -e recipe ]
