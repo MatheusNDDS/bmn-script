@@ -582,7 +582,7 @@ pkg_install(){
 
 ## Bundle Processes
 bnd_parser(){
-bndp_a=($($prt $1|tr '=' ' '))
+bndp_a=($($prt $1|tr ':' ' '))
 	case $1 in
 	'-pbf')
 		#brint bnd flags
