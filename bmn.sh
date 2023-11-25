@@ -631,7 +631,13 @@ cook(){
 		output -hT "Setting “$1” Recipe"
 		$rex $*
 	fi
-	output -hT "“$1” $(bnd_parser -pbf) Instaled"
+	if [ -z $errmsg ]
+	then
+		output -hT "“$1” $(bnd_parser -pbf) Instaled"
+	else
+		output -eT "“$1” $(bnd_parser -pbf) Not Instaled"
+		$prt $errmsg
+	fi
 }
 
 ## Script Managment
