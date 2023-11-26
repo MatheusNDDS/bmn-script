@@ -728,9 +728,6 @@ setup(){
 		qwerry_bnd -rU
 		output -hT "$name_upper instaled"
 	fi
-#printing binary location
-	initlist=($(cat $init_file))
-	output -d 'init' "${initlist[0]} ${initlist[1]}"
 }
 cfgb_update(){
 	output -hT "Updating $name_upper Script"
