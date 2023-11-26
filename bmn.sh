@@ -20,7 +20,7 @@ load_data(){
 	cat="$r cat"
 	dl="$r wget"
 	d0="/dev/0"
-	jmp="2> $log &"
+	jmp="2> blog &"
 	gitc="$r git clone"
 	bmi="$r bmn -i"
 	bmn="bmn"
@@ -79,6 +79,7 @@ load_data(){
 	flathub="flathub https://flathub.org/repo/flathub.flatpakrepo"
 	fp_mode="--system"
 	fp_remote="flathub"
+
 	
 ## External Data Import ##
 	source $cfg_file
@@ -94,7 +95,7 @@ load_data $*
 			bnd_parser $i
 			if [[ "${release[@]}" = *"$bndf"* ]] || [[ $lc_inst = 1 ]] #checks if the bundle exists in the repository.
 			then
-				output -hT "Installing “$bnd_name” $(bnd_parser -pbf)"
+				output -hT "Installing “$bnd_name$(bnd_parser -pbf)”"
 				$srm $bnd_dir/$bnd_name
 				cd $bnd_dir/
 				download $bnd_name 0
@@ -128,7 +129,7 @@ load_data $*
 			if [[ ${bnd_ignore[*]} != *"$i"* ]]
 			then
 				bnd_parser $i
-				output -hT "Installing “$bnd_name” $(bnd_parser -pbf)"
+				output -hT "Installing “$bnd_name$(bnd_parser -pbf)”"
 				$srm $bnd_dir/$bnd_name
 				cd $bnd_dir/
 				unpack $bnd_name
@@ -158,7 +159,7 @@ load_data $*
 			if [[ ${bnd_ignore[*]} != *"$i"* ]]
 			then
 				bnd_parser $i
-				output -hT "Installing “$bnd_name” $(bnd_parser -pbf)"
+				output -hT "Installing “$bnd_name$(bnd_parser -pbf)”"
 				cd $bnd_dir/
 				cook $bnd_name ${bnd_flags[@]}
 				$srm $bnd_dir/$bnd_name
@@ -236,14 +237,14 @@ output(){
 	t[progress]="\033[01;35m [$2]: -=- $3 -=-\033[00m"
 	t[list]="\033[01m $2: [ $($prt $3|tr ' ' ', ') ]\033[00m "
 	t[dialogue]="\033[01m [$2]: $3\033[00m"
-	t[high_title]="\033[01;36m\n******** $2 ********\n\033[00m"
-	t[error_title]="\033[01;31m\n******** $2 ********\n\033[00m"
-	t[title]="\033[01;36m\n ### $2 ###\n\033[00m"
+	t[high_title]="\n\033[01;36m******** [ $2 ] ********\033[00m\n"
+	t[alert_high_title]="\n\033[01;33m******** < $2 > ********\033[00m\n"
+	t[title]="\n\033[01;36m ### [ $2 ] ###\033[00m\n"
 	t[sub_title]="\033[01;33m - $2\033[00m"
 	t[error]="\033[01;31m {$2}: $3\033[00m"
 	t[sucess]="\033[01;32m ($2): $3\033[00m"
 	
-	#Simplification Redirect
+	#simple arguments
 	t[0]=${t[header]}
 	t[1]=${t[info_header]}
 	t[2]=${t[help_text]}
@@ -253,7 +254,7 @@ output(){
 	t['-d']=${t[dialogue]}
 	t['-T']=${t[title]}
 	t['-hT']=${t[high_title]}
-	t['-eT']=${t[error_title]}
+	t['-ahT']=${t[alert_high_title]}
 	t['-t']=${t[sub_title]}
 	t['-e']=${t[error]}
 	t['-s']=${t[sucess]}
@@ -313,6 +314,7 @@ pma_a=($*)
 	pm_u[apx]=@
 	pm_g[apx]=@
 	
+	## options for pma ##
 	if [ $1 = "-qpm" ] #Qwerry Package Manager
 	then
 		bin_dirs="$(echo $PATH | tr ':' ' ')"
@@ -444,6 +446,28 @@ sfm(){
 			output -e "SFM" "cannot remove root directory “/”"
 		fi
 	done
+}
+blog(){
+## simple flile based log register ##
+	log_hist=($(cat $log))
+	case $1 in
+	"-err") #write a error
+		$prt "err $2" >> $log
+	;;
+	"-w") #write a custom key and value
+		$prt "$2 $3" >> $log
+	;;
+	"-rm") #removes a line with the key or value found
+		sed -i "/$2/d" $log
+	;;
+	"-ck") #returns the line with the found value
+		$prt ${log_hist[@]} | grep $2
+	;;
+	"-ckr") #returns the line with the found value and remove it
+		sed -i "/$2/d" $log
+		$prt ${log_hist[@]} | grep $2
+	;;
+	esac
 }
 
 ## Package Install
@@ -625,19 +649,19 @@ unpack(){
 	output -l "files" "$(ls $bnd_dir/$1/)"
 }
 cook(){
-	load_data
 	cd $1/
 	pkg_install
 	if [ -e recipe ]
 	then
-		output -hT "Setting “$1” Recipe"
+		output -hT "Executing “$1” Recipe"
 		$rex $*
 	fi
-	if [ $? >= 1 ]
+	#check log for recipe alerts
+	if [[ $(blog -ckr $1) != "err $1" ]]
 	then
-		output -hT "“$1” $(bnd_parser -pbf) Instaled"
+		output -hT "“$1$(bnd_parser -pbf)” Instaled"
 	else
-		output -eT "“$1” $(bnd_parser -pbf) Not Instaled"
+		output -ahT "“$1$(bnd_parser -pbf)” Recipe Returned Problems"
 	fi
 }
 
@@ -659,10 +683,10 @@ setup(){
 	$elf $cmd_srcd/$name
 #init file buid
 	$prt "source $cmd_srcd/$name" > $init_file
-	$prt 'export PS1="\\n“\w”\\n$(output -d $name)"\nalias q="exit 0"\nalias x="clear"\nalias c="$editor $cfg_file"\nalias i="$editor $init_file"\nalias r="$editor $pdir/release"\nalias h="$prt +\\n c: edit config\\n i: edit init\\n s: edit lsh init\\n r: edit release\\n x: clear prompt\\n h: help\\n q: exit+"' | tr '+' "'" >> $init_file
+	$prt 'export PS1="\\n“\w”\\n$(output -d $name)"\nalias q="exit 0"\nalias x="clear"\nalias c="$editor $cfg_file"\nalias i="$editor $init_file"\nalias r="$editor $pdir/release"\nalias l="$editor $pdir/log"\nalias h="$prt +\\n c: edit config\\n i: edit init\\n s: edit lsh init\\n r: edit release\\n l: edit log\\n x: clear prompt\\n h: help\\n q: exit+"' | tr '+' "'" >> $init_file
 #Package manager autodetect
 	output -p $name "Detecting Package Manager"
-	pma -qpm 2> $log
+	pma -qpm 2> blog
 	output -t "Package Manager : $pm_detected"
 #Detecting home and user
 	output -p $name "Detecting Home Directory and User"
@@ -703,7 +727,7 @@ setup(){
 cfgb_update(){
 	output -hT "Updating $name_upper Script"
 	bin_srcd=($(cat $init_file))
-	cmd_bin=${bin_srcd[-1]}
+	cmd_bin=${bin_srcd[1]}
 	if [[ $1 = "" ]]
 	then
 		current_dir=$(pwd)
