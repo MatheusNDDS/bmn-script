@@ -662,7 +662,6 @@ cook(){
 	
 	recipe_log=($(blog -ckr $1))
 	key="${recipe_log[0]} ${recipe_log[1]}"
-	output -d "$key"
 	if [ "$key" = "-a $1" ]
 	then
 		output -ahT "“$1$(bnd_parser -pbf)” Recipe Returned Problems" 
