@@ -73,7 +73,7 @@ load_data(){
 	init_file="$pdir/init"
 	lsh_init="$pdir/.lshrc"
 	cmd_srcd="/bin"
-	log="$pdir/log"
+	log="$pdir/.log"
 
 ## Flatpak Configuration ##
 	flathub="flathub https://flathub.org/repo/flathub.flatpakrepo"
@@ -111,7 +111,7 @@ load_data $*
 	elif [[ "$1" = '-li' ]] || [[ "$1" = '--lc-install' ]]
 	then
 		bnd_ignore=()
-		output -hT "Importing bundle from $file_format"
+		output -hT "Importing bundle"
 		for i in ${args[@]:3}
 		do
 			bnd_parser $i
@@ -236,13 +236,15 @@ output(){
 	t[bnd_parser_data]="bndp_a=(${bndp_a[@]})\nbndf=$bndf\nbnd_raw_name=$bnd_raw_name\nbnd_pre_name=(${bnd_pre_name[@]})\nbnd_name=$bnd_name\nflags=(${bnd_flags[@]})"
 	t[progress]="\033[01;35m [$2]: -=- $3 -=-\033[00m"
 	t[list]="\033[01m $2: [ $($prt $3|tr ' ' ', ') ]\033[00m "
-	t[dialogue]="\033[01m [$2]: $3\033[00m"
 	t[high_title]="\n\033[01;36m******** [ $2 ] ********\033[00m\n"
-	t[alert_high_title]="\n\033[01;33m******** < $2 > ********\033[00m\n"
+	t[alert_high_title]="\n\033[01;33m******** / $2 / ********\033[00m\n"
+	t[error_high_title]="\n\033[01;31m*#*#*#*# { $2 } #*#*#*#*\033[00m\n"
 	t[title]="\n\033[01;36m ### [ $2 ] ###\033[00m\n"
 	t[sub_title]="\033[01;33m - $2\033[00m"
+	t[dialogue]="\033[01m [$2]: $3\033[00m"
 	t[error]="\033[01;31m {$2}: $3\033[00m"
 	t[sucess]="\033[01;32m ($2): $3\033[00m"
+	t[alert]="\033[01;33m /$2/: $3\033[00m"
 	
 	#simple arguments
 	t[0]=${t[header]}
@@ -255,9 +257,11 @@ output(){
 	t['-T']=${t[title]}
 	t['-hT']=${t[high_title]}
 	t['-ahT']=${t[alert_high_title]}
+	t['-ehT']=${t[error_high_title]}
 	t['-t']=${t[sub_title]}
 	t['-e']=${t[error]}
 	t['-s']=${t[sucess]}
+	t['-a']=${t[alert]}
 	
 	$prt ${t[$1]}
 }
@@ -448,24 +452,23 @@ sfm(){
 	done
 }
 blog(){
-## simple flile based log register ##
 	log_hist=($(cat $log))
 	case $1 in
-	"-err") #write a error
-		$prt "err $2" >> $log
+	"-a"|"-e"|"-d")
+		$prt "$1 $2 $3" >> $log
 	;;
-	"-w") #write a custom key and value
-		$prt "$2 $3" >> $log
+	"-reg")
+		$prt "$2" >> $log
 	;;
 	"-rm") #removes a line with the key or value found
 		sed -i "/$2/d" $log
 	;;
 	"-ck") #returns the line with the found value
-		$prt ${log_hist[@]} | grep $2
+		grep $2 $log
 	;;
 	"-ckr") #returns the line with the found value and remove it
+		grep $2 $log
 		sed -i "/$2/d" $log
-		$prt ${log_hist[@]} | grep $2
 	;;
 	esac
 }
@@ -656,12 +659,18 @@ cook(){
 		output -hT "Executing “$1” Recipe"
 		$rex $*
 	fi
-	#check log for recipe alerts
-	if [[ $(blog -ckr $1) != "err $1" ]]
+	
+	recipe_log=($(blog -ckr $1))
+	key="${recipe_log[0]} ${recipe_log[1]}"
+	output -d "$key"
+	if [ "$key" = "-a $1" ]
 	then
-		output -hT "“$1$(bnd_parser -pbf)” Instaled"
+		output -ahT "“$1$(bnd_parser -pbf)” Recipe Returned Problems" 
+	elif [ "$key" = "-e $1" ]
+	then
+		output -ehT "“$1$(bnd_parser -pbf)” Recipe Returned Erros"
 	else
-		output -ahT "“$1$(bnd_parser -pbf)” Recipe Returned Problems"
+		output -hT "“$1$(bnd_parser -pbf)” Instaled"
 	fi
 }
 
@@ -683,7 +692,7 @@ setup(){
 	$elf $cmd_srcd/$name
 #init file buid
 	$prt "source $cmd_srcd/$name" > $init_file
-	$prt 'export PS1="\\n“\w”\\n$(output -d $name)"\nalias q="exit 0"\nalias x="clear"\nalias c="$editor $cfg_file"\nalias i="$editor $init_file"\nalias r="$editor $pdir/release"\nalias l="$editor $pdir/log"\nalias h="$prt +\\n c: edit config\\n i: edit init\\n s: edit lsh init\\n r: edit release\\n l: edit log\\n x: clear prompt\\n h: help\\n q: exit+"' | tr '+' "'" >> $init_file
+	$prt 'export PS1="\\n“\w”\\n$(output -d $name)"\nalias q="exit 0"\nalias x="clear"\nalias c="$editor $cfg_file"\nalias i="$editor $init_file"\nalias r="$editor $pdir/release"\nalias l="$editor $log"\nalias h="$prt +\\n c: edit config\\n i: edit init\\n s: edit lsh init\\n r: edit release\\n l: edit log\\n x: clear prompt\\n h: help\\n q: exit+"' | tr '+' "'" >> $init_file
 #Package manager autodetect
 	output -p $name "Detecting Package Manager"
 	pma -qpm 2> blog
