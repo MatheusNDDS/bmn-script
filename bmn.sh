@@ -455,7 +455,6 @@ blog(){
 	blog_a=($*)
 	log_hist=($(cat $log))
 	line=($(grep "$2" $log))
-	
 	case $1 in
 	"-a"|"-e"|"-d")
 		if [[ ! -z $line ]] && [[ $1 != "-d" ]] && [[ $line != "-e" ]]
@@ -481,7 +480,7 @@ blog(){
 			$prt "${blog_a[@]:1}" | sed "s/\n//g" >> $log
 		fi
 	;;
-	"-sub")
+	"-sub") #substitute the line with the found value
 		if [[ ! -z $line ]]
 		then
 			sed -i "/$2/d" $log
