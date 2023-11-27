@@ -452,23 +452,43 @@ sfm(){
 	done
 }
 blog(){
+	blog_a=($*)
 	log_hist=($(cat $log))
 	case $1 in
 	"-a"|"-e"|"-d")
+		if [[ ! -z $(grep $2 $log) ]] && [[ $1 != "-d" ]]
+		then
+			sed -i "/$2/d" $log
+		fi
 		$prt "$1 $2 $3" >> $log
+		if [ $blog_verbose = 1 ]
+		then
+			output "$1" "$2" "$3"
+		fi
 	;;
 	"-reg")
-		$prt "$2" >> $log
+		$prt "${blog_a[@]:1}" | sed "s/\n//g" >> $log
 	;;
-	"-rm") #removes a line with the key or value found
-		sed -i "/$2/d" $log
+	"-ed")
+		if [[ ! -z $(grep "$2" $log) ]]
+		then
+			sed -i "/$2/d" $log
+			$prt "${blog_a[@]:1}" | sed "s/\n//g" >> $log
+		fi
+	;;
+	"-sub")
+		if [[ ! -z $(grep "$2" $log) ]]
+		then
+			sed -i "/$2/d" $log
+			$prt "${blog_a[@]:3}" | sed "s/\n//g" >> $log
+		fi
 	;;
 	"-ck") #returns the line with the found value
-		grep $2 $log
+		grep "${blog_a[@]:1}" $log
 	;;
 	"-ckr") #returns the line with the found value and remove it
-		grep $2 $log
-		sed -i "/$2/d" $log
+		grep "${blog_a[@]:1}" $log
+		sed -i "/"${blog_a[@]:1}"/d" $log
 	;;
 	esac
 }
@@ -691,7 +711,7 @@ setup(){
 	$elf $cmd_srcd/$name
 #init file buid
 	$prt "source $cmd_srcd/$name" > $init_file
-	$prt 'export PS1="\\n“\w”\\n$(output -d $name)"\nalias q="exit 0"\nalias x="clear"\nalias c="$editor $cfg_file"\nalias i="$editor $init_file"\nalias r="$editor $pdir/release"\nalias l="$editor $log"\nalias h="$prt +\\n c: edit config\\n i: edit init\\n r: edit release\\n l: edit log\\n x: clear prompt\\n h: help\\n q: exit+"' | tr '+' "'" >> $init_file
+	$prt 'export PS1="\\n“\w”\\n$(output -d $name)"\nalias q="exit 0"\nalias x="clear"\nalias c="$editor $cfg_file"\nalias i="$editor $init_file"\nalias r="$editor $pdir/release"\nalias l="$editor $log"\nalias h="$prt +\\n c: edit config\\n i: edit init\\n r: edit release\\n l: edit log\\n x: clear prompt\\n h: help\\n q: exit+\nblog_verbose=1"' | tr '+' "'" >> $init_file
 #Package manager autodetect
 	output -p $name "Detecting Package Manager"
 	pma -qpm 2> blog
