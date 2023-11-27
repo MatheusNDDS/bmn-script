@@ -229,22 +229,23 @@ load_data $*
 ### Program Functions ###
 ## Utilities
 output(){
+	out_a=($*)
 	declare -A t
 	t[header]="\033[01;36m-=/Configuration Bundles Manager/=-\033[00m \n~ MatheusNDDS : https://github.com/MatheusNDDS\n"
 	t[info_header]="\033[01;33m[Properties]\033[00m\n User: $u\n Home: $h\n PkgM: $pm\n Repo: $repo"
 	t[help_text]="\033[01;33m[Commands]\033[00m\n --install,-i : Install bundles from repository, use -iu to update $pm repositories during installation.\n --lc-install,-li : Install bundles from $file_format file path, use -liu to update $pm repositories during installation.\n --dir-install,-di : Install bundles from unpacked dir path, use -diu to update $pm repositories during installation.\n --dowload,-d : Download bundles from repository.\n --repo-update,-rU : Update repository release file, use this regularly.\n --$name-update,-U : Update $name script from Repo source or local script.\n --list-bnds,-l : List or search for bundles in repo file.\n --live-shell,-sh : Run live shell for testing $name functions.\n --properties,-p : Prints the user information that $name uses.\n --help,-h : Print help text."
 	t[bnd_parser_data]="bndp_a=(${bndp_a[@]})\nbndf=$bndf\nbnd_raw_name=$bnd_raw_name\nbnd_pre_name=(${bnd_pre_name[@]})\nbnd_name=$bnd_name\nflags=(${bnd_flags[@]})"
-	t[progress]="\033[01;35m [$2]: -=- $3 -=-\033[00m"
-	t[list]="\033[01m $2: [ $($prt $3|tr ' ' ', ') ]\033[00m "
-	t[high_title]="\n\033[01;36m******** [ $2 ] ********\033[00m\n"
-	t[alert_high_title]="\n\033[01;33m******** / $2 / ********\033[00m\n"
-	t[error_high_title]="\n\033[01;31m*#*#*#*# { $2 } #*#*#*#*\033[00m\n"
-	t[title]="\n\033[01;36m ### [ $2 ] ###\033[00m\n"
-	t[sub_title]="\033[01;33m - $2\033[00m"
-	t[dialogue]="\033[01m [$2]: $3\033[00m"
-	t[error]="\033[01;31m {$2}: $3\033[00m"
-	t[sucess]="\033[01;32m ($2): $3\033[00m"
-	t[alert]="\033[01;33m /$2/: $3\033[00m"
+	t[progress]="\033[01;35m [$2]: -=- ${out_a[@]:2} -=-\033[00m"
+	t[list]="\033[01m $2: [ $($prt ${out_a[@]:2}|tr ' ' ', ') ]\033[00m "
+	t[high_title]="\n\033[01;36m******** [ ${out_a[@]:1} ] ********\033[00m\n"
+	t[alert_high_title]="\n\033[01;33m******** / ${out_a[@]:1} / ********\033[00m\n"
+	t[error_high_title]="\n\033[01;31m*#*#*#*# { ${out_a[@]:1} } #*#*#*#*\033[00m\n"
+	t[title]="\n\033[01;36m ### [ ${out_a[@]:1} ] ###\033[00m\n"
+	t[sub_title]="\033[01;33m - ${out_a[@]:1}\033[00m"
+	t[dialogue]="\033[01m [$2]: ${out_a[@]:2}\033[00m"
+	t[error]="\033[01;31m {$2}: ${out_a[@]:2}\033[00m"
+	t[sucess]="\033[01;32m ($2): ${out_a[@]:2}\033[00m"
+	t[alert]="\033[01;33m /$2/: ${out_a[@]:2}\033[00m"
 	
 	#simple arguments
 	t[0]=${t[header]}
@@ -452,46 +453,48 @@ sfm(){
 	done
 }
 blog(){
+#data
 	blog_a=($*)
 	log_hist=($(cat $log))
 	line=($(grep "$2" $log))
+
 	case $1 in
-	"-a"|"-e"|"-d")
+	"-a"|"-e"|"-d") #register a alert compatible with the output functions
 		if [[ ! -z $line ]] && [[ $1 != "-d" ]] && [[ $line != "-e" ]]
 		then
 			sed -i "/$2/d" $log
 		fi
 		if [[ $line != *"-e"* ]] || [[ $1 != "-a" ]]
 		then
-			$prt "$1 $2 $3" >> $log
+			$prt ${blog_a[@]} >> $log
 		fi
 		if [ $blog_verbose = 1 ]
 		then
-			output "$1" "$2" "$3"
+			output ${blog_a[@]}
 		fi
 	;;
-	"-reg")
+	"-reg") #register a custom value
 		$prt "${blog_a[@]:1}" | sed "s/\n//g" >> $log
 	;;
-	"-ed")
+	"-ed") #edit a line, keeps the previous key
 		if [[ ! -z $line ]]
 		then
 			sed -i "/$2/d" $log
-			$prt "${blog_a[@]:1}" | sed "s/\n//g" >> $log
+			$prt ${blog_a[@]:1} | sed "s/\n//g" >> $log
 		fi
 	;;
-	"-sub") #substitute the line with the found value
+	"-sub") #substitute the line
 		if [[ ! -z $line ]]
 		then
 			sed -i "/$2/d" $log
-			$prt "${blog_a[@]:3}" | sed "s/\n//g" >> $log
+			$prt ${blog_a[@]:3} | sed "s/\n//g" >> $log
 		fi
 	;;
 	"-ck") #returns the line with the found value
-		grep "${blog_a[@]:1}" $log
+		grep ${blog_a[@]:1} $log
 	;;
 	"-ckr") #returns the line with the found value and remove it
-		grep "${blog_a[@]:1}" $log
+		grep ${blog_a[@]:1} $log
 		sed -i "/"${blog_a[@]:1}"/d" $log
 	;;
 	esac
