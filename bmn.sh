@@ -456,7 +456,7 @@ blog(){
 	log_hist=($(cat $log))
 	case $1 in
 	"-a"|"-e"|"-d")
-		if [[ ! -z $(grep $2 $log) ]] && [[ $1 != "-d" ]]
+		if [[ ! -z $(grep "$2" $log) ]] && [[ $1 != "-d" ]]
 		then
 			sed -i "/$2/d" $log
 		fi
