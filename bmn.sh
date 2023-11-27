@@ -454,13 +454,18 @@ sfm(){
 blog(){
 	blog_a=($*)
 	log_hist=($(cat $log))
+	line=($(grep "$2" $log))
+	
 	case $1 in
 	"-a"|"-e"|"-d")
-		if [[ ! -z $(grep "$2" $log) ]] && [[ $1 != "-d" ]]
+		if [[ ! -z $line ]] && [[ $1 != "-d" ]] && [[ $line != "-e" ]]
 		then
 			sed -i "/$2/d" $log
 		fi
-		$prt "$1 $2 $3" >> $log
+		if [[ $line != *"-e"* ]] || [[ $1 != "-a" ]]
+		then
+			$prt "$1 $2 $3" >> $log
+		fi
 		if [ $blog_verbose = 1 ]
 		then
 			output "$1" "$2" "$3"
@@ -470,14 +475,14 @@ blog(){
 		$prt "${blog_a[@]:1}" | sed "s/\n//g" >> $log
 	;;
 	"-ed")
-		if [[ ! -z $(grep "$2" $log) ]]
+		if [[ ! -z $line ]]
 		then
 			sed -i "/$2/d" $log
 			$prt "${blog_a[@]:1}" | sed "s/\n//g" >> $log
 		fi
 	;;
 	"-sub")
-		if [[ ! -z $(grep "$2" $log) ]]
+		if [[ ! -z $line ]]
 		then
 			sed -i "/$2/d" $log
 			$prt "${blog_a[@]:3}" | sed "s/\n//g" >> $log
