@@ -1,5 +1,5 @@
 # Config Bundle Manager (B.M.N)
-It is something like a package manager created to facilitate the post-installation of Linux based operational systems.
+It is something like a package manager (but weirder), created to facilitate the post-installation of Linux based operational systems.
 
 # Setup instructions
 Install syntax:
