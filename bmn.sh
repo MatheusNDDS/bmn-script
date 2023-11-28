@@ -110,7 +110,7 @@ load_data $*
 		done
 	elif [[ "$1" = '-li' ]] || [[ "$1" = '--lc-install' ]]
 	then
-		if [[ $2 = *"$cfg_file"* ]]
+		if [[ $2 = *"$file_format"* ]]
 		then
 			bnd_ignore=()
 			output -hT "Importing bundle"
@@ -253,7 +253,7 @@ output(){
 	t[alert]="\033[01;33m /$2/: ${out_a[@]:2}\033[00m"
 	
 	#simple arguments
-	t[0]=${t[header]}
+	t[0]=${t[header]} #
 	t[1]=${t[info_header]}
 	t[2]=${t[help_text]}
 	t[3]=${t[bnd_parser_data]}
@@ -269,7 +269,12 @@ output(){
 	t['-s']=${t[sucess]}
 	t['-a']=${t[alert]}
 	
-	$prt ${t[$1]}
+	if [[ $1 != "-qi" ]]
+	then
+		$prt ${t[$1]}
+	else
+		$prt ${!t[@]}
+	fi
 }
 pma(){
 pma_a=($*)
@@ -462,9 +467,11 @@ blog(){
 	blog_a=($*)
 	log_hist=($(cat $log))
 	line=($(grep -- "$2" $log))
-
+	output_index=($(output -qi))
+	
 	case $1 in
 	"-a"|"-e"|"-d") #register a alert compatible with the output functions
+	#blog -d "@key" "all text arguments"
 		if [[ ! -z $line ]] && [[ $1 != "-d" ]] && [[ $line != "-e" ]]
 		then
 			sed -i "/$2/d" $log
@@ -475,28 +482,40 @@ blog(){
 		fi
 		if [[ $blog_verbose = 1 ]]
 		then
-			output ${blog_a[@]}
+			output $($prt ${blog_a[@]}| sed 's/@//g')
 		fi
 	;;
 	"-reg") #register a custom value
-		$prt "${blog_a[@]:1}" | sed "s/\n//g" >> $log
-		if [[ $blog_verbose = 1 ]]
+	#blog -reg -d "@key" "all text arguments"
+		if [[ ${output_index[@]} != *"${blog_a[1]}"* ]]
 		then
-			output ${blog_a[@]:1}
+			output -e blog type of data not especified
+			output -d blog use: ${output_index[@]}
+		elif [[ “${blog_a[2]}” != *"@"* ]]
+		then
+			output -e blog missin “@” key symbol for “${blog_a[2]}”
+		else
+			$prt "${blog_a[@]:1}" | sed "s/\n//g" >> $log
+			if [[ $blog_verbose = 1 ]]
+			then
+				output $($prt ${blog_a[@]}| sed 's/@//g')
+			fi
 		fi
 	;;
 	"-ed") #edit a line, keeps the previous key
+	#blog -ed "@keyQ" -d "@key" "all text arguments"
 		if [[ ! -z $line ]]
 		then
 			sed -i "/$2/d" $log
 			$prt ${blog_a[@]:1} | sed "s/\n//g" >> $log
 			if [[ $blog_verbose = 1 ]]
 			then
-				output ${blog_a[@]:1}
+				output $($prt ${blog_a[@]}| sed 's/@//g')
 			fi
 		fi
 	;;
 	"-sub") #substitute the line
+	#blog -sub "@keyQ" -d "@key" "all text arguments"
 		if [[ ! -z $line ]]
 		then
 			sed -i "/$2/d" $log
@@ -709,10 +728,10 @@ cook(){
 	
 	recipe_log=($(blog -ckr $1))
 	key="${recipe_log[0]} ${recipe_log[1]}"
-	if [ "$key" = "-a $1" ]
+	if [ "$key" = "-a @$1" ]
 	then
 		output -ahT "“$1$(bnd_parser -pbf)” Recipe Returned Problems" 
-	elif [ "$key" = "-e $1" ]
+	elif [ "$key" = "-e @$1" ]
 	then
 		output -ehT "“$1$(bnd_parser -pbf)” Recipe Returned Erros"
 	else
@@ -738,7 +757,7 @@ setup(){
 	$elf $cmd_srcd/$name
 #init file buid
 	$prt "source $cmd_srcd/$name" > $init_file
-	$prt 'export PS1="\\n“\w”\\n$(output -d $name)"\nalias q="exit 0"\nalias x="clear"\nalias c="$editor $cfg_file"\nalias i="$editor $init_file"\nalias r="$editor $pdir/release"\nalias l="$editor $log"\nalias h="$prt +\\n c: edit config\\n i: edit init\\n r: edit release\\n l: edit log\\n x: clear prompt\\n h: help\\n q: exit+\nblog_verbose=1"' | tr '+' "'" >> $init_file
+	$prt 'export PS1="\\n“\w”\\n$(output -d $name)"\nalias q="exit 0"\nalias x="clear"\nalias c="$editor $cfg_file"\nalias i="$editor $init_file"\nalias r="$editor $pdir/release"\nalias l="$editor $log"\nalias h="$prt +\\n c: edit config\\n i: edit init\\n r: edit release\\n l: edit log\\n x: clear prompt\\n h: help\\n q: exit+"\nblog_verbose=1' | tr '+' "'" >> $init_file
 #Package manager autodetect
 	output -p $name "Detecting Package Manager"
 	pma -qpm 2> blog
