@@ -461,7 +461,7 @@ blog(){
 #data
 	blog_a=($*)
 	log_hist=($(cat $log))
-	line=($(grep "$2" $log))
+	line=($(grep -- "$2" $log))
 
 	case $1 in
 	"-a"|"-e"|"-d") #register a alert compatible with the output functions
