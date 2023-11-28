@@ -104,40 +104,45 @@ load_data $*
 				$srm $bnd_dir/$bnd_name
 				lc_inst=0
 			else
-				output -e $name "“$bnd_name” bundle not found"
+				output -a $name "“$bnd_name” bundle not found"
 				output -d i "Maybe the relese file has outdated, try “$name -rU”."
 			fi
 		done
 	elif [[ "$1" = '-li' ]] || [[ "$1" = '--lc-install' ]]
 	then
-		bnd_ignore=()
-		output -hT "Importing bundle"
-		for i in ${args[@]:3}
-		do
-			bnd_parser $i
-			if [ -f $bndf ]
-			then
-				output -p $name "Importing “$bnd_name”"
-				$cp $bndf $bnd_dir/
-			else
-				output -e $name "File “$i” does not exists"
-				bnd_ignore+=($i)
-			fi
-		done
-		for i in ${args[@]:3}
-		do
-			if [[ ${bnd_ignore[*]} != *"$i"* ]]
-			then
+		if [[ $2 = *"$cfg_file"* ]]
+		then
+			bnd_ignore=()
+			output -hT "Importing bundle"
+			for i in ${args[@]:3}
+			do
 				bnd_parser $i
-				output -hT "Installing “$bnd_name$(bnd_parser -pbf)”"
-				$srm $bnd_dir/$bnd_name
-				cd $bnd_dir/
-				unpack $bnd_name
-				cook $bnd_name ${bnd_flags[@]}
-				$srm $bnd_dir/$bnd_name
-				lc_inst=0
-			fi
-		done
+				if [ -f $bndf ]
+				then
+					output -p $name "Importing “$bnd_name”"
+					$cp $bndf $bnd_dir/
+				else
+					output -a $name "File “$i” does not exists"
+					bnd_ignore+=($i)
+				fi
+			done
+			for i in ${args[@]:3}
+			do
+				if [[ ${bnd_ignore[*]} != *"$i"* ]]
+				then
+					bnd_parser $i
+					output -hT "Installing “$bnd_name$(bnd_parser -pbf)”"
+					$srm $bnd_dir/$bnd_name
+					cd $bnd_dir/
+					unpack $bnd_name
+					cook $bnd_name ${bnd_flags[@]}
+					$srm $bnd_dir/$bnd_name
+					lc_inst=0
+				fi
+			done
+		else
+			output -a $name "“$file_format” file not especified"
+		fi
 	elif [[ "$1" = '-di' ]] || [[ "$1" = '--dir-install' ]]
 	then
 		bnd_ignore=()
@@ -150,7 +155,7 @@ load_data $*
 				output -p $name "Importing “$bnd_name”"
 				$cp $bndf $bnd_dir/
 			else
-				output -e $name "Directory “$bnd_name” does not exists"
+				output -a $name "Directory “$bnd_name” does not exists"
 				bnd_ignore+=($i)
 			fi
 		done
@@ -388,7 +393,7 @@ sfm(){
 	sfm_a=($*)
 	for dof in ${sfm_a[@]:1}
 	do
-		if [ "$dof" != "/" ] || [ "$dof" != "$pdir" ] || [ "$dof" != $pdir/* ]
+		if [ "$dof" != "/" ] || [ "$dof" != "$pdir" ] || [ $pdir/* != *"$dof"* ]
 		then
 			case ${sfm_a[0]} in
 				'-d')
@@ -448,7 +453,7 @@ sfm(){
 				;;
 			esac
 		else
-			output -e "SFM" "cannot remove root directory “/”"
+			output -a "SFM" "cannot remove “$dof” directory"
 		fi
 	done
 }
@@ -475,12 +480,20 @@ blog(){
 	;;
 	"-reg") #register a custom value
 		$prt "${blog_a[@]:1}" | sed "s/\n//g" >> $log
+		if [ $blog_verbose = 1 ]
+		then
+			output ${blog_a[@]:1}
+		fi
 	;;
 	"-ed") #edit a line, keeps the previous key
 		if [[ ! -z $line ]]
 		then
 			sed -i "/$2/d" $log
 			$prt ${blog_a[@]:1} | sed "s/\n//g" >> $log
+			if [ $blog_verbose = 1 ]
+			then
+				output ${blog_a[@]:1}
+			fi
 		fi
 	;;
 	"-sub") #substitute the line
@@ -488,6 +501,10 @@ blog(){
 		then
 			sed -i "/$2/d" $log
 			$prt ${blog_a[@]:3} | sed "s/\n//g" >> $log
+			if [ $blog_verbose = 1 ]
+			then
+				output ${blog_a[@]:3}
+			fi
 		fi
 	;;
 	"-ck") #returns the line with the found value
