@@ -473,14 +473,14 @@ blog(){
 		then
 			$prt ${blog_a[@]} >> $log
 		fi
-		if [ $blog_verbose = 1 ]
+		if [[ $blog_verbose = 1 ]]
 		then
 			output ${blog_a[@]}
 		fi
 	;;
 	"-reg") #register a custom value
 		$prt "${blog_a[@]:1}" | sed "s/\n//g" >> $log
-		if [ $blog_verbose = 1 ]
+		if [[ $blog_verbose = 1 ]]
 		then
 			output ${blog_a[@]:1}
 		fi
@@ -490,7 +490,7 @@ blog(){
 		then
 			sed -i "/$2/d" $log
 			$prt ${blog_a[@]:1} | sed "s/\n//g" >> $log
-			if [ $blog_verbose = 1 ]
+			if [[ $blog_verbose = 1 ]]
 			then
 				output ${blog_a[@]:1}
 			fi
@@ -501,11 +501,14 @@ blog(){
 		then
 			sed -i "/$2/d" $log
 			$prt ${blog_a[@]:3} | sed "s/\n//g" >> $log
-			if [ $blog_verbose = 1 ]
+			if [[ $blog_verbose = 1 ]]
 			then
 				output ${blog_a[@]:3}
 			fi
 		fi
+	;;
+	"-rm")
+		sed -i "/"${blog_a[@]:1}"/d" $log
 	;;
 	"-ck") #returns the line with the found value
 		grep ${blog_a[@]:1} $log
