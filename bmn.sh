@@ -236,38 +236,21 @@ load_data $*
 output(){
 	out_a=($*)
 	declare -A t
-	t[header]="\033[01;36m-=/Configuration Bundles Manager/=-\033[00m \n~ MatheusNDDS : https://github.com/MatheusNDDS\n"
-	t[info_header]="\033[01;33m[Properties]\033[00m\n User: $u\n Home: $h\n PkgM: $pm\n Repo: $repo"
-	t[help_text]="\033[01;33m[Commands]\033[00m\n --install,-i : Install bundles from repository, use -iu to update $pm repositories during installation.\n --lc-install,-li : Install bundles from $file_format file path, use -liu to update $pm repositories during installation.\n --dir-install,-di : Install bundles from unpacked dir path, use -diu to update $pm repositories during installation.\n --dowload,-d : Download bundles from repository.\n --repo-update,-rU : Update repository release file, use this regularly.\n --$name-update,-U : Update $name script from Repo source or local script.\n --list-bnds,-l : List or search for bundles in repo file.\n --live-shell,-sh : Run live shell for testing $name functions.\n --properties,-p : Prints the user information that $name uses.\n --help,-h : Print help text."
-	t[bnd_parser_data]="bndp_a=(${bndp_a[@]})\nbndf=$bndf\nbnd_raw_name=$bnd_raw_name\nbnd_pre_name=(${bnd_pre_name[@]})\nbnd_name=$bnd_name\nflags=(${bnd_flags[@]})"
-	t[progress]="\033[01;35m [$2]: -=- ${out_a[@]:2} -=-\033[00m"
-	t[list]="\033[01m $2: [ $($prt ${out_a[@]:2}|tr ' ' ', ') ]\033[00m "
-	t[high_title]="\n\033[01;36m******** [ ${out_a[@]:1} ] ********\033[00m\n"
-	t[alert_high_title]="\n\033[01;33m******** / ${out_a[@]:1} / ********\033[00m\n"
-	t[error_high_title]="\n\033[01;31m*#*#*#*# { ${out_a[@]:1} } #*#*#*#*\033[00m\n"
-	t[title]="\n\033[01;36m ### [ ${out_a[@]:1} ] ###\033[00m\n"
-	t[sub_title]="\033[01;33m - ${out_a[@]:1}\033[00m"
-	t[dialogue]="\033[01m [$2]: ${out_a[@]:2}\033[00m"
-	t[error]="\033[01;31m {$2}: ${out_a[@]:2}\033[00m"
-	t[sucess]="\033[01;32m ($2): ${out_a[@]:2}\033[00m"
-	t[alert]="\033[01;33m /$2/: ${out_a[@]:2}\033[00m"
-	
-	#simple arguments
-	t[0]=${t[header]} #
-	t[1]=${t[info_header]}
-	t[2]=${t[help_text]}
-	t[3]=${t[bnd_parser_data]}
-	t['-p']=${t[progress]}
-	t['-l']=${t[list]}
-	t['-d']=${t[dialogue]}
-	t['-T']=${t[title]}
-	t['-hT']=${t[high_title]}
-	t['-ahT']=${t[alert_high_title]}
-	t['-ehT']=${t[error_high_title]}
-	t['-t']=${t[sub_title]}
-	t['-e']=${t[error]}
-	t['-s']=${t[sucess]}
-	t['-a']=${t[alert]}
+	t[0]="\033[01;36m-=/Configuration Bundles Manager/=-\033[00m \n~ MatheusNDDS : https://github.com/MatheusNDDS\n"
+	t[1]="\033[01;33m[Properties]\033[00m\n User: $u\n Home: $h\n PkgM: $pm\n Repo: $repo"
+	t[2]="\033[01;33m[Commands]\033[00m\n --install,-i : Install bundles from repository, use -iu to update $pm repositories during installation.\n --lc-install,-li : Install bundles from $file_format file path, use -liu to update $pm repositories during installation.\n --dir-install,-di : Install bundles from unpacked dir path, use -diu to update $pm repositories during installation.\n --dowload,-d : Download bundles from repository.\n --repo-update,-rU : Update repository release file, use this regularly.\n --$name-update,-U : Update $name script from Repo source or local script.\n --list-bnds,-l : List or search for bundles in repo file.\n --live-shell,-sh : Run live shell for testing $name functions.\n --properties,-p : Prints the user information that $name uses.\n --help,-h : Print help text."
+	t[3]="bndp_a=(${bndp_a[@]})\nbndf=$bndf\nbnd_raw_name=$bnd_raw_name\nbnd_pre_name=(${bnd_pre_name[@]})\nbnd_name=$bnd_name\nflags=(${bnd_flags[@]})"
+	t['-p']="\033[01;35m [$2]: -=- ${out_a[@]:2} -=-\033[00m"
+	t['-l']="\033[01m $2: [ $($prt ${out_a[@]:2}|tr ' ' ', ') ]\033[00m "
+	t['-hT']="\n\033[01;36m******** [ ${out_a[@]:1} ] ********\033[00m\n"
+	t['-ahT']="\n\033[01;33m******** / ${out_a[@]:1} / ********\033[00m\n"
+	t['-ehT']="\n\033[01;31m*#*#*#*# { ${out_a[@]:1} } #*#*#*#*\033[00m\n"
+	t['-T']="\n\033[01;36m ### [ ${out_a[@]:1} ] ###\033[00m\n"
+	t['-t']="\033[01;33m - ${out_a[@]:1}\033[00m"
+	t['-d']="\033[01m [$2]: ${out_a[@]:2}\033[00m"
+	t['-e']="\033[01;31m {$2}: ${out_a[@]:2}\033[00m"
+	t['-s']="\033[01;32m ($2): ${out_a[@]:2}\033[00m"
+	t['-a']="\033[01;33m /$2/: ${out_a[@]:2}\033[00m"
 	
 	if [[ $1 != "-qi" ]]
 	then
@@ -467,11 +450,10 @@ blog(){
 	blog_a=($*)
 	log_hist=($(cat $log))
 	line=($(grep -- "$2" $log))
-	output_index=($(output -qi))
+	output_index="$(output -qi)"
 	
 	case $1 in
 	"-a"|"-e"|"-d") #register a alert compatible with the output functions
-	#blog -d "@key" "all text arguments"
 		if [[ ! -z $line ]] && [[ $1 != "-d" ]] && [[ $line != "-e" ]]
 		then
 			sed -i "/$2/d" $log
@@ -486,14 +468,12 @@ blog(){
 		fi
 	;;
 	"-reg") #register a custom value
-	#blog -reg -d "@key" "all text arguments"
-		if [[ ${output_index[@]} != *"${blog_a[1]}"* ]]
+		if [[ $output_index != *"${blog_a[1]}"* ]] || [[ ${blog_a[2]} != "@"* ]] || [[ ${blog_a[@]:3} = *"@"* ]]
 		then
-			output -e blog type of data not especified
-			output -d blog use: ${output_index[@]}
-		elif [[ “${blog_a[2]}” != *"@"* ]]
-		then
-			output -e blog missin “@” key symbol for “${blog_a[2]}”
+			output -a blog wrong registration syntax for “-reg”
+			output -d blog/syntax 'blog -reg “-d” “@key” “text arguments”'
+			output -d "data types" $output_index
+			output -t blog text arguments cannot contain “@”
 		else
 			$prt "${blog_a[@]:1}" | sed "s/\n//g" >> $log
 			if [[ $blog_verbose = 1 ]]
@@ -503,38 +483,66 @@ blog(){
 		fi
 	;;
 	"-ed") #edit a line, keeps the previous key
-	#blog -ed "@keyQ" -d "@key" "all text arguments"
-		if [[ ! -z $line ]]
+		if [[ $output_index != *"${blog_a[2]}"* ]] || [[ ${blog_a[1]} != *"@"* ]] || [[ ${blog_a[@]:3} = *"@"* ]]
 		then
-			sed -i "/$2/d" $log
-			$prt ${blog_a[@]:1} | sed "s/\n//g" >> $log
-			if [[ $blog_verbose = 1 ]]
+			output -a blog wrong registration syntax for “-ed”
+			output -d blog/syntax 'blog -ed “@keyQwerry” ”-d” “text to substitute”'
+			output -d "data types" $output_index
+			output -t blog text arguments cannot contain “@”
+		else
+			if [[ ! -z $line ]]
 			then
-				output $($prt ${blog_a[@]}| sed 's/@//g')
+				sed -i "/$2/d" $log
+				$prt ${blog_a[2]} ${line[1]} ${blog_a[@]:3} | sed "s/\n//g" >> $log
+				if [[ $blog_verbose = 1 ]]
+				then
+					output $($prt ${blog_a[@]}| sed 's/@//g')
+				fi
 			fi
 		fi
 	;;
 	"-sub") #substitute the line
-	#blog -sub "@keyQ" -d "@key" "all text arguments"
-		if [[ ! -z $line ]]
+		if [[ $output_index != *"${blog_a[2]}"* ]] || [[ ${blog_a[1]} != *"@"* ]] || [[ ${blog_a[3]} != "@"* ]] || [[ ${blog_a[@]:4} = *"@"* ]]
 		then
-			sed -i "/$2/d" $log
-			$prt ${blog_a[@]:3} | sed "s/\n//g" >> $log
-			if [[ $blog_verbose = 1 ]]
+			output -a blog wrong registration syntax for “-ed”
+			output -d blog/syntax 'blog -sub “@keyQwerry” “-d” “@key” “text arguments”'
+			output -d "data types" $output_index
+			output -t blog text arguments cannot contain “@”
+		else
+			if [[ ! -z $line ]]
 			then
-				output ${blog_a[@]:3}
+				sed -i "/$2/d" $log
+				$prt ${blog_a[@]:2} | sed "s/\n//g" >> $log
+				if [[ $blog_verbose = 1 ]]
+				then
+					output ${blog_a[@]:3}
+				fi
 			fi
 		fi
 	;;
 	"-rm")
-		sed -i "/"${blog_a[@]:1}"/d" $log
+		if  [[ $output_index != *"${blog_a[1]}"* ]] || [[ "${blog_a[2]}" != "@"* ]]
+		then
+			output -a blog wrong registration syntax for “-rm”
+			output -d blog/syntax 'blog -rm “-d” “@key”'
+			output -d "data types" $output_index
+		else
+			sed -i "/${blog_a[1]} ${blog_a[2]}/d" $log
+		fi
 	;;
 	"-ck") #returns the line with the found value
 		grep ${blog_a[@]:1} $log
 	;;
 	"-ckr") #returns the line with the found value and remove it
-		grep ${blog_a[@]:1} $log
-		sed -i "/"${blog_a[@]:1}"/d" $log
+		if  [[ $output_index != *"${blog_a[1]}"* ]] || [[ "${blog_a[2]}" != "@"* ]]
+		then
+			output -a blog wrong registration syntax for “-ckr”
+			output -d blog/syntax 'blog -ckr “-d” “@key”'
+			output -d "data types" $output_index
+		else
+			grep "${blog_a[1]} ${blog_a[2]}" $log
+			sed -i "/${blog_a[1]} ${blog_a[2]}/d" $log
+		fi
 	;;
 	esac
 }
@@ -726,7 +734,7 @@ cook(){
 		$rex $*
 	fi
 	
-	recipe_log=($(blog -ckr $1))
+	recipe_log=($(blog -ckr -e $1))
 	key="${recipe_log[0]} ${recipe_log[1]}"
 	if [ "$key" = "-a @$1" ]
 	then
