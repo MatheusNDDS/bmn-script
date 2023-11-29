@@ -449,11 +449,15 @@ blog(){
 #data
 	blog_a=($*)
 	log_hist=($(cat $log))
-	line=($(grep -- "$2" $log))
+	line=($(grep -- "$1 $2" $log))
 	output_index="$(output -qi)"
 	
 	case $1 in
-	"-a"|"-e"|"-d") #register a alert compatible with the output functions
+	"-a"|"-e"|"-d") # quick a alert register for bundles
+	if [[ $output_index != *"${blog_a[0]}"* ]] || [[ ${blog_a[1]} != "@"* ]] || [[ ${blog_a[@]:2} = *"@"* ]]
+	then
+		output -d blog/syntax 'blog “-d” “@key” “text arguments (cannot contain @)”'
+	else
 		if [[ ! -z $line ]] && [[ $1 != "-d" ]] && [[ $line != "-e" ]]
 		then
 			sed -i "/$2/d" $log
@@ -466,14 +470,12 @@ blog(){
 		then
 			output $($prt ${blog_a[@]}| sed 's/@//g')
 		fi
+	fi
 	;;
 	"-reg") #register a custom value
 		if [[ $output_index != *"${blog_a[1]}"* ]] || [[ ${blog_a[2]} != "@"* ]] || [[ ${blog_a[@]:3} = *"@"* ]]
 		then
-			output -a blog wrong registration syntax for “-reg”
-			output -d blog/syntax 'blog -reg “-d” “@key” “text arguments”'
-			output -d "data types" $output_index
-			output -t blog text arguments cannot contain “@”
+			output -d blog/syntax 'blog -reg “-d” “@key” “text arguments (cannot contain @)”'
 		else
 			$prt "${blog_a[@]:1}" | sed "s/\n//g" >> $log
 			if [[ $blog_verbose = 1 ]]
@@ -485,10 +487,7 @@ blog(){
 	"-ed") #edit a line, keeps the previous key
 		if [[ $output_index != *"${blog_a[2]}"* ]] || [[ ${blog_a[1]} != *"@"* ]] || [[ ${blog_a[@]:3} = *"@"* ]]
 		then
-			output -a blog wrong registration syntax for “-ed”
-			output -d blog/syntax 'blog -ed “@keyQwerry” ”-d” “text to substitute”'
-			output -d "data types" $output_index
-			output -t blog text arguments cannot contain “@”
+			output -d blog/syntax 'blog -ed “@keyQwerry” ”-d” “text arguments (cannot contain @)”'
 		else
 			if [[ ! -z $line ]]
 			then
@@ -504,10 +503,7 @@ blog(){
 	"-sub") #substitute the line
 		if [[ $output_index != *"${blog_a[2]}"* ]] || [[ ${blog_a[1]} != *"@"* ]] || [[ ${blog_a[3]} != "@"* ]] || [[ ${blog_a[@]:4} = *"@"* ]]
 		then
-			output -a blog wrong registration syntax for “-ed”
-			output -d blog/syntax 'blog -sub “@keyQwerry” “-d” “@key” “text arguments”'
-			output -d "data types" $output_index
-			output -t blog text arguments cannot contain “@”
+			output -d blog/syntax 'blog -sub “@keyQwerry” “-d” “@key” “text arguments (cannot contain @)”'
 		else
 			if [[ ! -z $line ]]
 			then
@@ -520,28 +516,44 @@ blog(){
 			fi
 		fi
 	;;
-	"-rm")
+	"-rm") #removes a especific type and key line
 		if  [[ $output_index != *"${blog_a[1]}"* ]] || [[ "${blog_a[2]}" != "@"* ]]
 		then
-			output -a blog wrong registration syntax for “-rm”
 			output -d blog/syntax 'blog -rm “-d” “@key”'
-			output -d "data types" $output_index
 		else
 			sed -i "/${blog_a[1]} ${blog_a[2]}/d" $log
 		fi
 	;;
-	"-ck") #returns the line with the found value
-		grep ${blog_a[@]:1} $log
+	"-del") #delete all key lines
+		if  [[ "${blog_a[1]}" != "@"* ]]
+		then
+			output -d blog/syntax 'blog -del “@key”'
+		else
+			sed -i "/${blog_a[1]}/d" $log
+		fi
 	;;
-	"-ckr") #returns the line with the found value and remove it
+	"-gl") #returns the line with the found value
+			if  [[ $output_index != *"${blog_a[1]}"* ]] || [[ "${blog_a[2]}" != "@"* ]]
+		then
+			output -d blog/syntax 'blog -gl “-d” “@key”'
+		else
+			grep -- "${blog_a[1]} "${blog_a[2]} $log
+		fi
+	;;
+	"-gal") #returns all the key lines
+			if  [[ "${blog_a[1]}" != "@"* ]]
+			then
+				output -d "blog/syntax" 'blog -gal “@key”'
+			else
+				grep -- "${blog_a[1]}" $log
+			fi
+	;;
+	"-gd") #returns only the data without type or key
 		if  [[ $output_index != *"${blog_a[1]}"* ]] || [[ "${blog_a[2]}" != "@"* ]]
 		then
-			output -a blog wrong registration syntax for “-ckr”
-			output -d blog/syntax 'blog -ckr “-d” “@key”'
-			output -d "data types" $output_index
+			output -d blog/syntax 'blog -gd “-d” “@key”'
 		else
-			grep "${blog_a[1]} ${blog_a[2]}" $log
-			sed -i "/${blog_a[1]} ${blog_a[2]}/d" $log
+			$prt ${line[@]:2}
 		fi
 	;;
 	esac
@@ -734,12 +746,12 @@ cook(){
 		$rex $*
 	fi
 	
-	recipe_log=($(blog -ckr -e $1))
-	key="${recipe_log[0]} ${recipe_log[1]}"
-	if [ "$key" = "-a @$1" ]
+	recipe_log=($(blog -gal @$1))
+	blog -del @$1
+	if [[ "${recipe_log[@]}" = *"-a"* ]]
 	then
 		output -ahT "“$1$(bnd_parser -pbf)” Recipe Returned Problems" 
-	elif [ "$key" = "-e @$1" ]
+	elif [[ "${recipe_log[@]}" = *"-e"* ]]
 	then
 		output -ehT "“$1$(bnd_parser -pbf)” Recipe Returned Erros"
 	else
