@@ -449,111 +449,104 @@ blog(){
 #data
 	blog_a=($*)
 	log_hist=($(cat $log))
-	line=($(grep -- "$1 $2" $log))
+	line=($(grep -- "$2 $3" $log))
 	output_index="$(output -qi)"
 	
 	case $1 in
 	"-a"|"-e"|"-d") # quick a alert register for bundles
-	if [[ $output_index != *"${blog_a[0]}"* ]] || [[ ${blog_a[1]} != "@"* ]] || [[ ${blog_a[@]:2} = *"@"* ]]
+	if [[ $output_index != *"${blog_a[0]}"* ]] || [[ $2 != "@"* ]] || [[ ${blog_a[@]:2} = *"@"* ]]
 	then
 		output -d blog/syntax 'blog “-d” “@key” “text arguments (cannot contain @)”'
 	else
+		line=($(grep -- "$1 $2" $log))
 		if [[ ! -z $line ]] && [[ $1 != "-d" ]] && [[ $line != "-e" ]]
 		then
-			sed -i "/$2/d" $log
+			sed -i "/$1 $2/d" $log
 		fi
 		if [[ $line != *"-e"* ]] || [[ $1 != "-a" ]]
 		then
-			$prt ${blog_a[@]} >> $log
+			echo "$*" >> $log
 		fi
 		if [[ $blog_verbose = 1 ]]
 		then
-			output $($prt ${blog_a[@]}| sed 's/@//g')
+			output $(echo "$*" | sed 's/@//g')
 		fi
 	fi
 	;;
 	"-reg") #register a custom value
-		if [[ $output_index != *"${blog_a[1]}"* ]] || [[ ${blog_a[2]} != "@"* ]] || [[ ${blog_a[@]:3} = *"@"* ]]
+		if [[ $output_index != *"$2"* ]] || [[ $3 != "@"* ]] || [[ ${blog_a[@]:3} = *"@"* ]]
 		then
 			output -d blog/syntax 'blog -reg “-d” “@key” “text arguments (cannot contain @)”'
 		else
-			$prt "${blog_a[@]:1}" | sed "s/\n//g" >> $log
+			echo "${blog_a[@]:1}" | sed "s/\n//g" >> $log
 			if [[ $blog_verbose = 1 ]]
 			then
-				output $($prt ${blog_a[@]}| sed 's/@//g')
+				output $(echo ${blog_a[@]}| sed 's/@//g')
 			fi
 		fi
 	;;
 	"-ed") #edit a line, keeps the previous key
-		if [[ $output_index != *"${blog_a[2]}"* ]] || [[ ${blog_a[1]} != *"@"* ]] || [[ ${blog_a[@]:3} = *"@"* ]]
+		if [[ $output_index != *"$2"* ]] || [[ $3 != *"@"* ]] || [[ ${blog_a[@]:3} = *"@"* ]]
 		then
-			output -d blog/syntax 'blog -ed “@keyQwerry” ”-d” “text arguments (cannot contain @)”'
+			output -d blog/syntax 'blog -ed “-d” “@keyQwerry” “text arguments (cannot contain @)”'
 		else
 			if [[ ! -z $line ]]
 			then
-				sed -i "/$2/d" $log
-				$prt ${blog_a[2]} ${line[1]} ${blog_a[@]:3} | sed "s/\n//g" >> $log
-				if [[ $blog_verbose = 1 ]]
-				then
-					output $($prt ${blog_a[@]}| sed 's/@//g')
-				fi
+				sed -i "/$2 $3/d" $log
+				echo "$2 $3" "${blog_a[@]:3}" | sed "s/\n//g" >> $log
 			fi
 		fi
 	;;
 	"-sub") #substitute the line
-		if [[ $output_index != *"${blog_a[2]}"* ]] || [[ ${blog_a[1]} != *"@"* ]] || [[ ${blog_a[3]} != "@"* ]] || [[ ${blog_a[@]:4} = *"@"* ]]
+		if [[ $output_index != *"$2"* ]] || [[ $3 != "@"* ]] ||  [[ $output_index != *"$4"* ]] || [[ $5 != "@"* ]] || [[ ${blog_a[@]:5} = *"@"* ]] 
 		then
-			output -d blog/syntax 'blog -sub “@keyQwerry” “-d” “@key” “text arguments (cannot contain @)”'
+			output -d blog/syntax 'blog -sub “-d” “@keyQwerry” “-d” “@key” “text arguments (cannot contain @)”'
 		else
 			if [[ ! -z $line ]]
 			then
 				sed -i "/$2/d" $log
-				$prt ${blog_a[@]:2} | sed "s/\n//g" >> $log
-				if [[ $blog_verbose = 1 ]]
-				then
-					output ${blog_a[@]:3}
-				fi
+				echo "${blog_a[@]:3}" | sed "s/\n//g" >> $log
 			fi
 		fi
 	;;
 	"-rm") #removes a especific type and key line
-		if  [[ $output_index != *"${blog_a[1]}"* ]] || [[ "${blog_a[2]}" != "@"* ]]
+		if  [[ $output_index != *"$2"* ]] || [[ "$3" != "@"* ]]
 		then
 			output -d blog/syntax 'blog -rm “-d” “@key”'
 		else
-			sed -i "/${blog_a[1]} ${blog_a[2]}/d" $log
+			sed -i "/$2 $2/d" $log
 		fi
 	;;
 	"-del") #delete all key lines
-		if  [[ "${blog_a[1]}" != "@"* ]]
+		if  [[ "$2" != "@"* ]]
 		then
 			output -d blog/syntax 'blog -del “@key”'
 		else
-			sed -i "/${blog_a[1]}/d" $log
+			sed -i "/$2/d" $log
 		fi
 	;;
 	"-gl") #returns the line with the found value
-			if  [[ $output_index != *"${blog_a[1]}"* ]] || [[ "${blog_a[2]}" != "@"* ]]
+			if  [[ $output_index != *"$2"* ]] || [[ "$3" != "@"* ]]
 		then
 			output -d blog/syntax 'blog -gl “-d” “@key”'
 		else
-			grep -- "${blog_a[1]} "${blog_a[2]} $log
+			grep -- "$2 $3" $log
 		fi
 	;;
 	"-gal") #returns all the key lines
-			if  [[ "${blog_a[1]}" != "@"* ]]
+			if  [[ "$2" != "@"* ]]
 			then
 				output -d "blog/syntax" 'blog -gal “@key”'
 			else
-				grep -- "${blog_a[1]}" $log
+				grep -- "$2" $log
 			fi
 	;;
 	"-gd") #returns only the data without type or key
-		if  [[ $output_index != *"${blog_a[1]}"* ]] || [[ "${blog_a[2]}" != "@"* ]]
+		if  [[ $output_index != *"$2"* ]] || [[ "$3" != "@"* ]]
 		then
 			output -d blog/syntax 'blog -gd “-d” “@key”'
 		else
-			$prt ${line[@]:2}
+			echo ${line[@]:2}
 		fi
 	;;
 	esac
