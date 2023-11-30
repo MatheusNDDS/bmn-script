@@ -104,7 +104,7 @@ load_data $*
 				$srm $bnd_dir/$bnd_name
 				lc_inst=0
 			else
-				output -a $name "“$bnd_name” bundle not found"
+				output -a $name "“$bnd_name” bundle not found in repository"
 				output -d i "Maybe the relese file has outdated, try “$name -rU”."
 			fi
 		done
@@ -256,7 +256,7 @@ output(){
 	then
 		$prt ${t[$1]}
 	else
-		$prt ${!t[@]}
+		$prt ${!t[@]} | sed "s/0 1 2 3//g"
 	fi
 }
 pma(){
