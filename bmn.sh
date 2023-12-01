@@ -240,23 +240,26 @@ output(){
 	t[1]="\033[01;33m[Properties]\033[00m\n User: $u\n Home: $h\n PkgM: $pm\n Repo: $repo"
 	t[2]="\033[01;33m[Commands]\033[00m\n --install,-i : Install bundles from repository, use -iu to update $pm repositories during installation.\n --lc-install,-li : Install bundles from $file_format file path, use -liu to update $pm repositories during installation.\n --dir-install,-di : Install bundles from unpacked dir path, use -diu to update $pm repositories during installation.\n --dowload,-d : Download bundles from repository.\n --repo-update,-rU : Update repository release file, use this regularly.\n --$name-update,-U : Update $name script from Repo source or local script.\n --list-bnds,-l : List or search for bundles in repo file.\n --live-shell,-sh : Run live shell for testing $name functions.\n --properties,-p : Prints the user information that $name uses.\n --help,-h : Print help text."
 	t[3]="bndp_a=(${bndp_a[@]})\nbndf=$bndf\nbnd_raw_name=$bnd_raw_name\nbnd_pre_name=(${bnd_pre_name[@]})\nbnd_name=$bnd_name\nflags=(${bnd_flags[@]})"
-	t['-p']="\033[01;35m [$2]: -=- ${out_a[@]:2} -=-\033[00m"
-	t['-l']="\033[01m $2: [ $($prt ${out_a[@]:2}|tr ' ' ', ') ]\033[00m "
-	t['-hT']="\n\033[01;36m******** [ ${out_a[@]:1} ] ********\033[00m\n"
-	t['-ahT']="\n\033[01;33m******** / ${out_a[@]:1} / ********\033[00m\n"
-	t['-ehT']="\n\033[01;31m*#*#*#*# { ${out_a[@]:1} } #*#*#*#*\033[00m\n"
-	t['-T']="\n\033[01;36m ### [ ${out_a[@]:1} ] ###\033[00m\n"
-	t['-t']="\033[01;33m - ${out_a[@]:1}\033[00m"
-	t['-d']="\033[01m [$2]: ${out_a[@]:2}\033[00m"
-	t['-e']="\033[01;31m {$2}: ${out_a[@]:2}\033[00m"
-	t['-s']="\033[01;32m ($2): ${out_a[@]:2}\033[00m"
-	t['-a']="\033[01;33m /$2/: ${out_a[@]:2}\033[00m"
+	
+## Formatting arguments
+#Text output formatting arguments are also used by blog() to register data.
+	t['-p']="\033[01;35m [$2]: -=- ${out_a[@]:2} -=-\033[00m" #Process
+	t['-l']="\033[01m $2: [ $($prt ${out_a[@]:2}|tr ' ' ', ') ]\033[00m " #List itens
+	t['-hT']="\n\033[01;36m******** [ ${out_a[@]:1} ] ********\033[00m\n" #High Title
+	t['-ahT']="\n\033[01;33m******** / ${out_a[@]:1} / ********\033[00m\n" #Alert High Title
+	t['-ehT']="\n\033[01;31m*#*#*#*# { ${out_a[@]:1} } #*#*#*#*\033[00m\n" #Error High Title
+	t['-T']="\n\033[01;36m ### [ ${out_a[@]:1} ] ###\033[00m\n" #Title
+	t['-t']="\033[01;33m - ${out_a[@]:1}\033[00m" #Subtitle
+	t['-d']="\033[01m [$2]: ${out_a[@]:2}\033[00m" #Dialog, blog Data
+	t['-e']="\033[01;31m {$2}: ${out_a[@]:2}\033[00m" #Error Dialog
+	t['-s']="\033[01;32m ($2): ${out_a[@]:2}\033[00m" #Sucess Dialog
+	t['-a']="\033[01;33m /$2/: ${out_a[@]:2}\033[00m" #Alert Dialog
 	
 	if [[ $1 != "-qi" ]]
 	then
 		$prt ${t[$1]}
 	else
-		$prt ${!t[@]} | sed "s/0 1 2 3//g"
+		$prt ${!t[@]} | sed 's/[0-9]//g'
 	fi
 }
 pma(){
@@ -446,7 +449,7 @@ sfm(){
 	done
 }
 blog(){
-#data
+# Simple Line based log  and data register
 	blog_a=($*)
 	log_hist=($(cat $log))
 	line=($(grep -- "$2 $3" $log))
@@ -457,6 +460,7 @@ blog(){
 	if [[ $output_index != *"${blog_a[0]}"* ]] || [[ $2 != "@"* ]] || [[ ${blog_a[@]:2} = *"@"* ]]
 	then
 		output -d blog/syntax 'blog “-d” “@key” “text arguments (cannot contain @)”'
+		output -d blog/dataTypes ${output_index[@]}
 	else
 		line=($(grep -- "$1 $2" $log))
 		if [[ ! -z $line ]] && [[ $1 != "-d" ]] && [[ $line != "-e" ]]
@@ -477,6 +481,7 @@ blog(){
 		if [[ $output_index != *"$2"* ]] || [[ $3 != "@"* ]] || [[ ${blog_a[@]:3} = *"@"* ]]
 		then
 			output -d blog/syntax 'blog -reg “-d” “@key” “text arguments (cannot contain @)”'
+			output -d blog/dataTypes ${output_index[@]}
 		else
 			echo "${blog_a[@]:1}" | sed "s/\n//g" >> $log
 			if [[ $blog_verbose = 1 ]]
@@ -489,6 +494,7 @@ blog(){
 		if [[ $output_index != *"$2"* ]] || [[ $3 != *"@"* ]] || [[ ${blog_a[@]:3} = *"@"* ]]
 		then
 			output -d blog/syntax 'blog -ail “-d” “@keyQwerry” “text arguments (cannot contain @)”'
+			output -d blog/dataTypes ${output_index[@]}
 		else
 			if [[ ! -z $line ]]
 			then
@@ -501,6 +507,7 @@ blog(){
 		if [[ $output_index != *"$2"* ]] || [[ $3 != *"@"* ]] || [[ ${blog_a[@]:3} = *"@"* ]]
 		then
 			output -d blog/syntax 'blog -ed “-d” “@keyQwerry” “text arguments (cannot contain @)”'
+			output -d blog/dataTypes ${output_index[@]}
 		else
 			if [[ ! -z $line ]]
 			then
@@ -513,6 +520,7 @@ blog(){
 		if [[ $output_index != *"$2"* ]] || [[ $3 != "@"* ]] ||  [[ $output_index != *"$4"* ]] || [[ $5 != "@"* ]] || [[ ${blog_a[@]:5} = *"@"* ]] 
 		then
 			output -d blog/syntax 'blog -sub “-d” “@keyQwerry” “-d” “@key” “text arguments (cannot contain @)”'
+			output -d blog/dataTypes ${output_index[@]}
 		else
 			if [[ ! -z $line ]]
 			then
@@ -525,6 +533,7 @@ blog(){
 		if  [[ $output_index != *"$2"* ]] || [[ "$3" != "@"* ]]
 		then
 			output -d blog/syntax 'blog -rm “-d” “@key”'
+			output -d blog/dataTypes ${output_index[@]}
 		else
 			sed -i "/$2 $2/d" $log
 		fi
@@ -538,25 +547,27 @@ blog(){
 		fi
 	;;
 	"-gl") #returns the line with the found value
-			if  [[ $output_index != *"$2"* ]] || [[ "$3" != "@"* ]]
+		if  [[ $output_index != *"$2"* ]] || [[ "$3" != "@"* ]]
 		then
 			output -d blog/syntax 'blog -gl “-d” “@key”'
+			output -d blog/dataTypes ${output_index[@]}
 		else
 			grep -- "$2 $3" $log
 		fi
 	;;
 	"-gal") #returns all the key lines
-			if  [[ "$2" != "@"* ]]
-			then
-				output -d "blog/syntax" 'blog -gal “@key”'
-			else
-				grep -- "$2" $log
-			fi
+		if  [[ "$2" != "@"* ]]
+		then
+			output -d "blog/syntax" 'blog -gal “@key”'
+		else
+			grep -- "$2" $log
+		fi
 	;;
 	"-gd") #returns only the data without type or key
 		if  [[ $output_index != *"$2"* ]] || [[ "$3" != "@"* ]]
 		then
 			output -d blog/syntax 'blog -gd “-d” “@key”'
+			output -d blog/dataTypes ${output_index[@]}
 		else
 			echo ${line[@]:2}
 		fi
