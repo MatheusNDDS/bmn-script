@@ -612,7 +612,7 @@ pkg_install(){
 	if [ $pkg_flag != "null" ]
 	then
 		$pnl
-		output -p $pm "Installing Packages"
+		output -p $pm "Installing “$1” Packages"
 		pkg_parser list_pkgs
 		if [[ $pm_update = 1 ]]
 		then
@@ -655,7 +655,7 @@ pkg_install(){
 	if [ $pkg_flag != "null" ]
 	then
 		$pnl
-		output -p Flatpak "Installing Flatpaks"
+		output -p Flatpak "Installing “$1” Flatpaks"
 		pkg_parser list_pkgs
 		if [[ $pm_update = 1 ]]
 		then
