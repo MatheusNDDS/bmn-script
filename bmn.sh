@@ -485,6 +485,18 @@ blog(){
 			fi
 		fi
 	;;
+	"-ail") #add items at the end of a line 
+		if [[ $output_index != *"$2"* ]] || [[ $3 != *"@"* ]] || [[ ${blog_a[@]:3} = *"@"* ]]
+		then
+			output -d blog/syntax 'blog -ail “-d” “@keyQwerry” “text arguments (cannot contain @)”'
+		else
+			if [[ ! -z $line ]]
+			then
+				sed -i "/$2 $3/d" $log
+				echo "${line[@]}" "${blog_a[@]:3}" | sed "s/\n//g" >> $log
+			fi
+		fi
+	;;
 	"-ed") #edit a line, keeps the previous key
 		if [[ $output_index != *"$2"* ]] || [[ $3 != *"@"* ]] || [[ ${blog_a[@]:3} = *"@"* ]]
 		then
