@@ -65,6 +65,7 @@ load_data(){
 	editor="nano"
 	deps="wget bash sudo $editor"
 	sfm_verbose=0 #Enable verbose log for SFM
+	bkc=@
 
 ## Work Directorys ##
 	pdir="/etc/$name"
@@ -456,10 +457,10 @@ blog(){
 	output_index="$(output -qi)"
 	
 	case $1 in
-	"-a"|"-e"|"-d") # quick a alert register for bundles
-	if [[ $output_index != *"${blog_a[0]}"* ]] || [[ $2 != "@"* ]] || [[ ${blog_a[@]:2} = *"@"* ]]
+	"-a"|"-e"|"-d") #quick alert and error register for bundles
+	if [[ $output_index != *"${blog_a[0]}"* ]] || [[ $2 != "${bkc}"* ]] || [[ ${blog_a[@]:2} = *"${bkc}"* ]]
 	then
-		output -d blog/syntax 'blog “-d” “@key” “text arguments (cannot contain @)”'
+		output -d blog/syntax "blog $1 “${bkc}key” “text arguments (cannot contain ${bkc})”"
 		output -d blog/dataTypes ${output_index[@]}
 	else
 		line=($(grep -- "$1 $2" $log))
@@ -469,107 +470,120 @@ blog(){
 		fi
 		if [[ $line != *"-e"* ]] || [[ $1 != "-a" ]]
 		then
-			echo "$*" >> $log
+			echo "${blog_a[*]}" >> $log
 		fi
 		if [[ $blog_verbose = 1 ]]
 		then
-			output $(echo "$*" | sed 's/@//g')
+			output $(echo "${blog_a[*]}" | sed "s/${bkc}//g")
 		fi
 	fi
 	;;
 	"-reg") #register a custom value
-		if [[ $output_index != *"$2"* ]] || [[ $3 != "@"* ]] || [[ ${blog_a[@]:3} = *"@"* ]]
+		if [[ $output_index != *"$2"* ]] || [[ $3 != "${bkc}"* ]] || [[ ${blog_a[@]:3} = *"${bkc}"* ]]
 		then
-			output -d blog/syntax 'blog -reg “-d” “@key” “text arguments (cannot contain @)”'
+			output -d blog/syntax "blog $1 “-d” “${bkc}key” “text arguments (cannot contain ${bkc})”"
 			output -d blog/dataTypes ${output_index[@]}
 		else
-			echo "${blog_a[@]:1}" | sed "s/\n//g" >> $log
+			echo "${blog_a[*]:1}" | sed "s/\n//g" >> $log
 			if [[ $blog_verbose = 1 ]]
 			then
-				output $(echo ${blog_a[@]}| sed 's/@//g')
+				output $(echo "${blog_a[*]:1}" | sed "s/${bkc}//g")
 			fi
 		fi
 	;;
-	"-ail") #add items at the end of a line 
-		if [[ $output_index != *"$2"* ]] || [[ $3 != *"@"* ]] || [[ ${blog_a[@]:3} = *"@"* ]]
+	"-ail"|"-ril") #add and remove items in a line 
+		if [[ $output_index != *"$2"* ]] || [[ $3 != *"@"* ]] || [[ ${blog_a[@]:3} = *"${bkc}"* ]]
 		then
-			output -d blog/syntax 'blog -ail “-d” “@keyQwerry” “text arguments (cannot contain @)”'
+			output -d blog/syntax "blog $1 “-d” “${bkc}keyQwerry” “text arguments (cannot contain ${bkc})”"
 			output -d blog/dataTypes ${output_index[@]}
 		else
 			if [[ ! -z $line ]]
 			then
-				sed -i "/$2 $3/d" $log
-				echo "${line[@]}" "${blog_a[@]:3}" | sed "s/\n//g" >> $log
+				if [ $1 = "-ail" ]
+				then
+					sed -i "/$2 $3/d" $log
+					echo "${line[*]} ${blog_a[*]:3}" | sed "s/\n//g" >> $log
+				else
+					for item in ${blog_a[@]:3}
+					do
+						blog -sub $2 $3 $(echo "${line[*]}" | sed "s/$item//g")
+					done
+				fi
 			fi
 		fi
 	;;
 	"-ed") #edit a line, keeps the previous key
-		if [[ $output_index != *"$2"* ]] || [[ $3 != *"@"* ]] || [[ ${blog_a[@]:3} = *"@"* ]]
+		if [[ $output_index != *"$2"* ]] || [[ $3 != *"${bkc}"* ]] || [[ ${blog_a[@]:3} = *"${bkc}"* ]]
 		then
-			output -d blog/syntax 'blog -ed “-d” “@keyQwerry” “text arguments (cannot contain @)”'
+			output -d blog/syntax "blog $1 “-d” “${bkc}keyQwerry” “text arguments (cannot contain ${bkc})”"
 			output -d blog/dataTypes ${output_index[@]}
 		else
 			if [[ ! -z $line ]]
 			then
 				sed -i "/$2 $3/d" $log
-				echo "$2 $3" "${blog_a[@]:3}" | sed "s/\n//g" >> $log
+				echo "$2 $3 ${blog_a[*]:3}" | sed "s/\n//g" >> $log
 			fi
 		fi
 	;;
 	"-sub") #substitute the line
-		if [[ $output_index != *"$2"* ]] || [[ $3 != "@"* ]] ||  [[ $output_index != *"$4"* ]] || [[ $5 != "@"* ]] || [[ ${blog_a[@]:5} = *"@"* ]] 
+		if [[ $output_index != *"$2"* ]] || [[ $3 != "${bkc}"* ]] ||  [[ $output_index != *"$4"* ]] || [[ $5 != "${bkc}"* ]] || [[ ${blog_a[@]:5} = *"${bkc}"* ]] 
 		then
-			output -d blog/syntax 'blog -sub “-d” “@keyQwerry” “-d” “@key” “text arguments (cannot contain @)”'
+			output -d blog/syntax "blog $1 “-d” “${bkc}keyQwerry” “-d” “${bkc}key” “text arguments (cannot contain ${bkc})”"
 			output -d blog/dataTypes ${output_index[@]}
 		else
 			if [[ ! -z $line ]]
 			then
-				sed -i "/$2/d" $log
-				echo "${blog_a[@]:3}" | sed "s/\n//g" >> $log
+				sed -i "/$2 $3/d" $log
+				echo "${blog_a[*]:3}" | sed "s/\n//g" >> $log
 			fi
 		fi
 	;;
 	"-rm") #removes a especific type and key line
-		if  [[ $output_index != *"$2"* ]] || [[ "$3" != "@"* ]]
+		if  [[ $output_index != *"$2"* ]] || [[ "$3" != "${bkc}"* ]]
 		then
-			output -d blog/syntax 'blog -rm “-d” “@key”'
+			output -d blog/syntax "blog $1 “-d” “${bkc}key”"
 			output -d blog/dataTypes ${output_index[@]}
 		else
-			sed -i "/$2 $2/d" $log
+			sed -i "/$2 $3/d" $log
 		fi
 	;;
-	"-del") #delete all key lines
-		if  [[ "$2" != "@"* ]]
+	"-rma") #delete all key lines
+		if  [[ "$2" != "${bkc}"* ]]
 		then
-			output -d blog/syntax 'blog -del “@key”'
+			output -d blog/syntax 'blog -del “${bkc}key”'
 		else
 			sed -i "/$2/d" $log
 		fi
 	;;
-	"-gl") #returns the line with the found value
-		if  [[ $output_index != *"$2"* ]] || [[ "$3" != "@"* ]]
+	"-gl"|"-glf") #returns the line with the found value, -glf for remove @.
+		if  [[ $output_index != *"$2"* ]] || [[ "$3" != "${bkc}"* ]]
 		then
-			output -d blog/syntax 'blog -gl “-d” “@key”'
+			output -d blog/syntax "blog $1 “-d” “${bkc}key”"
 			output -d blog/dataTypes ${output_index[@]}
 		else
-			grep -- "$2 $3" $log
+			if [[ $1 = "-gl" ]]
+			then
+				echo "${line[*]}"
+			else
+				echo "${line[*]}" | sed "s/${bkc}//"
+			fi
 		fi
 	;;
 	"-gal") #returns all the key lines
-		if  [[ "$2" != "@"* ]]
+		if  [[ "$2" != "${bkc}"* ]]
 		then
-			output -d "blog/syntax" 'blog -gal “@key”'
+			output -d "blog/syntax" "blog $1 “${bkc}key”"
 		else
 			grep -- "$2" $log
 		fi
 	;;
 	"-gd") #returns only the data without type or key
-		if  [[ $output_index != *"$2"* ]] || [[ "$3" != "@"* ]]
+		if  [[ $output_index != *"$2"* ]] || [[ "$3" != "${bkc}"* ]]
 		then
-			output -d blog/syntax 'blog -gd “-d” “@key”'
+			output -d blog/syntax "blog $1 “-d” “${bkc}key”"
 			output -d blog/dataTypes ${output_index[@]}
 		else
-			echo ${line[@]:2}
+			echo "${line[*]:2}"
 		fi
 	;;
 	esac
@@ -761,9 +775,8 @@ cook(){
 		output -hT "Executing “$1” Recipe"
 		$rex $*
 	fi
-	
 	recipe_log=($(blog -gal @$1))
-	blog -del @$1
+	blog -rma @$1
 	if [[ "${recipe_log[@]}" = *"-a"* ]]
 	then
 		output -ahT "“$1$(bnd_parser -pbf)” Recipe Returned Problems" 
