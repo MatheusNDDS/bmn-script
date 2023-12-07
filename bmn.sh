@@ -56,7 +56,6 @@ load_data(){
 	name="bmn"
 	name_upper="$($prt $name|tr [:lower:] [:upper:])"
 	script="$(pwd)/${name}.sh"
-	lshrc="$(pwd)/.lshrc"
 	file_format="tar"
 	pkg_flag="null"
 	args=$*
@@ -64,6 +63,7 @@ load_data(){
 	rex="$r bash recipe"
 	editor="nano"
 	deps="wget bash sudo $editor"
+	script_src="https://github.com/MatheusNDDS/${name}-script/raw/main/${name}.sh"
 	sfm_verbose=0 #Enable verbose log for SFM
 	bkc=@
 
@@ -868,7 +868,6 @@ cfgb_update(){
 	if [[ $1 = "" ]]
 	then
 		current_dir=$(pwd)
-		script_src="https://github.com/MatheusNDDS/${name}-script/raw/main/${name}.sh"
 		output -p $name 'Downloading Script'
 		output -d 'Source' $script_src
 		cd $pdir
