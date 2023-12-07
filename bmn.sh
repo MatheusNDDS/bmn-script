@@ -31,6 +31,7 @@ load_data(){
 	rpath="realpath"
 	pwd="$r pwd"
 	pkgi="pkg_install"
+	header="output -bH"
 	
 	#Safe File Manager Commands Varariables
 	srm="sfm -r"
@@ -261,6 +262,7 @@ output(){
 	t['-e']="\033[01;31m {$2}: ${out_a[@]:2}\033[00m" #Error Dialog
 	t['-s']="\033[01;32m ($2): ${out_a[@]:2}\033[00m" #Sucess Dialog
 	t['-a']="\033[01;33m /$2/: ${out_a[@]:2}\033[00m" #Alert Dialog
+	t['-bH']="\033[01;36m ## ${out_a[@]:3} ##\n ~ $2 ~\033[00m\n" #Bundle Header
 	
 	if [[ $1 != "-qi" ]]
 	then
