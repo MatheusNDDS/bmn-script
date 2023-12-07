@@ -57,7 +57,7 @@ load_data(){
 	name_upper="$($prt $name|tr [:lower:] [:upper:])"
 	script="$(pwd)/${name}.sh"
 	lshrc="$(pwd)/.lshrc"
-	file_format="tar.gz"
+	file_format="tar"
 	pkg_flag="null"
 	args=$*
 	cmd="$1"
@@ -94,7 +94,7 @@ load_data $*
 		for i in ${args[@]:2}
 		do
 			bnd_parser $i
-			if [[ "${release[@]}" = *"$bndf"* ]] || [[ $lc_inst = 1 ]] #checks if the bundle exists in the repository.
+			if [[ "${release[@]}" = *"$bndf"* ]] #checks if the bundle exists in the repository.
 			then
 				output -hT "Installing “$bnd_name$(bnd_parser -pbf)”"
 				$srm $bnd_dir/$bnd_name
@@ -193,6 +193,12 @@ load_data $*
 		do
 			download $i 1
 		done
+	elif [[ $1 = '-bp' ]] || [[ "$1" = '--bnd-pack' ]]
+	then
+		for i in ${args[@]:3}
+		do
+			bnd_pack $i
+		done
 	elif [[ $1 = '-s' ]] || [[ "$1" = '--setup' ]]
 	then
 		setup $*
@@ -212,7 +218,7 @@ load_data $*
 	then
 		output 0
 		output 1
-	elif [[ ! -z $2 ]] && [[ $1 = '-bp' ]] || [[ $1 = '--bp-properties' ]]
+	elif [[ ! -z $2 ]] && [[ $1 = '-bd' ]] || [[ $1 = '--bnd-data' ]]
 	then
 		output -hT "$2"
 		bnd_parser $2
@@ -239,7 +245,7 @@ output(){
 	declare -A t
 	t[0]="\033[01;36m-=/Configuration Bundles Manager/=-\033[00m \n~ MatheusNDDS : https://github.com/MatheusNDDS\n"
 	t[1]="\033[01;33m[Properties]\033[00m\n User: $u\n Home: $h\n PkgM: $pm\n Repo: $repo"
-	t[2]="\033[01;33m[Commands]\033[00m\n --install,-i : Install bundles from repository, use -iu to update $pm repositories during installation.\n --lc-install,-li : Install bundles from $file_format file path, use -liu to update $pm repositories during installation.\n --dir-install,-di : Install bundles from unpacked dir path, use -diu to update $pm repositories during installation.\n --dowload,-d : Download bundles from repository.\n --repo-update,-rU : Update repository release file, use this regularly.\n --$name-update,-U : Update $name script from Repo source or local script.\n --list-bnds,-l : List or search for bundles in repo file.\n --live-shell,-sh : Run live shell for testing $name functions.\n --properties,-p : Prints the user information that $name uses.\n --help,-h : Print help text."
+	t[2]="\033[01;33m[Commands]\033[00m\n --install,-i : Install bundles from repository, use -iu to update $pm repositories during installation.\n --lc-install,-li : Install bundles from $file_format file path, use -liu to update $pm repositories during installation.\n --dir-install,-di : Install bundles from unpacked dir path, use -diu to update $pm repositories during installation.\n --dowload,-d : Download bundles from repository.\n --bnd-pack, -bp : Pack a bundle from a directory.\n --repo-update,-rU : Update repository release file, use this regularly.\n --$name-update,-U : Update $name script from Repo source or local script.\n --list-bnds,-l : List or search for bundles in repo file.\n --live-shell,-sh : Run live shell for testing $name functions.\n --properties,-p : Prints the user information that $name uses.\n --help,-h : Print help text."
 	t[3]="bndp_a=(${bndp_a[@]})\nbndf=$bndf\nbnd_raw_name=$bnd_raw_name\nbnd_pre_name=(${bnd_pre_name[@]})\nbnd_name=$bnd_name\nflags=(${bnd_flags[@]})"
 	
 ## Formatting arguments
@@ -649,7 +655,7 @@ pkg_install(){
 	if [ $pkg_flag != "null" ]
 	then
 		$pnl
-		output -p $pm "Installing “$1” Packages"
+		output -p $pm "Installing Packages"
 		pkg_parser list_pkgs
 		if [[ $pm_update = 1 ]]
 		then
@@ -692,7 +698,7 @@ pkg_install(){
 	if [ $pkg_flag != "null" ]
 	then
 		$pnl
-		output -p Flatpak "Installing “$1” Flatpaks"
+		output -p Flatpak "Installing Flatpaks"
 		pkg_parser list_pkgs
 		if [[ $pm_update = 1 ]]
 		then
@@ -785,6 +791,17 @@ cook(){
 		output -ehT "“$1$(bnd_parser -pbf)” Recipe Returned Erros"
 	else
 		output -hT "“$1$(bnd_parser -pbf)” Instaled"
+	fi
+}
+bnd_pack(){
+	current_dir=$(pwd)
+	if [ -d $1 ]
+	then
+		cd $1
+		tar -zcvf "$current_dir/$1.$file_format" *
+		cd $current_dir
+	else
+		output -e $name "Directory “$1” does not exist"
 	fi
 }
 
