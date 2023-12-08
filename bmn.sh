@@ -759,7 +759,12 @@ bndp_a=($($prt $1|tr ':' ' '))
 download(){
 	output -p $name "Downloading “$1”"
 	$srm $1.$file_format
-	$dl $repo/$1.$file_format
+	if [ $lc_repo = 0 ]
+	then
+		$dl $repo/$1.$file_format
+	else
+		$cp $lc_repo/$1.$file_format $bnd_dir/
+	fi
 	if [ $2 != 1 ]
 	then
 		output -l "files" "$(ls $bnd_dir/ | grep $1.$file_format)"
@@ -845,7 +850,7 @@ setup(){
 	then
 		if [ -e repo ]
 		then
-			$prt "pm=$pm_detected h=$h u=$u \nrepo=$(cat repo)" > $cfg_file
+			$prt "pm=$pm_detected h=$h u=$u \nrepo=$(cat repo) \nlc_repo=0" > $cfg_file
 			$src $cfg_file
 #Downloading repository releas
 			qwerry_bnd -rU
@@ -856,7 +861,7 @@ setup(){
 			exit 1
 		fi
 	else
-		$prt "pm=$pm_detected h=$h u=$u \nrepo=$2" > $cfg_file
+		$prt "pm=$pm_detected h=$h u=$u \nrepo=$2 \nlc_repo=0" > $cfg_file
 		$src $cfg_file
 #Downloading repository release
 		qwerry_bnd -rU
