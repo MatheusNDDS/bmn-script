@@ -1,35 +1,33 @@
 #!/usr/bin/env bash
 ### Core functions ###
 load_data(){
-## Configure pm,u,h variables
-	detect_user_props
-
 ## Evironment Variables : Can be used in recipe scripts ##
 	#General commands 
 	r="sudo"
-	chm="$r chmod"
-	cho="$r chown"
-	cp="$r cp -r"
-	rm="$r rm -rf"
-	rmd="$r rmdir --ignore-fail-on-non-empty"
-	mv="$r mv"
+	ir=""
+	chm="$ir chmod"
+	cho="$ir chown"
+	cp="$ir cp -r"
+	rm="$ir rm -rf"
+	rmd="$ir rmdir --ignore-fail-on-non-empty"
+	mv="$ir mv"
 	prt="echo -e"
-	mk="$r touch"
-	mkd="$r mkdir"
-	elf="$r chmod 755"
-	cat="$r cat"
-	dl="$r wget"
+	mk="$ir touch"
+	mkd="$ir mkdir"
+	elf="$ir chmod 755"
+	cat="$ir cat"
+	dl="$ir wget"
 	d0="/dev/0"
 	jmp="2> blog &"
-	gitc="$r git clone"
-	bmi="$r bmn -i"
+	gitc="$ir git clone"
+	bmi="$ir bmn -i"
 	bmn="bmn"
-	add_ppa="$r add-apt-repository"
+	add_ppa="$ir add-apt-repository"
 	flatpak_remote="flatpak remote-add --if-not-exists"
-	fp_overide="$r flatpak override"
+	fp_overide="$ir flatpak override"
 	pnl="$prt \n"
 	rpath="realpath"
-	pwd="$r pwd"
+	pwd="$ir pwd"
 	pkgi="pkg_install"
 	header="output -bH"
 	
@@ -63,14 +61,14 @@ load_data(){
 	cmd="$1"
 	rex="$r bash recipe"
 	editor="nano"
-	deps="wget bash sudo $editor"
+	deps="wget bash $ir $editor"
 	script_src="https://github.com/MatheusNDDS/${name}-script/raw/main/${name}.sh"
 	sfm_verbose=0 #Enable verbose log for SFM
 	bkc=@
+	rtext="output -a $name this program needs root privileges"
 
 ## Work Directorys ##
 	pdir="/etc/$name"
-	bnd_dir="$pdir/bundles"
 	cfg_file="$pdir/cfg"
 	init_file="$pdir/init"
 	lsh_init="$pdir/.lshrc"
@@ -81,17 +79,26 @@ load_data(){
 	flathub="flathub https://flathub.org/repo/flathub.flatpakrepo"
 	fp_mode="--system"
 	fp_remote="flathub"
-
 	
 ## External Data Import ##
 	source $cfg_file
 	source /etc/os-release
 	release=($($scat $pdir/release))
+
+## Configure pm,u,h variables
+	detect_user_props
+	bnd_dir="$h/.$name/bundles"
 }
 bmn_init(){
 load_data $*
+	$smkd "$h/.$name" $bnd_dir
 	if [[ "$1" = '-i' ]] || [[ "$1" = '--install' ]]
 	then
+		if [ $UID != 0 ]
+		then
+			$rtext
+			exit 0
+		fi
 		for i in ${args[@]:2}
 		do
 			bnd_parser $i
@@ -112,6 +119,11 @@ load_data $*
 		done
 	elif [[ "$1" = '-li' ]] || [[ "$1" = '--lc-install' ]]
 	then
+		if [ $UID != 0 ]
+		then
+			$rtext
+			exit 0
+		fi
 		if [[ $2 = *"$file_format"* ]]
 		then
 			bnd_ignore=()
@@ -147,6 +159,11 @@ load_data $*
 		fi
 	elif [[ "$1" = '-di' ]] || [[ "$1" = '--dir-install' ]]
 	then
+		if [ $UID != 0 ]
+		then
+			$rtext
+			exit 0
+		fi
 		bnd_ignore=()
 		output -hT "Importing bundle from directory"
 		for i in ${args[@]:3}
@@ -187,6 +204,11 @@ load_data $*
 		bmn_init -di ${args[@]:4}
 	elif [[ $1 = '-e' ]] || [[ "$1" = '--enable-extras' ]]
 	then
+		if [ $UID != 0 ]
+		then
+			$rtext
+			exit 0
+		fi
 		enable_extras $*
 	elif [[ $1 = '-d' ]] || [[ "$1" = '--download' ]]
 	then
@@ -202,18 +224,43 @@ load_data $*
 		done
 	elif [[ $1 = '-s' ]] || [[ "$1" = '--setup' ]]
 	then
+		if [ $UID != 0 ]
+		then
+			$rtext
+			exit 0
+		fi
 		setup $*
 	elif [[ $1 = '-ss' ]] || [[ "$1" = '--setup' ]]
 	then
+		if [ $UID != 0 ]
+		then
+			$rtext
+			exit 0
+		fi
 		cfgb_update $script
 	elif [[ $1 = '-U' ]] || [[ "$1" = "--$name-update" ]]
 	then
+		if [ $UID != 0 ]
+		then
+			$rtext
+			exit 0
+		fi
 		cfgb_update $2
 	elif [[ $1 = '-rU' ]] || [[ "$1" = '--repo-update' ]]
 	then
+		if [ $UID != 0 ]
+		then
+			$rtext
+			exit 0
+		fi
 		qwerry_bnd $1
 	elif [[ $1 = '-l' ]] || [[ "$1" = '--list-bnds' ]]
 	then
+		if [ $UID != 0 ]
+		then
+			$rtext
+			exit 0
+		fi
 		qwerry_bnd ${args[@]:2}
 	elif [[ $1 = '-p' ]] || [[ $1 = '--properties' ]]
 	then
@@ -343,48 +390,48 @@ pma_a=($*)
 	then
 		if [ "${pm_i[$pm]}" = "@" ]
 		then
-			sudo $pm ${pm_i[apt]} ${pkg} -y
+			$ir $pm ${pm_i[apt]} ${pkg} -y
 		else
-			sudo $pm ${pm_i[$pm]} ${pkg} -y
+			$ir $pm ${pm_i[$pm]} ${pkg} -y
 		fi 
 	elif [ $1 = "-r" ]
 	then
 		if [ "${pm_r[$pm]}" = "@" ]
 		then
-			sudo $pm ${pm_r[apt]} ${pkg} -y
+			$ir $pm ${pm_r[apt]} ${pkg} -y
 		else
-			sudo $pm ${pm_r[$pm]} ${pkg} -y
+			$ir $pm ${pm_r[$pm]} ${pkg} -y
 		fi
 	elif [ $1 = '-s' ]
 	then
 		if [ "${pm_s[$pm]}" = "@" ]
 		then
-			sudo $pm ${pm_s[apt]} ${pkgs}
+			$ir $pm ${pm_s[apt]} ${pkgs}
 		else
-			sudo $pm ${pm_s[$pm]} ${pkgs}
+			$ir $pm ${pm_s[$pm]} ${pkgs}
 		fi 
 	elif [ $1 = "-l" ]
 	then
 		if [ "${pm_l[$pm]}" = "@" ]
 		then
-			sudo $pm ${pm_l[apt]}
+			$ir $pm ${pm_l[apt]}
 		else
-			sudo $pm ${pm_l[$pm]}
+			$ir $pm ${pm_l[$pm]}
 		fi 
 	elif [ $1 = "-u" ]
 	then
 		if [ "${pm_u[$pm]}" = "@" ]
 		then
-			sudo $pm ${pm_u[apt]} -y
+			$ir $pm ${pm_u[apt]} -y
 			if [ ${pm_g[$pm]} != 0 ]
 			then
-				sudo $pm ${pm_g[apt]} -y
+				$ir $pm ${pm_g[apt]} -y
 			fi
 		else
-			sudo $pm ${pm_u[$pm]} -y
+			$ir $pm ${pm_u[$pm]} -y
 			if [ ${pm_g[$pm]} != 0 ]
 			then
-				sudo $pm ${pm_g[$pm]} -y
+				$ir $pm ${pm_g[$pm]} -y
 			fi
 		fi
 	fi
@@ -705,7 +752,7 @@ pkg_install(){
 		if [[ $pm_update = 1 ]]
 		then
 			output -t 'Uptating Flathub'
-			sudo flatpak update -y
+			$ir flatpak update -y
 		fi
 		pkg_parser check fp
 		for i in ${to_install[*]}
@@ -716,7 +763,7 @@ pkg_install(){
 				output -s "flatpak" "$i is already installed"
 			else
 				output -t "flatpak/installing: $i"
-				sudo flatpak $fp_mode install $fp_remote $i -y
+				$ir flatpak $fp_mode install $fp_remote $i -y
 			fi
 		done
 		pkg_parser check fp
@@ -725,7 +772,7 @@ pkg_install(){
 			if [[ "$pkgs_in" = *"$i"* ]]
 			then
 				output -t "flatpak/removing: $i"
-				sudo flatpak uninstall $fp_mode $i -y
+				$ir flatpak uninstall $fp_mode $i -y
 			else
 				output -t "flatpak/removing: $i"
 				output -s "flatpak" "$i is not installed"
@@ -840,6 +887,7 @@ setup(){
 	detect_user_props
 	output -t "Default Home : $h"
 	output -t "Default User : $u"
+	output -a ATTENTION "If you run this program outside your home directory the directory defined in this setup will be used."
 #Installing dependencies
 	output -p $name "Installing Dependencies"
 	pm=$pm_detected
@@ -971,7 +1019,7 @@ detect_user_props(){
 live_shell(){
 	current_dir=$(pwd)
 	cd $pdir
-	$r bash --init-file $init_file
+	$ir bash --init-file $init_file
 	cd $current_dir
 }
 
