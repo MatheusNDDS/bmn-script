@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 ### Core functions ###
 load_data(){
+## Configure pm,u,h variables
+	detect_user_props
+	name="bmn"
+	pdir="/etc/$name"
+	bnd_dir="$h/.$name/bundles"
+
 ## Evironment Variables : Can be used in recipe scripts ##
 	#General commands 
 	r="sudo"
@@ -52,7 +58,6 @@ load_data(){
 	tmp="/temp"
 
 ## References ##
-	name="bmn"
 	name_upper="$($prt $name|tr [:lower:] [:upper:])"
 	script="$(pwd)/${name}.sh"
 	file_format="tar"
@@ -68,7 +73,6 @@ load_data(){
 	rtext="output -a $name this program needs root privileges"
 
 ## Work Directorys ##
-	pdir="/etc/$name"
 	cfg_file="$pdir/cfg"
 	init_file="$pdir/init"
 	lsh_init="$pdir/.lshrc"
@@ -84,10 +88,6 @@ load_data(){
 	source $cfg_file
 	source /etc/os-release
 	release=($($scat $pdir/release))
-
-## Configure pm,u,h variables
-	detect_user_props
-	bnd_dir="$h/.$name/bundles"
 }
 bmn_init(){
 load_data $*
