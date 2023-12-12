@@ -94,11 +94,7 @@ load_data $*
 	$smkd "$h/.$name" $bnd_dir
 	if [[ "$1" = '-i' ]] || [[ "$1" = '--install' ]]
 	then
-		if [ $UID != 0 ]
-		then
-			$rtext
-			exit 0
-		fi
+		if [ $UID != 0 ];then $rtext;exit 0;fi
 		for i in ${args[@]:2}
 		do
 			bnd_parser $i
@@ -119,11 +115,7 @@ load_data $*
 		done
 	elif [[ "$1" = '-li' ]] || [[ "$1" = '--lc-install' ]]
 	then
-		if [ $UID != 0 ]
-		then
-			$rtext
-			exit 0
-		fi
+		if [ $UID != 0 ];then $rtext;exit 0;fi
 		if [[ $2 = *"$file_format"* ]]
 		then
 			bnd_ignore=()
@@ -159,11 +151,7 @@ load_data $*
 		fi
 	elif [[ "$1" = '-di' ]] || [[ "$1" = '--dir-install' ]]
 	then
-		if [ $UID != 0 ]
-		then
-			$rtext
-			exit 0
-		fi
+		if [ $UID != 0 ];then $rtext;exit 0;fi
 		bnd_ignore=()
 		output -hT "Importing bundle from directory"
 		for i in ${args[@]:3}
@@ -204,11 +192,6 @@ load_data $*
 		bmn_init -di ${args[@]:4}
 	elif [[ $1 = '-e' ]] || [[ "$1" = '--enable-extras' ]]
 	then
-		if [ $UID != 0 ]
-		then
-			$rtext
-			exit 0
-		fi
 		enable_extras $*
 	elif [[ $1 = '-d' ]] || [[ "$1" = '--download' ]]
 	then
@@ -232,35 +215,15 @@ load_data $*
 		setup $*
 	elif [[ $1 = '-ss' ]] || [[ "$1" = '--setup' ]]
 	then
-		if [ $UID != 0 ]
-		then
-			$rtext
-			exit 0
-		fi
 		cfgb_update $script
 	elif [[ $1 = '-U' ]] || [[ "$1" = "--$name-update" ]]
 	then
-		if [ $UID != 0 ]
-		then
-			$rtext
-			exit 0
-		fi
 		cfgb_update $2
 	elif [[ $1 = '-rU' ]] || [[ "$1" = '--repo-update' ]]
 	then
-		if [ $UID != 0 ]
-		then
-			$rtext
-			exit 0
-		fi
 		qwerry_bnd $1
 	elif [[ $1 = '-l' ]] || [[ "$1" = '--list-bnds' ]]
 	then
-		if [ $UID != 0 ]
-		then
-			$rtext
-			exit 0
-		fi
 		qwerry_bnd ${args[@]:2}
 	elif [[ $1 = '-p' ]] || [[ $1 = '--properties' ]]
 	then
@@ -505,12 +468,10 @@ sfm(){
 	done
 }
 blog(){
-# Simple Line based log  and data register
 	blog_a=($*)
 	log_hist=($(cat $log))
 	line=($(grep -- "$2 $3" $log))
 	output_index="$(output -qi)"
-	
 	case $1 in
 	"-a"|"-e"|"-d") #quick alert and error register for bundles
 	if [[ $output_index != *"${blog_a[0]}"* ]] || [[ $2 != "${bkc}"* ]] || [[ ${blog_a[@]:2} = *"${bkc}"* ]]
@@ -786,15 +747,13 @@ pkg_install(){
 bnd_parser(){
 bndp_a=($($prt $1|sed "s/:/ /"))
 	case $1 in
-	'-pbf')
-		#brint bnd flags
+	'-pbf') #brint bnd flags
 		if [[ ! -z $bnd_flags ]]
 		then
 			$prt : ${bnd_flags[@]}
 		fi
 	;;
-	*)
-		#set flags
+	*) #set flags
 		bndf=${bndp_a[0]}
 		bnd_raw_name=$1
 		bnd_pre_name=($($prt $bndf|tr '/' ' '))
@@ -812,12 +771,7 @@ download(){
 	else
 		$cp $lc_repo/$1.$file_format $bnd_dir/
 	fi
-	if [ $2 != 1 ]
-	then
-		output -l "files" "$(ls $bnd_dir/ | grep $1.$file_format)"
-	else
-		output -l "files" "$(ls . | grep $1.$file_format)"
-	fi
+	output -l "files" "$(ls . | grep $1.$file_format)"
 }
 unpack(){
 	output -p $name "Unpacking “$1”"
@@ -917,6 +871,7 @@ setup(){
 	fi
 }
 cfgb_update(){
+	if [ $UID != 0 ];then $rtext;exit 0;fi
 	output -hT "Updating $name_upper Script"
 	bin_srcd=($(cat $init_file))
 	cmd_bin=${bin_srcd[1]}
@@ -942,6 +897,7 @@ cfgb_update(){
 qwerry_bnd(){
 	if [[ $1 = '-rU' ]]
 	then
+		if [ $UID != 0 ];then $rtext;exit 0;fi
 		current_dir=$(pwd)
 		output -hT "Updating Repository"
 		cd $pdir
@@ -986,6 +942,7 @@ qwerry_bnd(){
 	fi
 }
 enable_extras(){
+	if [ $UID != 0 ];then $rtext;exit 0;fi
 	for i in $*
 	do
 		if [ $i = flatpak ]
