@@ -1,12 +1,6 @@
 #!/usr/bin/env bash
 ### Core functions ###
 load_data(){
-## Configure pm,u,h variables
-	detect_user_props
-	name="bmn"
-	pdir="/etc/$name"
-	bnd_dir="$h/.$name/bundles"
-
 ## Evironment Variables : Can be used in recipe scripts ##
 	#General commands 
 	r="sudo"
@@ -58,6 +52,7 @@ load_data(){
 	tmp="/temp"
 
 ## References ##
+	name="bmn"
 	name_upper="$($prt $name|tr [:lower:] [:upper:])"
 	script="$(pwd)/${name}.sh"
 	file_format="tar"
@@ -73,6 +68,7 @@ load_data(){
 	rtext="output -a $name this program needs root privileges"
 
 ## Work Directorys ##
+	pdir="/etc/$name"
 	cfg_file="$pdir/cfg"
 	init_file="$pdir/init"
 	lsh_init="$pdir/.lshrc"
@@ -88,10 +84,19 @@ load_data(){
 	source $cfg_file
 	source /etc/os-release
 	release=($($scat $pdir/release))
+	
+## Configure pm,u,h variables
+	detect_user_props
+	# Directories that use data from detect_user_props()
+	lc_dir="$h/.$name"
+	bnd_dir="$h/.$name/bundles"
+	hsr="$h/.local/share"
+	hlc="$h/.local"
+	cfg="$h/.config"
 }
 bmn_init(){
-load_data $*
-	$smkd "$h/.$name" $bnd_dir
+	load_data $*
+	$smkd $lc_dir $bnd_dir
 	if [[ "$1" = '-i' ]] || [[ "$1" = '--install' ]]
 	then
 		if [ $UID != 0 ];then $rtext;exit 0;fi
@@ -962,12 +967,12 @@ enable_extras(){
 exit
 }
 detect_user_props(){
-	curent_path=($(pwd|tr '/' ' '))
-	if [ "${curent_path[0]}" = "home" ]
+	pwdp=($(pwd|tr '/' ' '))
+	if [ "${pwdp[0]}" = "home" ]
 	then
-		h="/home/${curent_path[1]}"
-		u="${curent_path[1]}"
-	elif [ "${curent_path[0]}" = "root" ]
+		h="/home/${pwdp[1]}"
+		u="${pwdp[1]}"
+	elif [ "${pwdp[0]}" = "root" ]
 	then
 		h="/root"
 		u="root"
