@@ -839,7 +839,7 @@ setup(){
 	$prt 'export PS1="\\n“\w”\\n$(output -d $name)"\nalias q="exit 0"\nalias x="clear"\nalias c="$editor $cfg_file"\nalias i="$editor $init_file"\nalias r="$editor $pdir/release"\nalias l="$editor $log"\nalias h="$prt +\\n c: edit config\\n i: edit init\\n r: edit release\\n l: edit log\\n x: clear prompt\\n h: help\\n q: exit+"\nblog_verbose=1' | tr '+' "'" >> $init_file
 #Package manager autodetect
 	output -p $name "Detecting Package Manager"
-	pma -qpm 2> blog
+	pma -qpm | blog
 	output -t "Package Manager : $pm_detected"
 #Detecting home and user
 	output -p $name "Detecting Home Directory and User"
