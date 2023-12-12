@@ -512,6 +512,20 @@ blog(){
 			fi
 		fi
 	;;
+	"-srg") # safe register, if there is data replace it with the newest one.
+		if [[ $output_index != *"$2"* ]] || [[ $3 != "${bkc}"* ]] || [[ ${blog_a[@]:3} = *"${bkc}"* ]]
+		then
+			output -d blog/syntax "blog $1 “-d” “${bkc}key” “text arguments (cannot contain ${bkc})”"
+			output -d blog/dataTypes ${output_index[@]}
+		else
+			if [ -z "$(blog -gl $2 $3)" ]
+			then
+				blog -reg ${blog_a[@]:1}
+			else
+				blog -sub $2 $3 ${blog_a[@]:1}
+			fi
+		fi
+	;;
 	"-ail"|"-ril") #add and remove items in a line 
 		if [[ $output_index != *"$2"* ]] || [[ $3 != *"@"* ]] || [[ ${blog_a[@]:3} = *"${bkc}"* ]]
 		then
@@ -798,12 +812,12 @@ cook(){
 	blog -rma @$1
 	if [[ "${recipe_log[@]}" = *"-a"* ]]
 	then
-		output -ahT "“$1$(bnd_parser -pbf)” Recipe Returned Problems" 
+		output -ahT "“$1$(bnd_parser -pbf)” Recipe Returned Alerts" 
 	elif [[ "${recipe_log[@]}" = *"-e"* ]]
 	then
 		output -ehT "“$1$(bnd_parser -pbf)” Recipe Returned Erros"
 	else
-		output -hT "“$1$(bnd_parser -pbf)” Instaled"
+		output -hT "“$1$(bnd_parser -pbf)” Finished"
 	fi
 }
 bnd_pack(){
