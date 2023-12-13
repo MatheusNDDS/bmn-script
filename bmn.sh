@@ -97,7 +97,7 @@ load_data(){
 bmn_init(){
 	load_data $*
 	$smkd $lc_dir $bnd_dir
-	if [[ "$1" = '-i' ]] || [[ "$1" = '--install' ]]
+	if [[ "$1" = '-i' ]] || [[ "$1" = '--install' ]] 
 	then
 		if [ $UID != 0 ];then $rtext;exit 0;fi
 		for i in ${args[@]:2}
@@ -105,7 +105,7 @@ bmn_init(){
 			bnd_parser $i
 			if [[ "${release[@]}" = *"$bndf"* ]] #checks if the bundle exists in the repository.
 			then
-				output -hT "Installing “$bnd_name$(bnd_parser -pbf)”"
+				output -hT "Configuring “$bnd_name$(bnd_parser -pbf)”"
 				$srm $bnd_dir/$bnd_name
 				cd $bnd_dir/
 				download $bnd_name 0
@@ -118,13 +118,13 @@ bmn_init(){
 				output -d i "Maybe the relese file has outdated, try “$name -rU”."
 			fi
 		done
-	elif [[ "$1" = '-li' ]] || [[ "$1" = '--lc-install' ]]
+	elif [[ "$1" = '-li' ]] || [[ "$1" = '--lc-install' ]] && [[ ! -z "${args[@]:3}" ]]
 	then
 		if [ $UID != 0 ];then $rtext;exit 0;fi
 		if [[ $2 = *"$file_format"* ]]
 		then
 			bnd_ignore=()
-			output -hT "Importing bundle"
+			output -hT "Importing bundles"
 			for i in ${args[@]:3}
 			do
 				bnd_parser $i
@@ -142,7 +142,7 @@ bmn_init(){
 				if [[ ${bnd_ignore[*]} != *"$i"* ]]
 				then
 					bnd_parser $i
-					output -hT "Installing “$bnd_name$(bnd_parser -pbf)”"
+					output -hT "Configuring “$bnd_name$(bnd_parser -pbf)”"
 					$srm $bnd_dir/$bnd_name
 					cd $bnd_dir/
 					unpack $bnd_name
@@ -154,11 +154,11 @@ bmn_init(){
 		else
 			output -a $name "“$file_format” file not especified"
 		fi
-	elif [[ "$1" = '-di' ]] || [[ "$1" = '--dir-install' ]]
+	elif [[ "$1" = '-di' ]] || [[ "$1" = '--dir-install' ]] && [[ ! -z "${args[@]:3}" ]]
 	then
 		if [ $UID != 0 ];then $rtext;exit 0;fi
 		bnd_ignore=()
-		output -hT "Importing bundle from directory"
+		output -hT "Importing dir bundles"
 		for i in ${args[@]:3}
 		do
 			bnd_parser $i
@@ -176,7 +176,7 @@ bmn_init(){
 			if [[ ${bnd_ignore[*]} != *"$i"* ]]
 			then
 				bnd_parser $i
-				output -hT "Installing “$bnd_name$(bnd_parser -pbf)”"
+				output -hT "Configuring “$bnd_name$(bnd_parser -pbf)”"
 				cd $bnd_dir/
 				cook $bnd_name ${bnd_flags[@]}
 				$srm $bnd_dir/$bnd_name
@@ -266,18 +266,18 @@ output(){
 	
 ## Formatting arguments
 #Text output formatting arguments are also used by blog() to register data.
-	t['-p']="\033[01;35m [$2]: -=- ${out_a[@]:2} -=-\033[00m" #Process
-	t['-l']="\033[01m $2: [ $($prt ${out_a[@]:2}|tr ' ' ', ') ]\033[00m " #List itens
-	t['-hT']="\n\033[01;36m******** [ ${out_a[@]:1} ] ********\033[00m\n" #High Title
-	t['-ahT']="\n\033[01;33m******** / ${out_a[@]:1} / ********\033[00m\n" #Alert High Title
-	t['-ehT']="\n\033[01;31m*#*#*#*# { ${out_a[@]:1} } #*#*#*#*\033[00m\n" #Error High Title
-	t['-T']="\n\033[01;36m ### [ ${out_a[@]:1} ] ###\033[00m\n" #Title
-	t['-t']="\033[01;33m - ${out_a[@]:1}\033[00m" #Subtitle
-	t['-d']="\033[01m [$2]: ${out_a[@]:2}\033[00m" #Dialog, blog Data
-	t['-e']="\033[01;31m {$2}: ${out_a[@]:2}\033[00m" #Error Dialog
-	t['-s']="\033[01;32m ($2): ${out_a[@]:2}\033[00m" #Sucess Dialog
-	t['-a']="\033[01;33m /$2/: ${out_a[@]:2}\033[00m" #Alert Dialog
-	t['-bH']="\033[01;36m ## ${out_a[@]:3} ##\n ~ $2 ~\033[00m\n" #Bundle Header
+	t['-p']="\033[01;35m [$2]: -=- ${out_a[*]:3} -=-\033[00m" #Process
+	t['-l']="\033[01m $2: [ $($prt ${out_a[*]:3}|tr ' ' ', ') ]\033[00m " #List itens
+	t['-hT']="\n\033[01;36m******** [ ${out_a[*]:1} ] ********\033[00m\n" #High Title
+	t['-ahT']="\n\033[01;33m******** / ${out_a[*]:1} / ********\033[00m\n" #Alert High Title
+	t['-ehT']="\n\033[01;31m*#*#*#*# { ${out_a[*]:1} } #*#*#*#*\033[00m\n" #Error High Title
+	t['-T']="\n\033[01;36m ### [ ${out_a[*]:1} ] ###\033[00m\n" #Title
+	t['-t']="\033[01;33m - ${out_a[*]:1}\033[00m" #Subtitle
+	t['-d']="\033[01m [$2]: ${out_a[*]:3}\033[00m" #Dialog, blog Data
+	t['-e']="\033[01;31m {$2}: ${out_a[*]:3}\033[00m" #Error Dialog
+	t['-s']="\033[01;32m ($2): ${out_a[*]:3}\033[00m" #Sucess Dialog
+	t['-a']="\033[01;33m /$2/: ${out_a[*]:3}\033[00m" #Alert Dialog
+	t['-bH']="\033[01;36m ## ${out_a[*]:3} ##\n ~ $2 ~\033[00m\n" #Bundle Header
 	
 	if [[ $1 != "-qi" ]]
 	then
@@ -769,7 +769,7 @@ bndp_a=($($prt $1|sed "s/:/ /"))
 	'-pbf') #brint bnd flags
 		if [[ ! -z $bnd_flags ]]
 		then
-			$prt : ${bnd_flags[@]}
+			$prt ":${bnd_flags[@]}" | tr ' ' ','
 		fi
 	;;
 	*) #set flags
@@ -812,10 +812,10 @@ cook(){
 	blog -rma @$1
 	if [[ "${recipe_log[@]}" = *"-a"* ]]
 	then
-		output -ahT "“$1$(bnd_parser -pbf)” Recipe Returned Alerts" 
+		output -ahT "“$1$(bnd_parser -pbf)” Returned Alerts" 
 	elif [[ "${recipe_log[@]}" = *"-e"* ]]
 	then
-		output -ehT "“$1$(bnd_parser -pbf)” Recipe Returned Erros"
+		output -ehT "“$1$(bnd_parser -pbf)” Returned Erros"
 	else
 		output -hT "“$1$(bnd_parser -pbf)” Finished"
 	fi
