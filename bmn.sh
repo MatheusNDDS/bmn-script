@@ -805,7 +805,7 @@ cook(){
 	pkg_install
 	if [ -e recipe ]
 	then
-		output -hT "- Executing “$1” Recipe -"
+		output -hT "- Executing “$1$(bnd_parser -pbf)” Recipe -"
 		$rex $*
 	fi
 	recipe_log=($(blog -gal @$1))
@@ -835,6 +835,7 @@ bnd_pack(){
 ## Script Managment
 setup(){
 #Detect custom bin path
+	if [ $UID != 0 ];then $rtext;exit 0;fi
 	if [[ $2 = *"srcd="* ]]
 	then
 		cmd_srcd=$($prt $2|sed "s/srcd=//g")
