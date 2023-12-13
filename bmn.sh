@@ -259,31 +259,31 @@ bmn_init(){
 output(){
 	out_a=($*)
 	declare -A t
-	t[0]="\033[01;36m-=/Configuration Bundles Manager/=-\033[00m \n~ MatheusNDDS : https://github.com/MatheusNDDS\n"
-	t[1]="\033[01;33m[Properties]\033[00m\n User: $u\n Home: $h\n PkgM: $pm\n Repo: $repo"
-	t[2]="\033[01;33m[Commands]\033[00m\n --install,-i : Install bundles from repository, use -iu to update $pm repositories during installation.\n --lc-install,-li : Install bundles from $file_format file path, use -liu to update $pm repositories during installation.\n --dir-install,-di : Install bundles from unpacked dir path, use -diu to update $pm repositories during installation.\n --dowload,-d : Download bundles from repository.\n --bnd-pack, -bp : Pack a bundle from a directory.\n --repo-update,-rU : Update repository release file, use this regularly.\n --$name-update,-U : Update $name script from Repo source or local script.\n --list-bnds,-l : List or search for bundles in repo file.\n --live-shell,-sh : Run live shell for testing $name functions.\n --properties,-p : Prints the user information that $name uses.\n --help,-h : Print help text."
-	t[3]="bndp_a=(${bndp_a[@]})\nbndf=$bndf\nbnd_raw_name=$bnd_raw_name\nbnd_pre_name=(${bnd_pre_name[@]})\nbnd_name=$bnd_name\nflags=(${bnd_flags[@]})"
+	[ $1 = 0 ] && t[0]="\033[01;36m-=/Configuration Bundles Manager/=-\033[00m \n~ MatheusNDDS : https://github.com/MatheusNDDS\n"
+	[ $1 = 1 ] && t[1]="\033[01;33m[Properties]\033[00m\n User: $u\n Home: $h\n PkgM: $pm\n Repo: $repo"
+	[ $1 = 2 ] && t[2]="\033[01;33m[Commands]\033[00m\n --install,-i : Install bundles from repository, use -iu to update $pm repositories during installation.\n --lc-install,-li : Install bundles from $file_format file path, use -liu to update $pm repositories during installation.\n --dir-install,-di : Install bundles from unpacked dir path, use -diu to update $pm repositories during installation.\n --dowload,-d : Download bundles from repository.\n --bnd-pack, -bp : Pack a bundle from a directory.\n --repo-update,-rU : Update repository release file, use this regularly.\n --$name-update,-U : Update $name script from Repo source or local script.\n --list-bnds,-l : List or search for bundles in repo file.\n --live-shell,-sh : Run live shell for testing $name functions.\n --properties,-p : Prints the user information that $name uses.\n --help,-h : Print help text."
+	[ $1 = 3 ] && t[3]="bndp_a=(${bndp_a[@]})\nbndf=$bndf\nbnd_raw_name=$bnd_raw_name\nbnd_pre_name=(${bnd_pre_name[@]})\nbnd_name=$bnd_name\nflags=(${bnd_flags[@]})"
 	
 ## Formatting arguments
 #Text output formatting arguments are also used by blog() to register data.
-	t['-p']="\033[01;35m [$2]: -=- ${out_a[*]:2} -=-\033[00m" #Process
-	t['-l']="\033[01m $2: [ $($prt ${out_a[*]:2}|tr ' ' ', ') ]\033[00m " #List itens
-	t['-hT']="\n\033[01;36m******** [ ${out_a[*]:1} ] ********\033[00m\n" #High Title
-	t['-ahT']="\n\033[01;33m******** / ${out_a[*]:1} / ********\033[00m\n" #Alert High Title
-	t['-ehT']="\n\033[01;31m*#*#*#*# { ${out_a[*]:1} } #*#*#*#*\033[00m\n" #Error High Title
-	t['-T']="\n\033[01;36m ### [ ${out_a[*]:1} ] ###\033[00m\n" #Title
-	t['-t']="\033[01;33m - ${out_a[*]:1}\033[00m" #Subtitle
-	t['-d']="\033[01m [$2]: ${out_a[*]:2}\033[00m" #Dialog, blog Data
-	t['-e']="\033[01;31m {$2}: ${out_a[*]:2}\033[00m" #Error Dialog
-	t['-s']="\033[01;32m ($2): ${out_a[*]:2}\033[00m" #Sucess Dialog
-	t['-a']="\033[01;33m /$2/: ${out_a[*]:2}\033[00m" #Alert Dialog
-	t['-bH']="\033[01;36m ## ${out_a[*]:2} ##\n ~ $2 ~\033[00m\n" #Bundle Header
+	[ $1 = '-p' ]    || [ $1 = '-qi' ] && t['-p']="\033[01;35m [$2]: -=- ${out_a[*]:2} -=-\033[00m" #Process
+	[ $1 = '-l' ]    || [ $1 = '-qi' ] && t['-l']="\033[01m $2: [ $($prt ${out_a[*]:2}|tr ' ' ', ') ]\033[00m " #List itens
+	[ $1 = '-hT' ]   || [ $1 = '-qi' ] &&  t['-hT']="\n\033[01;36m******** [ ${out_a[*]:1} ] ********\033[00m\n" #High Title
+	[ $1 = '-ahT' ]  || [ $1 = '-qi' ] &&  t['-ahT']="\n\033[01;33m******** / ${out_a[*]:1} / ********\033[00m\n" #Alert High Title
+	[ $1 = '-ehT' ]  || [ $1 = '-qi' ] &&  t['-ehT']="\n\033[01;31m*#*#*#*# { ${out_a[*]:1} } #*#*#*#*\033[00m\n" #Error High Title
+	[ $1 = '-T' ]    || [ $1 = '-qi' ] &&  t['-T']="\n\033[01;36m ### [ ${out_a[*]:1} ] ###\033[00m\n" #Title
+	[ $1 = '-t' ]    || [ $1 = '-qi' ] &&  t['-t']="\033[01;33m - ${out_a[*]:1}\033[00m" #Subtitle
+	[ $1 = '-d' ]    || [ $1 = '-qi' ] &&  t['-d']="\033[01m [$2]: ${out_a[*]:2}\033[00m" #Dialog, blog Data
+	[ $1 = '-e' ]    || [ $1 = '-qi' ] &&  t['-e']="\033[01;31m {$2}: ${out_a[*]:2}\033[00m" #Error Dialog
+	[ $1 = '-s' ]    || [ $1 = '-qi' ] &&  t['-s']="\033[01;32m ($2): ${out_a[*]:2}\033[00m" #Sucess Dialog
+	[ $1 = '-a' ]    || [ $1 = '-qi' ] &&  t['-a']="\033[01;33m /$2/: ${out_a[*]:2}\033[00m" #Alert Dialog
+	[ $1 = '-bH' ]   || [ $1 = '-qi' ] &&  t['-bH']="\033[01;36m ## ${out_a[*]:2} ##\n ~ $2 ~\033[00m\n" #Bundle Header
 	
 	if [[ $1 != "-qi" ]]
 	then
 		$prt ${t[$1]}
 	else
-		$prt ${!t[@]} | sed 's/[0-9]//g'
+		$prt ${!t[@]}
 	fi
 }
 pma(){
@@ -481,8 +481,8 @@ blog(){
 	"-a"|"-e"|"-d") #quick alert and error register for bundles
 	if [[ $output_index != *"${blog_a[0]}"* ]] || [[ $2 != "${bkc}"* ]] || [[ ${blog_a[@]:2} = *"${bkc}"* ]]
 	then
-		output -d blog/syntax "blog $1 “${bkc}key” “text arguments (cannot contain ${bkc})”"
-		output -d blog/dataTypes ${output_index[@]}
+		output -a syntax "blog $1 “${bkc}key” “text arguments (cannot contain ${bkc})”"
+		output -d dataTypes ${output_index[@]}
 	else
 		line=($(grep -- "$1 $2" $log))
 		if [[ ! -z $line ]] && [[ $1 != "-d" ]] && [[ $line != "-e" ]]
@@ -502,8 +502,8 @@ blog(){
 	"-reg") #register a custom value
 		if [[ $output_index != *"$2"* ]] || [[ $3 != "${bkc}"* ]] || [[ ${blog_a[@]:3} = *"${bkc}"* ]]
 		then
-			output -d blog/syntax "blog $1 “-d” “${bkc}key” “text arguments (cannot contain ${bkc})”"
-			output -d blog/dataTypes ${output_index[@]}
+			output -a syntax "blog $1 “-d” “${bkc}key” “text arguments (cannot contain ${bkc})”"
+			output -d dataTypes ${output_index[@]}
 		else
 			echo "${blog_a[*]:1}" | sed "s/\n//g" >> $log
 			if [[ $blog_verbose = 1 ]]
@@ -515,8 +515,8 @@ blog(){
 	"-srg") # safe register, if there is data replace it with the newest one.
 		if [[ $output_index != *"$2"* ]] || [[ $3 != "${bkc}"* ]] || [[ ${blog_a[@]:3} = *"${bkc}"* ]]
 		then
-			output -d blog/syntax "blog $1 “-d” “${bkc}key” “text arguments (cannot contain ${bkc})”"
-			output -d blog/dataTypes ${output_index[@]}
+			output -a syntax "blog $1 “-d” “${bkc}key” “text arguments (cannot contain ${bkc})”"
+			output -d dataTypes ${output_index[@]}
 		else
 			if [ -z "$(blog -gl $2 $3)" ]
 			then
@@ -529,8 +529,8 @@ blog(){
 	"-ail"|"-ril") #add and remove items in a line 
 		if [[ $output_index != *"$2"* ]] || [[ $3 != *"@"* ]] || [[ ${blog_a[@]:3} = *"${bkc}"* ]]
 		then
-			output -d blog/syntax "blog $1 “-d” “${bkc}keyQwerry” “text arguments (cannot contain ${bkc})”"
-			output -d blog/dataTypes ${output_index[@]}
+			output -a syntax "blog $1 “-d” “${bkc}keyQwerry” “text arguments (cannot contain ${bkc})”"
+			output -d dataTypes ${output_index[@]}
 		else
 			if [[ ! -z $line ]]
 			then
@@ -550,8 +550,8 @@ blog(){
 	"-ed") #edit a line, keeps the previous key
 		if [[ $output_index != *"$2"* ]] || [[ $3 != *"${bkc}"* ]] || [[ ${blog_a[@]:3} = *"${bkc}"* ]]
 		then
-			output -d blog/syntax "blog $1 “-d” “${bkc}keyQwerry” “text arguments (cannot contain ${bkc})”"
-			output -d blog/dataTypes ${output_index[@]}
+			output -a syntax "blog $1 “-d” “${bkc}keyQwerry” “text arguments (cannot contain ${bkc})”"
+			output -d dataTypes ${output_index[@]}
 		else
 			if [[ ! -z $line ]]
 			then
@@ -563,8 +563,8 @@ blog(){
 	"-sub") #substitute the line
 		if [[ $output_index != *"$2"* ]] || [[ $3 != "${bkc}"* ]] ||  [[ $output_index != *"$4"* ]] || [[ $5 != "${bkc}"* ]] || [[ ${blog_a[@]:5} = *"${bkc}"* ]] 
 		then
-			output -d blog/syntax "blog $1 “-d” “${bkc}keyQwerry” “-d” “${bkc}key” “text arguments (cannot contain ${bkc})”"
-			output -d blog/dataTypes ${output_index[@]}
+			output -a syntax "blog $1 “-d” “${bkc}keyQwerry” “-d” “${bkc}key” “text arguments (cannot contain ${bkc})”"
+			output -d dataTypes ${output_index[@]}
 		else
 			if [[ ! -z $line ]]
 			then
@@ -576,8 +576,8 @@ blog(){
 	"-rm") #removes a especific type and key line
 		if  [[ $output_index != *"$2"* ]] || [[ "$3" != "${bkc}"* ]]
 		then
-			output -d blog/syntax "blog $1 “-d” “${bkc}key”"
-			output -d blog/dataTypes ${output_index[@]}
+			output -a syntax "blog $1 “-d” “${bkc}key”"
+			output -d dataTypes ${output_index[@]}
 		else
 			sed -i "/$2 $3/d" $log
 		fi
@@ -585,7 +585,7 @@ blog(){
 	"-rma") #delete all key lines
 		if  [[ "$2" != "${bkc}"* ]]
 		then
-			output -d blog/syntax 'blog -del “${bkc}key”'
+			output -a syntax 'blog -del “${bkc}key”'
 		else
 			sed -i "/$2/d" $log
 		fi
@@ -593,8 +593,8 @@ blog(){
 	"-gl"|"-glf") #returns the line with the found value, -glf for remove @.
 		if  [[ $output_index != *"$2"* ]] || [[ "$3" != "${bkc}"* ]]
 		then
-			output -d blog/syntax "blog $1 “-d” “${bkc}key”"
-			output -d blog/dataTypes ${output_index[@]}
+			output -a syntax "blog $1 “-d” “${bkc}key”"
+			output -d dataTypes ${output_index[@]}
 		else
 			if [[ $1 = "-gl" ]]
 			then
@@ -607,7 +607,7 @@ blog(){
 	"-gal") #returns all the key lines
 		if  [[ "$2" != "${bkc}"* ]]
 		then
-			output -d "blog/syntax" "blog $1 “${bkc}key”"
+			output -d "syntax" "blog $1 “${bkc}key”"
 		else
 			grep -- "$2" $log
 		fi
@@ -615,8 +615,8 @@ blog(){
 	"-gd") #returns only the data without type or key
 		if  [[ $output_index != *"$2"* ]] || [[ "$3" != "${bkc}"* ]]
 		then
-			output -d blog/syntax "blog $1 “-d” “${bkc}key”"
-			output -d blog/dataTypes ${output_index[@]}
+			output -a syntax "blog $1 “-d” “${bkc}key”"
+			output -d dataTypes ${output_index[@]}
 		else
 			echo "${line[*]:2}"
 		fi
@@ -993,6 +993,7 @@ detect_user_props(){
 	fi
 }
 live_shell(){
+	if [ $UID != 0 ];then $rtext;exit 0;fi
 	current_dir=$(pwd)
 	cd $pdir
 	$ir bash --init-file $init_file
