@@ -266,18 +266,18 @@ output(){
 	
 ## Formatting arguments
 #Text output formatting arguments are also used by blog() to register data.
-	t['-p']="\033[01;35m [$2]: -=- ${out_a[*]:3} -=-\033[00m" #Process
-	t['-l']="\033[01m $2: [ $($prt ${out_a[*]:3}|tr ' ' ', ') ]\033[00m " #List itens
+	t['-p']="\033[01;35m [$2]: -=- ${out_a[*]:2} -=-\033[00m" #Process
+	t['-l']="\033[01m $2: [ $($prt ${out_a[*]:2}|tr ' ' ', ') ]\033[00m " #List itens
 	t['-hT']="\n\033[01;36m******** [ ${out_a[*]:1} ] ********\033[00m\n" #High Title
 	t['-ahT']="\n\033[01;33m******** / ${out_a[*]:1} / ********\033[00m\n" #Alert High Title
 	t['-ehT']="\n\033[01;31m*#*#*#*# { ${out_a[*]:1} } #*#*#*#*\033[00m\n" #Error High Title
 	t['-T']="\n\033[01;36m ### [ ${out_a[*]:1} ] ###\033[00m\n" #Title
 	t['-t']="\033[01;33m - ${out_a[*]:1}\033[00m" #Subtitle
-	t['-d']="\033[01m [$2]: ${out_a[*]:3}\033[00m" #Dialog, blog Data
-	t['-e']="\033[01;31m {$2}: ${out_a[*]:3}\033[00m" #Error Dialog
-	t['-s']="\033[01;32m ($2): ${out_a[*]:3}\033[00m" #Sucess Dialog
-	t['-a']="\033[01;33m /$2/: ${out_a[*]:3}\033[00m" #Alert Dialog
-	t['-bH']="\033[01;36m ## ${out_a[*]:3} ##\n ~ $2 ~\033[00m\n" #Bundle Header
+	t['-d']="\033[01m [$2]: ${out_a[*]:2}\033[00m" #Dialog, blog Data
+	t['-e']="\033[01;31m {$2}: ${out_a[*]:2}\033[00m" #Error Dialog
+	t['-s']="\033[01;32m ($2): ${out_a[*]:2}\033[00m" #Sucess Dialog
+	t['-a']="\033[01;33m /$2/: ${out_a[*]:2}\033[00m" #Alert Dialog
+	t['-bH']="\033[01;36m ## ${out_a[*]:2} ##\n ~ $2 ~\033[00m\n" #Bundle Header
 	
 	if [[ $1 != "-qi" ]]
 	then
