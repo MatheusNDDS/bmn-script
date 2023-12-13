@@ -805,19 +805,19 @@ cook(){
 	pkg_install
 	if [ -e recipe ]
 	then
-		output -hT "- Executing “$1$(bnd_parser -pbf)” Recipe -"
+		output -hT "Executing “$1$(bnd_parser -pbf)” Recipe"
 		$rex $*
 	fi
 	recipe_log=($(blog -gal @$1))
 	blog -rma @$1
 	if [[ "${recipe_log[@]}" = *"-a"* ]]
 	then
-		output -ahT "- “$1$(bnd_parser -pbf)” Returned Alerts -" 
+		output -ahT "“$1$(bnd_parser -pbf)” Returned Alerts" 
 	elif [[ "${recipe_log[@]}" = *"-e"* ]]
 	then
-		output -ehT "- “$1$(bnd_parser -pbf)” Returned Erros -"
+		output -ehT "“$1$(bnd_parser -pbf)” Returned Erros"
 	else
-		output -hT "- “$1$(bnd_parser -pbf)” Finished -"
+		output -hT "“$1$(bnd_parser -pbf)” Finished"
 	fi
 }
 bnd_pack(){
