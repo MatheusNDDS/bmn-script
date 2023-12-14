@@ -215,11 +215,7 @@ bmn_init(){
 		done
 	elif [[ $1 = '-s' ]] || [[ "$1" = '--setup' ]]
 	then
-		if [ $UID != 0 ]
-		then
-			$rtext
-			exit 0
-		fi
+		if [ $UID != 0 ];then $rtext;exit 0;fi
 		setup $*
 	elif [[ $1 = '-ss' ]] || [[ "$1" = '--setup' ]]
 	then
@@ -345,7 +341,7 @@ pma_a=($*)
 	## options for pma ##
 	if [ $1 = "-qpm" ] #Qwerry Package Manager
 	then
-		bin_dirs="$(echo $PATH | tr ':' ' ')"
+		bin_dirs=($(echo $PATH | tr ':' ' '))
 		for dir in ${bin_dirs[@]}
 		do
 			bin_list+=($(ls $dir/))
@@ -838,7 +834,6 @@ bnd_pack(){
 ## Script Managment
 setup(){
 #Detect custom bin path
-	if [ $UID != 0 ];then $rtext;exit 0;fi
 	if [[ $2 = *"srcd="* ]]
 	then
 		cmd_srcd=$($prt $2|sed "s/srcd=//g")
@@ -857,7 +852,7 @@ setup(){
 	$prt 'export PS1="\\n“\w”\\n$(output -d $name)"\nalias q="exit 0"\nalias x="clear"\nalias c="$editor $cfg_file"\nalias i="$editor $init_file"\nalias r="$editor $pdir/release"\nalias l="$editor $log"\nalias h="$prt +\\n c: edit config\\n i: edit init\\n r: edit release\\n l: edit log\\n x: clear prompt\\n h: help\\n q: exit+"\nblog_verbose=1' | tr '+' "'" >> $init_file
 #Package manager autodetect
 	output -p $name "Detecting Package Manager"
-	pma -qpm | blog
+	pma -qpm 2> .log
 	output -t "Package Manager : $pm_detected"
 #Detecting home and user
 	output -p $name "Detecting Home Directory and User"
