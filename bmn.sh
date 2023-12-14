@@ -50,6 +50,9 @@ load_data(){
 	mdi="/media"
 	mnt="/mnt"
 	tmp="/temp"
+	sus="/etc/sudoers"
+	xss="$rsr/xsessions/"
+	wss="$rsr/wayland-sessions/"
 
 ## References ##
 	name="bmn"
