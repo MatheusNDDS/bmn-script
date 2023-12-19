@@ -1045,10 +1045,12 @@ btest(){
 	do
 		case $err_type in 
 		'-root')
-			[ $UID != 0 ] && output ${bterr[$err_type]} && err_cmd="exit 1" && $err_cmd
+			[ $UID != 0 ] && output ${bterr[$err_type]} && err_cmd="exit 1"
+			break
 		;;
 		'-net')
-			ping $repo 2> $tmpf || output ${bterr[$err_type]} && err_cmd="exit 1" && $err_cmd
+			ping -c 1 www.google.com > $tmpf || output ${bterr[$err_type]} && err_cmd="exit 1"
+			break
 		;;
 		esac
 	done
