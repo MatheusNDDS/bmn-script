@@ -963,7 +963,7 @@ qwerry_bnd(){
 		$srm $pdir/release
 		output -p $name "Downloading Release"
 		$dl $repo/release
-		bl -rgt @release_update $($scat $pdir/release)
+		bl -srgt @release $($scat $pdir/release)
 		# end
 		output -hT "Repository Updated"
 		cd $current_dir
@@ -1049,7 +1049,12 @@ btest(){
 			break
 		;;
 		'-net')
-			ping -c 1 www.google.com > $tmpf || output ${bterr[$err_type]} && err_cmd="exit 1"
+			ping -c 1 www.google.com > $tmpf 2>&1
+			if [ $? != 0 ]
+			then
+				output ${bterr[$err_type]}
+				err_cmd="exit 1"
+			fi
 			break
 		;;
 		esac
@@ -1062,6 +1067,8 @@ live_shell(){
 	$ir bash --init-file $init_file
 	cd $current_dir
 }
-
+null(){
+	exit $1
+}
 ### Program Start ###
 bmn_init $*
