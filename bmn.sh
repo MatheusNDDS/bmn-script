@@ -956,9 +956,9 @@ cfgb_update(){
 qwerry_bnd(){
 	if [[ $1 = '-rU' ]]
 	then
-		btest -root -net; $err_cmd
 		current_dir=$(pwd)
 		output -hT "Updating Repository"
+		btest -root -net; $err_cmd
 		cd $pdir
 		$srm $pdir/release
 		output -p $name "Downloading Release"
@@ -1045,19 +1045,18 @@ btest(){
 	do
 		case $err_type in 
 		'-root')
-			[ $UID != 0 ] && output ${bterr[$err_type]} && err_cmd="exit 1"
-			break
+			[ $UID != 0 ] &&  err_out=${bterr[$err_type]} && err_cmd="exit 1"
 		;;
 		'-net')
 			ping -c 1 www.google.com > $tmpf 2>&1
 			if [ $? != 0 ]
 			then
-				output ${bterr[$err_type]}
+				err_out=${bterr[$err_type]}
 				err_cmd="exit 1"
 			fi
-			break
 		;;
 		esac
+		[ ! -z "$err_out" ] && output $err_out
 	done
 }
 live_shell(){
