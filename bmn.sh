@@ -18,6 +18,7 @@ load_data(){
 	cat="$ir cat"
 	dl="$ir wget"
 	d0="/dev/0"
+	tmpf="/tmp/.tmp"
 	jmp="2> bl &"
 	gitc="$ir git clone"
 	bmi="$ir bmn -i"
@@ -68,7 +69,6 @@ load_data(){
 	script_src="https://github.com/MatheusNDDS/${name}-script/raw/main/${name}.sh"
 	sfm_verbose=0 #Enable verbose log for SFM
 	bkc=@
-	rtext="output -a $name this program needs root privileges"
 	date_f=('§' '%d-%m-%Y,%H:%M')
 
 ## Work Directorys ##
@@ -103,11 +103,11 @@ bmn_init(){
 	$smkd $lc_dir $bnd_dir
 	if [[ "$1" = '-i' ]] || [[ "$1" = '--install' ]] 
 	then
-		if [ $UID != 0 ];then $rtext;exit 0;fi
+		btest -root ; $err_cmd
 		for i in ${args[@]:2}
 		do
 			bnd_parser $i
-			if [[ "${release[@]}" = *"$bndf"* ]] #checks if the bundle exists in the repository.
+			if [[ "${release[@]}" = *"$bndf "* ]] || [[ ${release[0]} = $bndf ]] || [[ ${release[-1]} = $bndf ]] #checks if the bundle exists in the repository.
 			then
 				output -hT "Configuring “$bnd_name$(bnd_parser -pbf)”"
 				$srm $bnd_dir/$bnd_name
@@ -124,7 +124,7 @@ bmn_init(){
 		done
 	elif [[ "$1" = '-li' ]] || [[ "$1" = '--lc-install' ]] && [[ ! -z "${args[@]:3}" ]]
 	then
-		if [ $UID != 0 ];then $rtext;exit 0;fi
+		btest -root ; $err_cmd
 		if [[ $2 = *"$file_format"* ]]
 		then
 			bnd_ignore=()
@@ -160,7 +160,7 @@ bmn_init(){
 		fi
 	elif [[ "$1" = '-di' ]] || [[ "$1" = '--dir-install' ]] && [[ ! -z "${args[@]:3}" ]]
 	then
-		if [ $UID != 0 ];then $rtext;exit 0;fi
+		btest -root ; $err_cmd
 		bnd_ignore=()
 		output -hT "Importing dir bundles"
 		for i in ${args[@]:3}
@@ -216,7 +216,7 @@ bmn_init(){
 		done
 	elif [[ $1 = '-s' ]] || [[ "$1" = '--setup' ]]
 	then
-		if [ $UID != 0 ];then $rtext;exit 0;fi
+		btest -root -net ; $err_cmd
 		setup $*
 	elif [[ $1 = '-ss' ]] || [[ "$1" = '--setup' ]]
 	then
@@ -260,7 +260,7 @@ bmn_init(){
 ### Program Functions ###
 ## Utilities
 output(){
-	out_a=($*)
+out_a=($*)
 	declare -A t
 	[ $1 = 0 ] && t[0]="\033[01;36m-=/Configuration Bundles Manager/=-\033[00m \n~ MatheusNDDS : https://github.com/MatheusNDDS\n"
 	[ $1 = 1 ] && t[1]="\033[01;33m[Properties]\033[00m\n User: $u\n Home: $h\n PkgM: $pm\n Repo: $repo"
@@ -268,12 +268,12 @@ output(){
 	[ $1 = 3 ] && t[3]="bndp_a=(${bndp_a[@]})\nbndf=$bndf\nbnd_raw_name=$bnd_raw_name\nbnd_pre_name=(${bnd_pre_name[@]})\nbnd_name=$bnd_name\nflags=(${bnd_flags[@]})"
 	
 ## Formatting arguments
-#Text output formatting arguments are also used by bl() to register data.
+#Text output formatting arguments are also used by bl() to register logs and data.
 	[ $1 = '-p' ]    || [ $1 = '-qi' ] && t['-p']="\033[01;35m [$2]: -=- $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") -=-\033[00m" #Process
 	[ $1 = '-l' ]    || [ $1 = '-qi' ] && t['-l']="\033[01m $2: [ $($prt $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")|tr ' ' ', ') ]\033[00m " #List itens
 	[ $1 = '-hT' ]   || [ $1 = '-qi' ] &&  t['-hT']="\n\033[01;36m******** [ ${out_a[*]:1} ] ********\033[00m\n" #High Title
 	[ $1 = '-ahT' ]  || [ $1 = '-qi' ] &&  t['-ahT']="\n\033[01;33m******** / ${out_a[*]:1} / ********\033[00m\n" #Alert High Title
-	[ $1 = '-ehT' ]  || [ $1 = '-qi' ] &&  t['-ehT']="\n\033[01;31m*#*#*#*# { ${out_a[*]:1} } #*#*#*#*\033[00m\n" #Error High Title
+	[ $1 = '-ehT' ]  || [ $1 = '-qi' ] &&  t['-ehT']="\n\033[01;31m*#*#*#*# { $( echo "${out_a[*]:1}" | tr [:lower:] [:upper:]) } #*#*#*#*\033[00m\n" #Error High Title
 	[ $1 = '-T' ]    || [ $1 = '-qi' ] &&  t['-T']="\n\033[01;36m ### [ ${out_a[*]:1} ] ###\033[00m\n" #Title
 	[ $1 = '-t' ]    || [ $1 = '-qi' ] &&  t['-t']="\033[01;33m - ${out_a[*]:1}\033[00m" #Subtitle
 	[ $1 = '-d' ]    || [ $1 = '-qi' ] &&  t['-d']="\033[01m [$2]: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Dialog, bl Data
@@ -298,7 +298,7 @@ pma_a=($*)
 	declare -A pm_u
 	declare -A pm_g
 	pkg="${pma_a[*]:1}"
-
+	
 ##apt##
 	pm_i[apt]="install"
 	pm_r[apt]="remove"
@@ -361,17 +361,17 @@ pma_a=($*)
 	then
 		if [ "${pm_i[$pm]}" = "@" ]
 		then
-			$ir $pm ${pm_i[apt]} ${pkg} -y
+			$ir $pm ${pm_i[apt]} ${pkgs} -y
 		else
-			$ir $pm ${pm_i[$pm]} ${pkg} -y
+			$ir $pm ${pm_i[$pm]} ${pkgs} -y
 		fi 
 	elif [ $1 = "-r" ]
 	then
 		if [ "${pm_r[$pm]}" = "@" ]
 		then
-			$ir $pm ${pm_r[apt]} ${pkg} -y
+			$ir $pm ${pm_r[apt]} ${pkgs} -y
 		else
-			$ir $pm ${pm_r[$pm]} ${pkg} -y
+			$ir $pm ${pm_r[$pm]} ${pkgs} -y
 		fi
 	elif [ $1 = '-s' ]
 	then
@@ -408,7 +408,7 @@ pma_a=($*)
 	fi
 }
 sfm(){
-	sfm_a=($*)
+sfm_a=($*)
 	for dof in ${sfm_a[@]:1}
 	do
 		if [ "$dof" != "/" ] || [ "$dof" != "$pdir" ] || [ $pdir/* != *"$dof"* ]
@@ -476,9 +476,9 @@ sfm(){
 	done
 }
 bl(){
-	blog_a=($@)
+bl_a=($@)
 	log_hist=($(cat $log))
-	line=($(grep -- "${blog_a[1]} ${blog_a[2]}" $log))
+	line=($(grep -- "${bl_a[1]} ${bl_a[2]}" $log))
 	output_index="$(output -qi)"
 	blog_date_str="${date_f[0]}$(date +${date_f[1]})"
 	
@@ -486,15 +486,18 @@ bl(){
 		'-rg'|'-rgt'|'-rgt'|'-srgt'|'-gl'|'-glf'|'gd'|'-rm'|'-o')
 			if [[  $output_index != *"$2"* ]]
 			then
-				blog_a=($1 '-d' ${blog_a[@]:1})
-				line=($(grep -- "${blog_a[1]} ${blog_a[2]}" $log))
+				bl_a=($1 '-d' ${bl_a[@]:1})
+				line=($(grep -- "${bl_a[1]} ${bl_a[2]}" $log))
 			fi
 		;;
+		'@'*)
+			bl_a=('-a' ${bl_a[@]:0})
+			line=($(grep -- "${bl_a[1]} ${bl_a[2]}" $log))
+		;;
 	esac
-	
-	case $1 in
+	case ${bl_a[0]} in
 	"-a"|"-e"|"-d") #quick alert and error register for bundles
-	if [[ $output_index != *"${blog_a[0]}"* ]] || [[ $2 != "${bkc}"* ]] || [[ ${blog_a[@]:2} = *"${bkc}"* ]]
+	if [[ $output_index != *"${bl_a[0]}"* ]] || [[ ${bl_a[1]} != "${bkc}"* ]] || [[ ${bl_a[@]:2} = *"${bkc}"* ]]
 	then
 		output -a syntax "bl $1 “${bkc}key” “text arguments (cannot contain ${bkc})”"
 		output -d dataTypes ${output_index[@]}
@@ -506,16 +509,16 @@ bl(){
 		fi
 		if [[ $line != *"-e"* ]] || [[ $1 != "-a" ]]
 		then
-			echo "${blog_a[*]}" >> $log
+			echo "${bl_a[*]}" >> $log
 		fi
 		if [[ $blog_verbose = 1 ]]
 		then
-			output $(echo "${blog_a[*]}" | sed "s/${bkc}//g")
+			output $(echo "${bl_a[*]}" | sed "s/${bkc}//g")
 		fi
 	fi
 	;;
 	'-o')
-		if [[ $output_index != *"${blog_a[1]}"* ]] || [[ ${blog_a[2]}  != "${bkc}"* ]] || [[ ${blog_a[@]:3} = *"${bkc}"* ]]
+		if [[ $output_index != *"${bl_a[1]}"* ]] || [[ ${bl_a[2]}  != "${bkc}"* ]] || [[ ${bl_a[@]:3} = *"${bkc}"* ]]
 		then
 			output -a syntax "bl $1 “-d” “${bkc}key” “text arguments (cannot contain ${bkc})”"
 			output -d dataTypes ${output_index[@]}
@@ -524,43 +527,43 @@ bl(){
 		fi
 	;;
 	"-rg"|'-rgt') #register a custom value
-		if [[ $output_index != *"${blog_a[1]}"* ]] || [[ ${blog_a[2]}  != "${bkc}"* ]] || [[ ${blog_a[@]:3} = *"${bkc}"* ]]
+		if [[ $output_index != *"${bl_a[1]}"* ]] || [[ ${bl_a[2]}  != "${bkc}"* ]] || [[ ${bl_a[@]:3} = *"${bkc}"* ]]
 		then
 			output -a syntax "bl $1 “-d” “${bkc}key” “text arguments (cannot contain ${bkc})”"
 			output -d dataTypes ${output_index[@]}
 		else
 			if [ $1 = '-rgt' ]
 			then
-				blog_a[2]="${blog_a[2]}$blog_date_str"
+				bl_a[2]="${bl_a[2]}$blog_date_str"
 			fi
-			echo "${blog_a[*]:1}" | sed "s/\n//g" >> $log
+			echo "${bl_a[*]:1}" | sed "s/\n//g" >> $log
 			if [[ $blog_verbose = 1 ]]
 			then
-				output $(echo "${blog_a[*]:1}" | sed "s/${bkc}//g")
+				output $(echo "${bl_a[*]:1}" | sed "s/${bkc}//g")
 			fi
 		fi
 	;;
 	"-srg"|'-srgt') # safe register, if there is data replace it with the newest one.
-		if [[ $output_index != *"${blog_a[1]}"* ]] || [[ ${blog_a[2]}  != "${bkc}"* ]] || [[ ${blog_a[@]:3} = *"${bkc}"* ]]
+		if [[ $output_index != *"${bl_a[1]}"* ]] || [[ ${bl_a[2]}  != "${bkc}"* ]] || [[ ${bl_a[@]:3} = *"${bkc}"* ]]
 		then
 			output -a syntax "bl $1 “-d” “${bkc}key” “text arguments (cannot contain ${bkc})”"
 			output -d dataTypes ${output_index[@]}
 		else
 			if [ $1 = '-srgt' ]
 			then
-				blog_a[2]="${blog_a[2]}$blog_date_str"
+				bl_a[2]="${bl_a[2]}$blog_date_str"
 			fi
-			if [ -z "$(bl -gl ${blog_a[1]} ${blog_a[2]})" ]
+			if [ -z "$(bl -gl ${bl_a[1]} ${bl_a[2]})" ]
 			then
-				echo "${blog_a[*]:1}" | sed "s/\n//g" >> $log
+				echo "${bl_a[*]:1}" | sed "s/\n//g" >> $log
 			else
-				sed -i "/${blog_a[1]} ${blog_a[2]}/d" $log
-				echo "${blog_a[*]:1}" | sed "s/\n//g" >> $log
+				sed -i "/${bl_a[1]} ${bl_a[2]}/d" $log
+				echo "${bl_a[*]:1}" | sed "s/\n//g" >> $log
 			fi
 		fi
 	;;
 	"-ail"|"-ril") #add and remove items in a line 
-		if [[ $output_index != *"${blog_a[1]}"* ]] || [[ $3 != *"@"* ]] || [[ ${blog_a[@]:3} = *"${bkc}"* ]]
+		if [[ $output_index != *"${bl_a[1]}"* ]] || [[ $3 != *"@"* ]] || [[ ${bl_a[@]:3} = *"${bkc}"* ]]
 		then
 			output -a syntax "bl $1 “-d” “${bkc}keyQwerry” “text arguments (cannot contain ${bkc})”"
 			output -d dataTypes ${output_index[@]}
@@ -569,50 +572,50 @@ bl(){
 			then
 				if [ $1 = "-ail" ]
 				then
-					sed -i "/${blog_a[1]} ${blog_a[2]}/d" $log
-					echo "${line[*]} ${blog_a[*]:3}" | sed "s/\n//g" >> $log
+					sed -i "/${bl_a[1]} ${bl_a[2]}/d" $log
+					echo "${line[*]} ${bl_a[*]:3}" | sed "s/\n//g" >> $log
 				else
-					for item in ${blog_a[@]:3}
+					for item in ${bl_a[@]:3}
 					do
-						bl -sub ${blog_a[1]} ${blog_a[2]} $(echo "${line[*]}" | sed "s/$item//g")
+						bl -sub ${bl_a[1]} ${bl_a[2]} $(echo "${line[*]}" | sed "s/$item//g")
 					done
 				fi
 			fi
 		fi
 	;;
 	"-ed") #edit a line, keeps the previous key
-		if [[ $output_index != *"${blog_a[1]}"* ]] || [[ $3 != *"${bkc}"* ]] || [[ ${blog_a[@]:3} = *"${bkc}"* ]]
+		if [[ $output_index != *"${bl_a[1]}"* ]] || [[ $3 != *"${bkc}"* ]] || [[ ${bl_a[@]:3} = *"${bkc}"* ]]
 		then
 			output -a syntax "bl $1 “-d” “${bkc}keyQwerry” “text arguments (cannot contain ${bkc})”"
 			output -d dataTypes ${output_index[@]}
 		else
 			if [[ ! -z $line ]]
 			then
-				sed -i "/${blog_a[1]} ${blog_a[2]}/d" $log
-				echo "${blog_a[1]} ${blog_a[2]} ${blog_a[*]:3}" | sed "s/\n//g" >> $log
+				sed -i "/${bl_a[1]} ${bl_a[2]}/d" $log
+				echo "${bl_a[1]} ${bl_a[2]} ${bl_a[*]:3}" | sed "s/\n//g" >> $log
 			fi
 		fi
 	;;
 	"-sub") #substitute the line
-		if [[ $output_index != *"${blog_a[1]}"* ]] || [[ ${blog_a[2]}  != "${bkc}"* ]] ||  [[ $output_index != *"$4"* ]] || [[ $5 != "${bkc}"* ]] || [[ ${blog_a[@]:5} = *"${bkc}"* ]] 
+		if [[ $output_index != *"${bl_a[1]}"* ]] || [[ ${bl_a[2]}  != "${bkc}"* ]] ||  [[ $output_index != *"$4"* ]] || [[ $5 != "${bkc}"* ]] || [[ ${bl_a[@]:5} = *"${bkc}"* ]] 
 		then
 			output -a syntax "bl $1 “-d” “${bkc}keyQwerry” “-d” “${bkc}key” “text arguments (cannot contain ${bkc})”"
 			output -d dataTypes ${output_index[@]}
 		else
 			if [[ ! -z $line ]]
 			then
-				sed -i "/${blog_a[1]} ${blog_a[2]}/d" $log
-				echo "${blog_a[*]:3}" | sed "s/\n//g" >> $log
+				sed -i "/${bl_a[1]} ${bl_a[2]}/d" $log
+				echo "${bl_a[*]:3}" | sed "s/\n//g" >> $log
 			fi
 		fi
 	;;
 	"-rm") #removes a especific type and key line
-		if  [[ $output_index != *"${blog_a[1]}"* ]] || [[ ${blog_a[2]}  != "${bkc}"* ]]
+		if  [[ $output_index != *"${bl_a[1]}"* ]] || [[ ${bl_a[2]}  != "${bkc}"* ]]
 		then
 			output -a syntax "bl $1 “-d” “${bkc}key”"
 			output -d dataTypes ${output_index[@]}
 		else
-			sed -i "/${blog_a[1]} ${blog_a[2]}/d" $log
+			sed -i "/${bl_a[1]} ${bl_a[2]}/d" $log
 		fi
 	;;
 	"-rma") #delete all key lines
@@ -624,16 +627,16 @@ bl(){
 		fi
 	;;
 	"-gl"|"-glf") #returns the line with the found value, -glf for remove @.
-		if  [[ $output_index != *"${blog_a[1]}"* ]] || [[ ${blog_a[2]}  != "${bkc}"* ]]
+		if  [[ $output_index != *"${bl_a[1]}"* ]] || [[ ${bl_a[2]}  != "${bkc}"* ]]
 		then
 			output -a syntax "bl $1 “-d” “${bkc}key”"
 			output -d dataTypes ${output_index[@]}
 		else
 			if [[ $1 = "-gl" ]]
 			then
-				[ ! -z $line ] && grep -- "${blog_a[1]} ${blog_a[2]}" $log
+				[ ! -z $line ] && grep -- "${bl_a[1]} ${bl_a[2]}" $log
 			else
-				[ ! -z $line ] && grep -- "${blog_a[1]} ${blog_a[2]}" $log | sed "s/${bkc}//" | sed "s/${date_f[0]}/ /" | sed "s/${blog_a[1]}//"
+				[ ! -z $line ] && grep -- "${bl_a[1]} ${bl_a[2]}" $log | sed "s/${bkc}//" | sed "s/${date_f[0]}/ /" | sed "s/${bl_a[1]}//"
 			fi
 		fi
 	;;
@@ -646,7 +649,7 @@ bl(){
 		fi
 	;;
 	"-gd") #returns only the data without type or key
-		if  [[ $output_index != *"${blog_a[1]}"* ]] || [[ ${blog_a[2]}  != "${bkc}"* ]]
+		if  [[ $output_index != *"${bl_a[1]}"* ]] || [[ ${bl_a[2]}  != "${bkc}"* ]]
 		then
 			output -a syntax "bl $1 “-d” “${bkc}key”"
 			output -d dataTypes ${output_index[@]}
@@ -816,6 +819,7 @@ bndp_a=($($prt $1|sed "s/:/ /"))
 }
 download(){
 	output -p $name "Downloading “$1”"
+	btest -net ; $err_cmd
 	$srm $1.$file_format
 	if [ $lc_repo = 0 ]
 	then
@@ -924,7 +928,7 @@ setup(){
 	fi
 }
 cfgb_update(){
-	if [ $UID != 0 ];then $rtext;exit 0;fi
+	btest -root ; $err_cmd
 	output -hT "Updating $name_upper Script"
 	bin_srcd=($(cat $init_file))
 	cmd_bin=${bin_srcd[1]}
@@ -932,6 +936,7 @@ cfgb_update(){
 	then
 		current_dir=$(pwd)
 		output -p $name 'Downloading Script'
+		btest -net ; $err_cmd
 		output -d 'Source' $script_src
 		cd $pdir
 		$dl $script_src
@@ -951,13 +956,14 @@ cfgb_update(){
 qwerry_bnd(){
 	if [[ $1 = '-rU' ]]
 	then
-		if [ $UID != 0 ];then $rtext;exit 0;fi
+		btest -root -net; $err_cmd
 		current_dir=$(pwd)
 		output -hT "Updating Repository"
 		cd $pdir
 		$srm $pdir/release
 		output -p $name "Downloading Release"
 		$dl $repo/release
+		bl -rgt @release_update $($scat $pdir/release)
 		# end
 		output -hT "Repository Updated"
 		cd $current_dir
@@ -996,7 +1002,7 @@ qwerry_bnd(){
 	fi
 }
 enable_extras(){
-	if [ $UID != 0 ];then $rtext;exit 0;fi
+	btest -net -root ; $err_cmd
 	for i in $*
 	do
 		if [ $i = flatpak ]
@@ -1028,8 +1034,27 @@ detect_user_props(){
 		u="root"
 	fi
 }
+btest(){
+	# error texts database
+	declare -A bterr
+	bterr['-root']="-ahT $name_upper needs root privileges"
+	bterr['-net']="-ehT No internet connection"
+	
+	# tests
+	for err_type in $@
+	do
+		case $err_type in 
+		'-root')
+			[ $UID != 0 ] && output ${bterr[$err_type]} && err_cmd="exit 1" && $err_cmd
+		;;
+		'-net')
+			ping $repo 2> $tmpf || output ${bterr[$err_type]} && err_cmd="exit 1" && $err_cmd
+		;;
+		esac
+	done
+}
 live_shell(){
-	if [ $UID != 0 ];then $rtext;exit 0;fi
+	btest -root; $err_cmd
 	current_dir=$(pwd)
 	cd $pdir
 	$ir bash --init-file $init_file
