@@ -216,7 +216,7 @@ bmn_init(){
 		done
 	elif [[ $1 = '-s' ]] || [[ "$1" = '--setup' ]]
 	then
-		btest -root -net ; $err_cmd
+		btest -root ; $err_cmd
 		setup $*
 	elif [[ $1 = '-ss' ]] || [[ "$1" = '--setup' ]]
 	then
@@ -1048,7 +1048,7 @@ btest(){
 			[ $UID != 0 ] &&  err_out=${bterr[$err_type]} && err_cmd="exit 1"
 		;;
 		'-net')
-			ping -c 1 www.google.com > $tmpf 2>&1
+			wget -q --spider https://www.google.com
 			if [ $? != 0 ]
 			then
 				err_out=${bterr[$err_type]}
