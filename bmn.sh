@@ -216,7 +216,6 @@ bmn_init(){
 		done
 	elif [[ $1 = '-s' ]] || [[ "$1" = '--setup' ]]
 	then
-		btest -root ; $err_cmd
 		setup $*
 	elif [[ $1 = '-ss' ]] || [[ "$1" = '--setup' ]]
 	then
@@ -871,6 +870,7 @@ bnd_pack(){
 
 ## Script Managment
 setup(){
+	btest -root ; $err_cmd
 #Detect custom bin path
 	if [[ $2 = *"srcd="* ]]
 	then
@@ -902,7 +902,11 @@ setup(){
 	output -p $name "Installing Dependencies"
 	pm=$pm_detected
 	pma -u
-	pma -i $deps
+	for i in ${deps[@]}
+	do
+		output -t "$pm/install: $i"
+		pma -i $i
+	done
 #Saving environment variables
 	if [ -z "$2" ] && [[ $2 != *"srcd="* ]] || [ -z "$3" ] && [[ $3 != *"srcd="* ]]
 	then
@@ -954,17 +958,17 @@ cfgb_update(){
 	output -hT "$name_upper Script Updated"
 }
 qwerry_bnd(){
+	btest -root ; $err_cmd
 	if [[ $1 = '-rU' ]]
 	then
 		current_dir=$(pwd)
 		output -hT "Updating Repository"
-		btest -root -net; $err_cmd
 		cd $pdir
 		$srm $pdir/release
 		output -p $name "Downloading Release"
+		btest -net ; $err_cmd
 		$dl $repo/release
 		bl -srgt @release $($scat $pdir/release)
-		# end
 		output -hT "Repository Updated"
 		cd $current_dir
 	else
@@ -1041,14 +1045,14 @@ btest(){
 	bterr['-net']="-ehT No internet connection"
 	
 	# tests
-	for err_type in $@
+	for err_type in $*
 	do
 		case $err_type in 
 		'-root')
 			[ $UID != 0 ] &&  err_out=${bterr[$err_type]} && err_cmd="exit 1"
 		;;
 		'-net')
-			wget -q --spider https://www.google.com
+			wget -q --spider www.google.com
 			if [ $? != 0 ]
 			then
 				err_out=${bterr[$err_type]}
@@ -1067,7 +1071,7 @@ live_shell(){
 	cd $current_dir
 }
 null(){
-	exit $1
+	exit $?
 }
 ### Program Start ###
 bmn_init $*
