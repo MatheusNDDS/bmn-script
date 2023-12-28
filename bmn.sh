@@ -84,7 +84,7 @@ load_data(){
 	fp_remote="flathub"
 	
 ## External Data Import ##
-	$rsr $cfg_file
+	$src $cfg_file
 	$src /etc/os-release
 	release=($($scat $pdir/release))
 	
@@ -350,7 +350,7 @@ pma_a=($*)
 		done
 		for pmc in ${!pm_l[@]}
 		do
-			if [[ "${bin_list[@]}" = *"$pmc"* ]]
+			if [[ "${bin_list[@]}" = *"$pmc "* ]]
 			then
 				pm_detected=$pmc
 			fi
