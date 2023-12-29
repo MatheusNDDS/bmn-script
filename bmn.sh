@@ -24,7 +24,7 @@ load_data(){
 	bmn="bmn"
 	add_ppa="$ir add-apt-repository"
 	flatpak_remote="flatpak remote-add --if-not-exists"
-	fp_overide="$ir flatpak override"
+	fp_overide="s$r flatpak override"
 	pnl="$prt \n"
 	rpath="realpath"
 	pwd="$ir pwd"
@@ -295,7 +295,7 @@ pma_a=($*)
 	declare -A pm_s
 	declare -A pm_u
 	declare -A pm_g
-	pkg="${pma_a[*]:1}"
+	pkgs="${pma_a[*]:1}"
 	
 ##apt##
 	pm_i[apt]="install"
@@ -339,6 +339,13 @@ pma_a=($*)
 	pm_s[apx]=@
 	pm_u[apx]=@
 	pm_g[apx]=@
+##apt##
+	pm_i[apt-get]="install"
+	pm_r[apt-get]="remove"
+	pm_l[apt-get]="list --installed"
+	pm_s[apt-get]="search"
+	pm_u[apt-get]="update"
+	pm_g[apt-get]="upgrade"
 	
 	## options for pma ##
 	if [ $1 = "-qpm" ] #Qwerry Package Manager
@@ -359,48 +366,48 @@ pma_a=($*)
 	then
 		if [ "${pm_i[$pm]}" = "@" ]
 		then
-			$ir $pm ${pm_i[apt]} ${pkgs} -y
+			$r $pm ${pm_i[apt]} ${pkgs} -y
 		else
-			$ir $pm ${pm_i[$pm]} ${pkgs} -y
+			$r $pm ${pm_i[$pm]} ${pkgs} -y
 		fi 
 	elif [ $1 = "-r" ]
 	then
 		if [ "${pm_r[$pm]}" = "@" ]
 		then
-			$ir $pm ${pm_r[apt]} ${pkgs} -y
+			$r $pm ${pm_r[apt]} ${pkgs} -y
 		else
-			$ir $pm ${pm_r[$pm]} ${pkgs} -y
+			$r $pm ${pm_r[$pm]} ${pkgs} -y
 		fi
 	elif [ $1 = '-s' ]
 	then
 		if [ "${pm_s[$pm]}" = "@" ]
 		then
-			$ir $pm ${pm_s[apt]} ${pkgs}
+			$r $pm ${pm_s[apt]} ${pkgs}
 		else
-			$ir $pm ${pm_s[$pm]} ${pkgs}
+			$r $pm ${pm_s[$pm]} ${pkgs}
 		fi 
 	elif [ $1 = "-l" ]
 	then
 		if [ "${pm_l[$pm]}" = "@" ]
 		then
-			$ir $pm ${pm_l[apt]}
+			$r $pm ${pm_l[apt]}
 		else
-			$ir $pm ${pm_l[$pm]}
+			$r $pm ${pm_l[$pm]}
 		fi 
 	elif [ $1 = "-u" ]
 	then
 		if [ "${pm_u[$pm]}" = "@" ]
 		then
-			$ir $pm ${pm_u[apt]} -y
+			$r $pm ${pm_u[apt]} -y
 			if [ ${pm_g[$pm]} != 0 ]
 			then
-				$ir $pm ${pm_g[apt]} -y
+				$r $pm ${pm_g[apt]} -y
 			fi
 		else
-			$ir $pm ${pm_u[$pm]} -y
+			$r $pm ${pm_u[$pm]} -y
 			if [ ${pm_g[$pm]} != 0 ]
 			then
-				$ir $pm ${pm_g[$pm]} -y
+				$r $pm ${pm_g[$pm]} -y
 			fi
 		fi
 	fi
@@ -703,7 +710,7 @@ pkg_parser(){
 			pkgs_in=$(flatpak list)
 		elif [ $2 = "pma" ]
 		then
-			pkgs_in=$(pma -l)
+			pkgs_in=" $(ls /bin/) " #$(pma -l)
 		fi
 	fi
 }
@@ -728,7 +735,7 @@ pkg_install(){
 		pkg_parser check pma
 		for i in ${to_install[*]}
 		do
-			if [[ "$pkgs_in" = *"$i"* ]]
+			if [[ "$pkgs_in" = *" $i "* ]]
 			then
 				output -t "$pm/installing: $i"
 				output -s "$pm" "$i is already installed"
@@ -740,7 +747,7 @@ pkg_install(){
 		pkg_parser check pma
 		for i in ${to_remove[*]}
 		do
-			if [[ "$pkgs_in" = *"$i"* ]]
+			if [[ "$pkgs_in" = *" $i "* ]]
 			then
 				output -t "$pm/removing: $i"
 				pma -r $i
@@ -841,7 +848,8 @@ cook(){
 	if [ -e recipe ]
 	then
 		output -hT "Executing “$1$(bnd_parser -pbf)” Recipe"
-		$rex $*
+		$elf recipe
+		sudo bash recipe
 	fi
 	recipe_log=($(bl -gal @$1))
 	bl -rma @$1
