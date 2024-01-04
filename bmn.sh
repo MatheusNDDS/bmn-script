@@ -240,6 +240,9 @@ bmn_init(){
 	elif [[ ! -z $2 ]] && [[ $1 = '-rl' ]]
 	then
 		bl -glf ${args[@]:4}
+	elif [[ ! -z $2 ]] && [[ $1 = '-rd' ]]
+        then
+                bl -gd ${args[@]:4}
 	elif [[ $1 = '-h' ]] || [[ $1 = '--help' ]]
 	then
 		output 0
@@ -262,7 +265,7 @@ out_a=($*)
 	declare -A t
 	[ $1 = 0 ] && t[0]="\033[01;36m-=/Configuration Bundles Manager/=-\033[00m \n~ MatheusNDDS : https://github.com/MatheusNDDS\n"
 	[ $1 = 1 ] && t[1]="\033[01;33m[Properties]\033[00m\n User: $u\n Home: $h\n PkgM: $pm\n Repo: $repo"
-	[ $1 = 2 ] && t[2]="\033[01;33m[Commands]\033[00m\n --install,-i : Install bundles from repository, use -iu to update $pm repositories during installation.\n --lc-install,-li : Install bundles from $file_format file path, use -liu to update $pm repositories during installation.\n --dir-install,-di : Install bundles from unpacked dir path, use -diu to update $pm repositories during installation.\n --dowload,-d : Download bundles from repository.\n --bnd-pack, -bp : Pack a bundle from a directory.\n --repo-update,-rU : Update repository release file, use this regularly.\n --$name-update,-U : Update $name script from Repo source or local script.\n --list-bnds,-l : List or search for bundles in repo file.\n --live-shell,-sh : Run live shell for testing $name functions.\n --properties,-p : Prints the user information that $name uses.\n --help,-h : Print help text."
+	[ $1 = 2 ] && t[2]="\033[01;33m[Commands]\033[00m\n --install,-i : Install bundles from repository, use -iu to update $pm repositories during installation.\n --lc-install,-li : Install bundles from $file_format file path, use -liu to update $pm repositories during installation.\n --dir-install,-di : Install bundles from unpacked dir path, use -diu to update $pm repositories during installation.\n --dowload,-d : Download bundles from repository.\n --bnd-pack, -bp : Pack a bundle from a directory.\n --repo-update,-rU : Update repository release file, use this regularly.\n --$name-update,-U : Update $name script from Repo source or local script.\n --list-bnds,-l : List or search for bundles in repo file.\n --live-shell,-sh : Run live shell for testing $name functions.\n --properties,-p : Prints the user information that $name uses.\n -rl : Print a log line.\n -rd : Print log line data.\n --help,-h : Print help text."
 	[ $1 = 3 ] && t[3]="bndp_a=(${bndp_a[@]})\nbndf=$bndf\nbnd_raw_name=$bnd_raw_name\nbnd_pre_name=(${bnd_pre_name[@]})\nbnd_name=$bnd_name\nflags=(${bnd_flags[@]})"
 	
 ## Formatting arguments
@@ -849,7 +852,7 @@ cook(){
 	then
 		output -hT "Executing “$1$(bnd_parser -pbf)” Recipe"
 		$elf recipe
-		sudo bash recipe
+		$rex $1 $bnd_flags
 	fi
 	recipe_log=($(bl -gal @$1))
 	bl -rma @$1
