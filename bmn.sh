@@ -968,9 +968,9 @@ cfgb_update(){
 	output -hT "$name_upper Script Updated"
 }
 qwerry_bnd(){
-	btest -root ; $err_cmd
 	if [[ $1 = '-rU' ]]
 	then
+		btest -root ; $err_cmd
 		current_dir=$(pwd)
 		output -hT "Updating Repository"
 		cd $pdir
