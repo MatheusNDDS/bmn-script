@@ -69,6 +69,7 @@ load_data(){
 	sfm_verbose=0 #Enable verbose log for SFM
 	bkc=@
 	date_f=('§' '%d-%m-%Y,%H:%M')
+	sysdbl=/*
 
 ## Work Directorys ##
 	pdir="/etc/$name"
@@ -419,7 +420,7 @@ sfm(){
 sfm_a=($*)
 	for dof in ${sfm_a[@]:1}
 	do
-		if [ "$dof" != "/" ] || [ "$dof" != "$pdir" ] || [ $pdir/* != *"$dof"* ]
+		if [ "$dof" != "/" ] || [ " $sysdbl " != *" $dof "* -a $1 = "-r" ] || [ "$dof" != "$pdir" ] || [ $pdir/* != *"$dof"* ]
 		then
 			case ${sfm_a[0]} in
 				'-d')
@@ -713,7 +714,7 @@ pkg_parser(){
 			pkgs_in=$(flatpak list)
 		elif [ $2 = "pma" ]
 		then
-			pkgs_in=" $(ls /bin/) " #$(pma -l)
+			pkgs_in="$(pma -l)"
 		fi
 	fi
 }
@@ -738,7 +739,7 @@ pkg_install(){
 		pkg_parser check pma
 		for i in ${to_install[*]}
 		do
-			if [[ "$pkgs_in" = *" $i "* ]]
+			if [[ "$pkgs_in" = *"$i"* ]]
 			then
 				output -t "$pm/installing: $i"
 				output -s "$pm" "$i is already installed"
@@ -750,7 +751,7 @@ pkg_install(){
 		pkg_parser check pma
 		for i in ${to_remove[*]}
 		do
-			if [[ "$pkgs_in" = *" $i "* ]]
+			if [[ "$pkgs_in" = *"$i"* ]]
 			then
 				output -t "$pm/removing: $i"
 				pma -r $i
@@ -1079,6 +1080,7 @@ live_shell(){
 	current_dir=$(pwd)
 	cd $pdir
 	$ir bash --init-file $init_file
+	bl -rgt @bsh_login
 	cd $current_dir
 }
 null(){
