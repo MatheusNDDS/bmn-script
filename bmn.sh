@@ -219,10 +219,10 @@ bmn_init(){
 		setup $*
 	elif [[ $1 = '-ss' ]] || [[ "$1" = '--setup' ]]
 	then
-		cfgb_update $script
+		bmn_update $script
 	elif [[ $1 = '-U' ]] || [[ "$1" = "--$name-update" ]]
 	then
-		cfgb_update $2
+		bmn_update $2
 	elif [[ $1 = '-rU' ]] || [[ "$1" = '--repo-update' ]]
 	then
 		qwerry_bnd $1
@@ -266,7 +266,7 @@ out_a=($*)
 	declare -A t
 	[ $1 = 0 ] && t[0]="\033[01;36m-=/Configuration Bundles Manager/=-\033[00m \n~ MatheusNDDS : https://github.com/MatheusNDDS\n"
 	[ $1 = 1 ] && t[1]="\033[01;33m[Properties]\033[00m\n User: $u\n Home: $h\n PkgM: $pm\n Repo: $repo"
-	[ $1 = 2 ] && t[2]="\033[01;33m[Commands]\033[00m\n --install,-i : Install bundles from repository, use -iu to update $pm repositories during installation.\n --lc-install,-li : Install bundles from $file_format file path, use -liu to update $pm repositories during installation.\n --dir-install,-di : Install bundles from unpacked dir path, use -diu to update $pm repositories during installation.\n --dowload,-d : Download bundles from repository.\n --bnd-pack, -bp : Pack a bundle from a directory.\n --repo-update,-rU : Update repository release file, use this regularly.\n --$name-update,-U : Update $name script from Repo source or local script.\n --list-bnds,-l : List or search for bundles in repo file.\n --live-shell,-sh : Run live shell for testing $name functions.\n --properties,-p : Prints the user information that $name uses.\n -rl : Print a log line.\n -rd : Print log line data.\n --help,-h : Print help text."
+	[ $1 = 2 ] && t[2]="\033[01;33m[Commands]\033[00m\n --install,-i : Install bundles from repository, use -iu to update $pm repositories during installation.\n --lc-install,-li r: Install bundles from $file_format file path, use -liu to update $pm repositories during installation.\n --dir-install,-di : Install bundles from unpacked dir path, use -diu to update $pm repositories during installation.\n --dowload,-d : Download bundles from repository.\n --bnd-pack, -bp : Pack a bundle from a directory.\n --repo-update,-rU : Update repository release file, use this regularly.\n --$name-update,-U : Update $name script from Repo source or local script.\n --list-bnds,-l : List or search for bundles in repo file.\n --live-shell,-sh : Run live shell for testing $name functions.\n --properties,-p : Prints the user information that $name uses.\n -rl : Print a log line.\n -rd : Print log line data.\n --help,-h : Print help text."
 	[ $1 = 3 ] && t[3]="bndp_a=(${bndp_a[@]})\nbndf=$bndf\nbnd_raw_name=$bnd_raw_name\nbnd_pre_name=(${bnd_pre_name[@]})\nbnd_name=$bnd_name\nflags=(${bnd_flags[@]})"
 	
 ## Formatting arguments
@@ -847,24 +847,25 @@ unpack(){
 	output -l "files" "$(ls $bnd_dir/$1/)"
 }
 cook(){
-	cd $1/
+	bndid=$1
+	cd $bndid/
 	pkg_install
 	if [ -e recipe ]
 	then
-		output -hT "Executing “$1$(bnd_parser -pbf)” Recipe"
+		output -hT "Executing “$bndid$(bnd_parser -pbf)” Recipe"
 		$elf recipe
-		$rex $1 $bnd_flags
+		$rex $bndid $bnd_flags
 	fi
-	recipe_log=($(bl -gal @$1))
-	bl -rma @$1
-	if [[ "${recipe_log[@]}" = *"-a"* ]]
+	recipe_log=($(bl -gal @$bndid))
+	bl -rma @$bndid
+	if [[ " ${recipe_log[@]} " = *" -a "* ]]
 	then
-		output -ahT "“$1$(bnd_parser -pbf)” Returned Alerts" 
-	elif [[ "${recipe_log[@]}" = *"-e"* ]]
+		output -ahT "“$bndid$(bnd_parser -pbf)” Returned Alerts"
+	elif [[ " ${recipe_log[@]} " = *" -e "* ]]
 	then
-		output -ehT "“$1$(bnd_parser -pbf)” Returned Erros"
+		output -ehT "“$bndid$(bnd_parser -pbf)” Returned Erros"
 	else
-		output -hT "“$1$(bnd_parser -pbf)” Finished"
+		output -hT "“$bndid$(bnd_parser -pbf)” Finished"
 	fi
 }
 bnd_pack(){
@@ -942,7 +943,7 @@ setup(){
 	fi
 	bl -rgt @setup "$name target “$cmd_srcd”. pm=$pm, h=$h, u=$u, repo=$repo"
 }
-cfgb_update(){
+bmn_update(){
 	btest -root ; $err_cmd
 	output -hT "Updating $name_upper Script"
 	bin_srcd=($(cat $init_file))
@@ -1053,7 +1054,7 @@ detect_user_props(){
 btest(){
 	# error texts database
 	declare -A bterr
-	bterr['-root']="-ahT $name_upper needs root privileges"
+	bterr['-root']="-ahT “$name $cmd” needs root privileges"
 	bterr['-net']="-ehT No internet connection"
 	
 	# tests
