@@ -30,6 +30,7 @@ load_data(){
 	pwd="$ir pwd"
 	pkgi="pkg_install"
 	header="output -bH"
+	set_owner="$cho -R $u:$u"
 	
 	#Safe File Manager Commands Varariables
 	srm="sfm -r"
@@ -70,6 +71,8 @@ load_data(){
 	bkc=@
 	date_f=('§' '%d-%m-%Y,%H:%M')
 	sysdbl=/*
+	bt_root_txt="-ahT “$name $cmd” needs root privileges"
+	bt_net_txt="-ehT No internet connection"
 
 ## Work Directorys ##
 	pdir="/etc/$name"
@@ -343,13 +346,6 @@ pma_a=($*)
 	pm_s[apx]=@
 	pm_u[apx]=@
 	pm_g[apx]=@
-##apt##
-	pm_i[apt-get]="install"
-	pm_r[apt-get]="remove"
-	pm_l[apt-get]="list --installed"
-	pm_s[apt-get]="search"
-	pm_u[apt-get]="update"
-	pm_g[apt-get]="upgrade"
 	
 	## options for pma ##
 	if [ $1 = "-qpm" ] #Qwerry Package Manager
@@ -898,7 +894,7 @@ setup(){
 	$cp $script $cmd_srcd/$name
 	$elf $cmd_srcd/$name
 #init file buid
-	$prt "source $cmd_srcd/$name" > $init_file
+	$prt "bundle_mode=1 ; source $cmd_srcd/$name" > $init_file
 	$prt 'export PS1="\\n“\w”\\n$(output -d $name)"\nalias q="exit 0"\nalias x="clear"\nalias c="$editor $cfg_file"\nalias i="$editor $init_file"\nalias r="$editor $pdir/release"\nalias l="$editor $log"\nalias h="$prt +\\n c: edit config\\n i: edit init\\n r: edit release\\n l: edit log\\n x: clear prompt\\n h: help\\n q: exit+"\nblog_verbose=1' | tr '+' "'" >> $init_file
 #Package manager autodetect
 	output -p $name "Detecting Package Manager"
@@ -1054,8 +1050,8 @@ detect_user_props(){
 btest(){
 	# error texts database
 	declare -A bterr
-	bterr['-root']="-ahT “$name $cmd” needs root privileges"
-	bterr['-net']="-ehT No internet connection"
+	bterr['-root']=$bt_root_txt
+	bterr['-net']=$bt_net_txt
 	
 	# tests
 	for err_type in $*
@@ -1089,4 +1085,4 @@ null(){
 }
 
 ### Program Start ###
-bmn_init $*
+[[ -z $bundle_mode ]] && bmn_init $* || load_data $*
