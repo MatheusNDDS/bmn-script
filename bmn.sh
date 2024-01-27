@@ -30,7 +30,6 @@ load_data(){
 	pwd="$ir pwd"
 	pkgi="pkg_install"
 	header="output -bH"
-	set_owner="$cho -R $u:$u"
 	
 	#Safe File Manager Commands Varariables
 	srm="sfm -r"
@@ -42,8 +41,8 @@ load_data(){
 	
 	#Directorys collection
 	rsr="/usr/share" #root share
-	hsr="$h/.local/share" #home share
 	rlc="/usr/local" #root local
+	hsr="$h/.local/share" #home share
 	hlc="$h/.local" #home local
 	cfg="$h/.config"
 	etc="/etc"
@@ -94,16 +93,17 @@ load_data(){
 	
 ## Configure pm,u,h variables
 	detect_user_props
-	# Directories that use data from detect_user_props()
+	# Directories and commands that use data from detect_user_props()
 	lc_dir="$h/.$name"
 	bnd_dir="$h/.$name/bundles"
 	hsr="$h/.local/share"
 	hlc="$h/.local"
 	cfg="$h/.config"
+	set_owner="$cho -R $u:$u"
 }
 bmn_init(){
 	load_data $*
-	$smkd $lc_dir $bnd_dir
+	$smkd $lc_dir $bnd_dir && $cho -R root:root $lc_dir | null
 	if [[ "$1" = '-i' ]] || [[ "$1" = '--install' ]] 
 	then
 		btest -root ; $err_cmd
@@ -851,6 +851,7 @@ cook(){
 		output -hT "Executing “$bndid$(bnd_parser -pbf)” Recipe"
 		$elf recipe
 		$rex $bndid $bnd_flags
+		$set_owner $(echo $h/.* $h/* | sed s/$(echo $lc_dir | sed s/'\/'/'\\\/'/g)//)
 	fi
 	recipe_log=($(bl -gal @$bndid))
 	bl -rma @$bndid
@@ -943,7 +944,7 @@ bmn_update(){
 	btest -root ; $err_cmd
 	output -hT "Updating $name_upper Script"
 	bin_srcd=($(cat $init_file))
-	cmd_bin=${bin_srcd[1]}
+	cmd_bin=${bin_srcd[3]}
 	if [[ $1 = "" ]]
 	then
 		current_dir=$(pwd)
