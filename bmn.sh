@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ### Core functions ###
-load_data(){
+bmn_data(){
 ## Evironment Variables : Can be used in recipe scripts ##
 	#General commands 
 	r="sudo"
@@ -11,25 +11,26 @@ load_data(){
 	rm="$ir rm -rf"
 	rmd="$ir rmdir --ignore-fail-on-non-empty"
 	mv="$ir mv"
-	prt="echo -e"
 	mk="$ir touch"
 	mkd="$ir mkdir"
 	elf="$ir chmod 755"
 	cat="$ir cat"
+	prt="echo -e"
 	dl="$ir wget"
-	d0="/dev/0"
-	tmpf="/tmp/.tmp"
 	gitc="$ir git clone"
 	bmi="$ir bmn -i"
-	bmn="bmn"
 	add_ppa="$ir add-apt-repository"
 	flatpak_remote="flatpak remote-add --if-not-exists"
 	fp_overide="s$r flatpak override"
 	pnl="$prt \n"
-	rpath="realpath"
 	pwd="$ir pwd"
 	pkgi="pkg_install"
 	header="output -bH"
+	
+	#Redirect points
+	d0="/dev/0"
+	dnull="/dev/null"
+	tmpf="/tmp/$(date | tr ' :-' "$(date)")" #generate a unique temporary file
 	
 	#Safe File Manager Commands Varariables
 	srm="sfm -r"
@@ -54,7 +55,8 @@ load_data(){
 	xss="$rsr/xsessions/"
 	wss="$rsr/wayland-sessions/"
 
-## References ##
+## Script Variables : Change this variables may broke you bundle execution ##
+	#References
 	name="bmn"
 	name_upper="$($prt $name|tr [:lower:] [:upper:])"
 	script="$(pwd)/${name}.sh"
@@ -70,10 +72,8 @@ load_data(){
 	bkc=@
 	date_f=('§' '%d-%m-%Y,%H:%M')
 	sysdbl=/*
-	bt_root_txt="-ahT “$name $cmd” needs root privileges"
-	bt_net_txt="-ehT No internet connection"
 
-## Work Directorys ##
+	#Working Directories
 	pdir="/etc/$name"
 	cfg_file="$pdir/cfg"
 	init_file="$pdir/init"
@@ -81,19 +81,20 @@ load_data(){
 	cmd_srcd="/bin"
 	log="$pdir/.log"
 
-## Flatpak Configuration ##
+	#Flatpak Configuration
 	flathub="flathub https://flathub.org/repo/flathub.flatpakrepo"
 	fp_mode="--system"
 	fp_remote="flathub"
 	
-## External Data Import ##
+	#External Data Import ##
 	$src $cfg_file
 	$src /etc/os-release
 	release=($($scat $pdir/release))
 	
-## Configure pm,u,h variables
+	#Configure pm,u,h variables
 	detect_user_props
-	# Directories and commands that use data from detect_user_props()
+	
+	#Directories and commands that use data from detect_user_props()
 	lc_dir="$h/.$name"
 	bnd_dir="$h/.$name/bundles"
 	hsr="$h/.local/share"
@@ -102,8 +103,8 @@ load_data(){
 	set_owner="$cho -R $u:$u"
 }
 bmn_init(){
-	load_data $*
-	$smkd $lc_dir $bnd_dir && $cho -R root:root $lc_dir | null
+	bmn_data $*
+	$smkd $lc_dir $bnd_dir && $cho -R root:root $lc_dir &> $dnull
 	if [[ "$1" = '-i' ]] || [[ "$1" = '--install' ]] 
 	then
 		btest -root ; $err_cmd
@@ -363,7 +364,7 @@ pma_a=($*)
 				pm_detected=$pmc
 			fi
 		done
-	elif [ $1 = "-i" ]
+	elif [ $1 = "-i" ] # Install
 	then
 		if [ "${pm_i[$pm]}" = "@" ]
 		then
@@ -371,7 +372,7 @@ pma_a=($*)
 		else
 			$r $pm ${pm_i[$pm]} ${pkgs} -y
 		fi 
-	elif [ $1 = "-r" ]
+	elif [ $1 = "-r" ] # Remove
 	then
 		if [ "${pm_r[$pm]}" = "@" ]
 		then
@@ -379,7 +380,7 @@ pma_a=($*)
 		else
 			$r $pm ${pm_r[$pm]} ${pkgs} -y
 		fi
-	elif [ $1 = '-s' ]
+	elif [ $1 = '-s' ] # Search
 	then
 		if [ "${pm_s[$pm]}" = "@" ]
 		then
@@ -387,7 +388,7 @@ pma_a=($*)
 		else
 			$r $pm ${pm_s[$pm]} ${pkgs}
 		fi 
-	elif [ $1 = "-l" ]
+	elif [ $1 = "-l" ] # List installed
 	then
 		if [ "${pm_l[$pm]}" = "@" ]
 		then
@@ -395,7 +396,7 @@ pma_a=($*)
 		else
 			$r $pm ${pm_l[$pm]}
 		fi 
-	elif [ $1 = "-u" ]
+	elif [ $1 = "-u" ] # Update and Upgrade
 	then
 		if [ "${pm_u[$pm]}" = "@" ]
 		then
@@ -840,7 +841,7 @@ cook(){
 		output -hT "Executing “$bndid$(bnd_parser -pbf)” Recipe"
 		$elf recipe
 		$rex $bndid $bnd_flags
-		$set_owner $(echo $h/.* $h/* | sed s/$(echo $lc_dir | sed s/'\/'/'\\\/'/g)//)
+		$set_owner $(echo $h/.* $h/* | sed s/$(echo $lc_dir | sed s/'\/'/'\\\/'/g)//) &> $dnull
 	fi
 	recipe_log=($(bl -gal @$bndid))
 	bl -rma @$bndid
@@ -884,8 +885,8 @@ setup(){
 	$cp $script $cmd_srcd/$name
 	$elf $cmd_srcd/$name
 #init file buid
-	$prt "bundle_mode=1 ; source $cmd_srcd/$name" > $init_file
-	$prt 'export PS1="\\n“\w”\\n$(output -d $name)"\nalias q="exit 0"\nalias x="clear"\nalias c="$editor $cfg_file"\nalias i="$editor $init_file"\nalias r="$editor $pdir/release"\nalias l="$editor $log"\nalias h="$prt +\\n c: edit config\\n i: edit init\\n r: edit release\\n l: edit log\\n x: clear prompt\\n h: help\\n q: exit+"\nblog_verbose=1' | tr '+' "'" >> $init_file
+	$prt "m=1 && source $cmd_srcd/$name" > $init_file
+	$prt 'export PS1="\\n“\w”\\n$(output -d $name)"\nalias q="exit 0"\nalias x="clear"\nalias c="$editor $cfg_file"\nalias i="$editor $init_file"\nalias r="$editor $pdir/release"\nalias l="$editor $log"\nalias h="$prt +\\n c: edit config\\n i: edit init\\n r: edit release\\n l: edit log\\n x: clear prompt\\n h: help\\n q: exit+"\nblog_verbose=1\nsfm_verbose=1' | tr '+' "'" >> $init_file
 #Package manager autodetect
 	output -p $name "Detecting Package Manager"
 	pma -qpm 2> .log
@@ -1040,9 +1041,8 @@ detect_user_props(){
 btest(){
 	# error texts database
 	declare -A bterr
-	bterr['-root']=$bt_root_txt
-	bterr['-net']=$bt_net_txt
-	
+	bterr['-root']="-ahT “$name $cmd” needs root privileges"
+	bterr['-net']="-ehT No internet connection"
 	# tests
 	for err_type in $*
 	do
@@ -1075,4 +1075,4 @@ null(){
 }
 
 ### Program Start ###
-[[ -z $bundle_mode ]] && bmn_init $* || load_data $*
+[[ -z $m ]] && bmn_init $* || bmn_data $*
