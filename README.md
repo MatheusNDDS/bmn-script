@@ -1,5 +1,5 @@
 # Automation Bundles Manager (BMN)
-It is something like a package manager (but weirder) focused in shell script automation packages, created to facilitate various tasks in Linux based operational systems. Especially package management across different distributions.
+It is something like a package manager (but weirder) focused in shell script automation packages, created to facilitate tasks in Linux based operational systems. Especially package management across different distributions.
 
 # Setup instructions
 Install syntax:
