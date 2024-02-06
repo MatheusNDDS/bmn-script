@@ -1,5 +1,5 @@
 # Configuration Bundles Manager (B.M.N)
-It is something like a package manager (but weirder), created to facilitate the post-installation of Linux based operational systems.
+It is something like a package manager (but weirder) focused in shell script automation packages, created to facilitate the post-installation of Linux based operational systems. Especially package management across different distributions.
 
 # Setup instructions
 Install syntax:
