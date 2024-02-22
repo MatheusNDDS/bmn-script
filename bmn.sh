@@ -100,7 +100,8 @@ bmn_data(){
 	hsr="$h/.local/share"
 	hlc="$h/.local"
 	cfg="$h/.config"
-	set_owner="$cho -R $u:$u"
+	set_owner="$cho -R $u:$u"  #set dirs owner to current user
+	set_owner_forced="$set_owner $(echo $h/.* $h/* | sed s/$(echo $lc_dir | sed s/'\/'/'\\\/'/g)//) &> $dnull" #force $set_owner in entire $HOME (slow)
 }
 bmn_init(){
 	bmn_data $*
@@ -129,12 +130,12 @@ bmn_init(){
 	elif [[ "$1" = '-li' ]] || [[ "$1" = '--lc-install' ]] && [[ ! -z "${args[@]:3}" ]]
 	then
 		btest -root ; $err_cmd
-		if [[ $2 = *"$file_format"* ]]
-		then
-			bnd_ignore=()
-			output -hT "Importing bundles"
-			for i in ${args[@]:3}
-			do
+		bnd_ignore=()
+		output -hT "Importing bundles"
+		for i in ${args[@]:3}
+		do
+			if [[ $i = *"$file_format" ]]
+			then
 				bnd_parser $i
 				if [ -f $bndf ]
 				then
@@ -144,24 +145,25 @@ bmn_init(){
 					output -a $name "File “$i” does not exists"
 					bnd_ignore+=($i)
 				fi
-			done
-			for i in ${args[@]:3}
-			do
-				if [[ ${bnd_ignore[*]} != *"$i"* ]]
-				then
-					bnd_parser $i
-					output -hT "Configuring “$bnd_name$(bnd_parser -pbf)”"
-					$srm $bnd_dir/$bnd_name
-					cd $bnd_dir/
-					unpack $bnd_name
-					cook $bnd_name ${bnd_flags[@]}
-					$srm $bnd_dir/$bnd_name
-					lc_inst=0
-				fi
-			done
-		else
-			output -a $name "“$file_format” file not especified"
-		fi
+			else
+				output -a $name "“$file_format” file not especified"
+				bnd_ignore+=($i)
+			fi
+		done
+		for i in ${args[@]:3}
+		do
+			if [[ ${bnd_ignore[*]} != *"$i"* ]]
+			then
+				bnd_parser $i
+				output -hT "Configuring “$bnd_name$(bnd_parser -pbf)”"
+				$srm $bnd_dir/$bnd_name
+				cd $bnd_dir/
+				unpack $bnd_name
+				cook $bnd_name ${bnd_flags[@]}
+				$srm $bnd_dir/$bnd_name
+				lc_inst=0
+			fi
+		done
 	elif [[ "$1" = '-di' ]] || [[ "$1" = '--dir-install' ]] && [[ ! -z "${args[@]:3}" ]]
 	then
 		btest -root ; $err_cmd
@@ -268,7 +270,7 @@ bmn_init(){
 output(){
 out_a=($*)
 	declare -A t
-	[ $1 = 0 ] && t[0]="\033[01;36m-=/Automation Bundles Manager/=-\033[00m \n~ MatheusNDDS : https://github.com/MatheusNDDS\n"
+	[ $1 = 0 ] && t[0]="\033[01;36m-=/Configuration Bundles Manager/=-\033[00m \n~ MatheusNDDS : https://github.com/MatheusNDDS\n"
 	[ $1 = 1 ] && t[1]="\033[01;33m[Properties]\033[00m\n User: $u\n Home: $h\n PkgM: $pm\n Repo: $repo"
 	[ $1 = 2 ] && t[2]="\033[01;33m[Commands]\033[00m\n --install,-i : Install bundles from repository, use -iu to update $pm repositories during installation.\n --lc-install,-li r: Install bundles from $file_format file path, use -liu to update $pm repositories during installation.\n --dir-install,-di : Install bundles from unpacked dir path, use -diu to update $pm repositories during installation.\n --dowload,-d : Download bundles from repository.\n --bnd-pack, -bp : Pack a bundle from a directory.\n --repo-update,-rU : Update repository release file, use this regularly.\n --$name-update,-U : Update $name script from Repo source or local script.\n --list-bnds,-l : List or search for bundles in repo file.\n --live-shell,-sh : Run live shell for testing $name functions.\n --properties,-p : Prints the user information that $name uses.\n -rl : Print a log line.\n -rd : Print log line data.\n --help,-h : Print help text."
 	[ $1 = 3 ] && t[3]="bndp_a=(${bndp_a[@]})\nbndf=$bndf\nbnd_raw_name=$bnd_raw_name\nbnd_pre_name=(${bnd_pre_name[@]})\nbnd_name=$bnd_name\nflags=(${bnd_flags[@]})"
@@ -841,7 +843,6 @@ cook(){
 		output -hT "Executing “$bndid$(bnd_parser -pbf)” Recipe"
 		$elf recipe
 		$rex $bndid $bnd_flags
-		$set_owner $(echo $h/.* $h/* | sed s/$(echo $lc_dir | sed s/'\/'/'\\\/'/g)//) &> $dnull
 	fi
 	recipe_log=($(bl -gal @$bndid))
 	bl -rma @$bndid
