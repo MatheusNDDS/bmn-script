@@ -815,13 +815,14 @@ bndp_a=($($prt $1|sed "s/:/ /"))
 	esac
 }
 download(){
-	output -p $name "Downloading “$1”"
-	btest -net ; $err_cmd
 	$srm $1.$file_format
 	if [ $lc_repo = 0 ]
 	then
+		output -p $name "Downloading “$1”"
+		btest -net ; $err_cmd
 		$dl $repo/$1.$file_format
 	else
+		output -p $name "Importing “$1”"
 		$cp $lc_repo/$1.$file_format $bnd_dir/
 	fi
 	output -l "files" "$(ls . | grep $1.$file_format)"
