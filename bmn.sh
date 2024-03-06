@@ -241,7 +241,7 @@ bmn_init(){
 		output 1
 	elif [[ ! -z $2 ]] && [[ $1 = '-bd' ]] || [[ $1 = '--bnd-data' ]]
 	then
-		output -hT "$2"
+		#output -hT "$2"
 		bnd_parser $2
 		output 3
 	elif [[ ! -z $2 ]] && [[ $1 = '-rl' ]]
@@ -283,13 +283,13 @@ out_a=($*)
 	[ $1 = '-ahT' ]  || [ $1 = '-qi' ] &&  t['-ahT']="\n\033[01;33m******** / ${out_a[*]:1} / ********\033[00m\n" #Alert High Title
 	[ $1 = '-shT' ]  || [ $1 = '-qi' ] &&  t['-shT']="\n\033[01;31m******** ( ${out_a[*]:1} ) ********\033[00m\n" #Sucess High Title
 	[ $1 = '-ehT' ]  || [ $1 = '-qi' ] &&  t['-ehT']="\n\033[01;31m*#*#*#*# { $( echo "${out_a[*]:1}" | tr [:lower:] [:upper:]) } #*#*#*#*\033[00m\n" #Error High Title
-	[ $1 = '-T' ]    || [ $1 = '-qi' ] &&  t['-T']="\n\033[01;36m ### [ ${out_a[*]:1} ] ###\033[00m\n" #Title
+	[ $1 = '-T' ]    || [ $1 = '-qi' ] &&  t['-T']="\n\033[01;36m ## ${out_a[*]:1} ##\033[00m\n" #Title
 	[ $1 = '-t' ]    || [ $1 = '-qi' ] &&  t['-t']="\033[01;33m - ${out_a[*]:1}\033[00m" #Subtitle
 	[ $1 = '-d' ]    || [ $1 = '-qi' ] &&  t['-d']="\033[01m [$2]: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Dialog, bl Data
 	[ $1 = '-e' ]    || [ $1 = '-qi' ] &&  t['-e']="\033[01;31m {$2}: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Error Dialog
 	[ $1 = '-s' ]    || [ $1 = '-qi' ] &&  t['-s']="\033[01;32m ($2): $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Sucess Dialog
 	[ $1 = '-a' ]    || [ $1 = '-qi' ] &&  t['-a']="\033[01;33m /$2/: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Alert Dialog
-	[ $1 = '-bH' ]   || [ $1 = '-qi' ] &&  t['-bH']="\033[01;36m ## $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") ##\n ~ $2 ~\033[00m\n" #Bundle Header
+	[ $1 = '-bH' ]   || [ $1 = '-qi' ] &&  t['-bH']="\033[01;36m ### $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") ###\n ~ $2 ~\033[00m\n" #Bundle Header
 	
 	if [[ $1 != "-qi" ]]
 	then
@@ -843,7 +843,7 @@ cook(){
 	then
 		output -hT "Executing “$bndid$(bnd_parser -pbf)” Recipe"
 		$elf recipe
-		$rex $bndid $bnd_flags
+		$rex $bndid ${bnd_flags[@]}
 	fi
 	recipe_log=($(bl -gal @$bndid))
 	bl -rma @$bndid
