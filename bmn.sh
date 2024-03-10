@@ -106,7 +106,7 @@ bmn_data(){
 bmn_init(){
 	bmn_data $*
 	$smkd $lc_dir $bnd_dir && $cho -R root:root $lc_dir &> $dnull
-	if [[ "$1" = '-i' ]] || [[ "$1" = '--install' ]] 
+	if [[ $1 = '-i' ]] || [[ $1 = '--install' ]]
 	then
 		btest -root ; $err_cmd
 		for i in ${args[@]:2}
@@ -127,7 +127,7 @@ bmn_init(){
 				output -d i "Maybe the relese file has outdated, try “$name -rU”."
 			fi
 		done
-	elif [[ "$1" = '-li' ]] || [[ "$1" = '--lc-install' ]] && [[ ! -z "${args[@]:3}" ]]
+	elif [[ $1 = '-li' ]] || [[ $1 = '--lc-install' ]] && [[ ! -z "${args[@]:3}" ]]
 	then
 		btest -root ; $err_cmd
 		bnd_ignore=()
@@ -164,7 +164,7 @@ bmn_init(){
 				lc_inst=0
 			fi
 		done
-	elif [[ "$1" = '-di' ]] || [[ "$1" = '--dir-install' ]] && [[ ! -z "${args[@]:3}" ]]
+	elif [[ $1 = '-di' ]] || [[ $1 = '--dir-install' ]] && [[ ! -z "${args[@]:3}" ]]
 	then
 		btest -root ; $err_cmd
 		bnd_ignore=()
@@ -193,46 +193,46 @@ bmn_init(){
 				lc_inst=0
 			fi
 		done
-	elif [[ "$1" = "-iu" ]]
+	elif [[ $1 = "-iu" ]]
 	then
 		pm_update=1
 		bmn_init -i ${args[@]:3}
-	elif [[ "$1" = "-liu" ]]
+	elif [[ $1 = "-liu" ]]
 	then
 		pm_update=1
 		bmn_init -li ${args[@]:4}
-	elif [[ "$1" = "-diu" ]]
+	elif [[ $1 = "-diu" ]]
 	then
 		pm_update=1
 		bmn_init -di ${args[@]:4}
-	elif [[ $1 = '-e' ]] || [[ "$1" = '--enable-extras' ]]
+	elif [[ $1 = '-e' ]] || [[ $1 = '--enable-extras' ]]
 	then
 		enable_extras $*
-	elif [[ $1 = '-d' ]] || [[ "$1" = '--download' ]]
+	elif [[ $1 = '-bdl' ]] || [[ $1 = '--bnd-dowload' ]]
 	then
-		for i in ${args[@]:2}
+		for dbnd in ${args[@]:4}
 		do
-			download $i 1
+			download $dbnd 1
 		done
-	elif [[ $1 = '-bp' ]] || [[ "$1" = '--bnd-pack' ]]
+	elif [[ $1 = '-bp' ]] || [[ $1 = '--bnd-pack' ]]
 	then
 		for i in ${args[@]:3}
 		do
 			bnd_pack $i
 		done
-	elif [[ $1 = '-s' ]] || [[ "$1" = '--setup' ]]
+	elif [[ $1 = '-s' ]] || [[ $1 = '--setup' ]]
 	then
 		setup $*
-	elif [[ $1 = '-ss' ]] || [[ "$1" = '--setup' ]]
+	elif [[ $1 = '-ss' ]] || [[ $1 = '--setup' ]]
 	then
 		bmn_update $script
-	elif [[ $1 = '-U' ]] || [[ "$1" = "--$name-update" ]]
+	elif [[ $1 = '-U' ]] || [[ $1 = "--$name-update" ]]
 	then
 		bmn_update $2
-	elif [[ $1 = '-rU' ]] || [[ "$1" = '--repo-update' ]]
+	elif [[ $1 = '-rU' ]] || [[ $1 = '--repo-update' ]]
 	then
 		qwerry_bnd $1
-	elif [[ $1 = '-l' ]] || [[ "$1" = '--list-bnds' ]]
+	elif [[ $1 = '-l' ]] || [[ $1 = '--list-bnds' ]]
 	then
 		qwerry_bnd ${args[@]:2}
 	elif [[ $1 = '-p' ]] || [[ $1 = '--properties' ]]
@@ -259,7 +259,7 @@ bmn_init(){
 		output 0
 		output 1
 		output 2
-	elif [[ $1 = '-sh' ]] || [[ $1 = '--live-shell' ]]
+	elif [[ $1 = '-sh' ]] || [[ "$1" = '--live-shell' ]]
 	then
 		live_shell
 	fi
@@ -272,7 +272,7 @@ out_a=($*)
 	declare -A t
 	[ $1 = 0 ] && t[0]="\033[01;36m-=/Automation Bundles Manager/=-\033[00m \n~ MatheusNDDS : https://github.com/MatheusNDDS\n"
 	[ $1 = 1 ] && t[1]="\033[01;33m[Properties]\033[00m\n User: $u\n Home: $h\n PkgM: $pm\n Repo: $repo"
-	[ $1 = 2 ] && t[2]="\033[01;33m[Commands]\033[00m\n$(output -t "Bundle tanagment")\n --install,-i : Install bundles from repository, use “-iu” to update $pm packages during installation.\n --lc-install,-li : Install bundles from $file_format file path, use “-liu” to update $pm packages during installation.\n --dir-install,-di : Install bundles from unpacked dir path, use “-diu” to update $pm packages during installation.\n --dowload,-d : Download bundles from repository.\n --list-bnds,-l : List or search for bundles in repo file.\n --repo-update,-rU : Update repository release file, use this regularly.\n\n$(output -t "Script tools")\n --$name-update,-U : Update $name script from Repo source or local script.\n --bnd-pack, -bp : Pack a bundle from a directory.\n --live-shell,-sh : Run live shell for testing $name functions.\n --properties,-p : Prints the user information that $name uses.\n\n$(output -t "Read bmn log data")\n -rl : Print a log line.\n -rd : Print log line data.\n\n --help,-h : Print help text."
+	[ $1 = 2 ] && t[2]="\033[01;33m[Commands]\033[00m\n$(output -t "Bundle tanagment")\n --install,-i : Install bundles from repository, use “-iu” to update $pm packages during installation.\n --lc-install,-li : Install bundles from $file_format file path, use “-liu” to update $pm packages during installation.\n --dir-install,-di : Install bundles from unpacked dir path, use “-diu” to update $pm packages during installation.\n --dowload,-bdl : Download bundles from repository.\n --list-bnds,-l : List or search for bundles in repo file.\n --repo-update,-rU : Update repository release file, use this regularly.\n\n$(output -t "Script tools")\n --$name-update,-U : Update $name script from Repo source or local script.\n --bnd-pack, -bp : Pack a bundle from a directory.\n --live-shell,-sh : Run live shell for testing $name functions.\n --properties,-p : Prints the user information that $name uses.\n\n$(output -t "Read bmn log data")\n -rl : Print a log line.\n -rd : Print log line data.\n\n --help,-h : Print help text."
 	[ $1 = 3 ] && t[3]="bndp_a=(${bndp_a[@]})\nbndf=$bndf\nbnd_raw_name=$bnd_raw_name\nbnd_pre_name=(${bnd_pre_name[@]})\nbnd_name=$bnd_name\nflags=(${bnd_flags[@]})"
 	
 ## Formatting arguments
@@ -816,7 +816,7 @@ bndp_a=($($prt $1|sed "s/:/ /"))
 }
 download(){
 	$srm $1.$file_format
-	if [ $lc_repo = 0 ]
+	if [ $lc_repo = 0 ] || [ $2 = 1 ]
 	then
 		output -p $name "Downloading “$1”"
 		btest -net ; $err_cmd
