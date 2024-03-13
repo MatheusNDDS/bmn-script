@@ -278,7 +278,7 @@ out_a=($*)
 ## Formatting arguments
 #Text output formatting arguments are also used by bl() to register logs and data.
 	[ $1 = '-p' ]    || [ $1 = '-qi' ] && t['-p']="\033[01;35m [$2]: -=- $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") -=-\033[00m" #Process
-	[ $1 = '-l' ]    || [ $1 = '-qi' ] && t['-l']="\033[01m $2: [ $($prt $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")|tr ' ' ', ') ]\033[00m " #List itens
+	[ $1 = '-l' ]    || [ $1 = '-qi' ] && t['-l']="\033[01m $2[ $($prt $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")|tr ' ' ', ') ]\033[00m " #List itens
 	[ $1 = '-hT' ]   || [ $1 = '-qi' ] &&  t['-hT']="\n\033[01;36m******** [ ${out_a[*]:1} ] ********\033[00m\n" #High Title
 	[ $1 = '-ahT' ]  || [ $1 = '-qi' ] &&  t['-ahT']="\n\033[01;33m******** / ${out_a[*]:1} / ********\033[00m\n" #Alert High Title
 	[ $1 = '-shT' ]  || [ $1 = '-qi' ] &&  t['-shT']="\n\033[01;31m******** ( ${out_a[*]:1} ) ********\033[00m\n" #Sucess High Title
@@ -823,6 +823,7 @@ download(){
 		$dl $repo/$1.$file_format
 	else
 		output -p $name "Importing “$1”"
+		output -d "dir" $lc_repo
 		$cp $lc_repo/$1.$file_format $bnd_dir/
 	fi
 	output -l "files" "$(ls . | grep $1.$file_format)"
@@ -913,7 +914,7 @@ setup(){
 	then
 		if [ -e repo ]
 		then
-			$prt "pm=$pm_detected h=$h u=$u \nrepo=$(cat repo) \nlc_repo=0" > $cfg_file
+			$prt "pm=$pm_detected h=$h u=$u \n$(cat repo)" > $cfg_file
 			$src $cfg_file
 #Downloading repository releas
 			qwerry_bnd -rU
@@ -966,9 +967,16 @@ qwerry_bnd(){
 		output -hT "Updating Repository"
 		cd $pdir
 		$srm $pdir/release
-		output -p $name "Downloading Release"
-		btest -net ; $err_cmd
-		$dl $repo/release
+		if [ $lc_repo = 0 ]
+		then
+			output -p $name "Downloading Release"
+			btest -net ; $err_cmd
+			$dl $repo/release
+		else
+			output -p $name "Importing Release"
+			output -d "dir" $lc_repo
+			$cp $lc_repo/release .
+		fi
 		bl -rm @release
 		bl -rgt @release $($scat $pdir/release)
 		output -hT "Repository Updated"
@@ -1043,7 +1051,7 @@ detect_user_props(){
 btest(){
 	# error texts database
 	declare -A bterr
-	bterr['-root']="-ahT “$name $cmd” needs root privileges"
+	bterr['-root']="-ahT “ $name $cmd ” needs root privileges"
 	bterr['-net']="-ehT No internet connection"
 	# tests
 	for err_type in $*
