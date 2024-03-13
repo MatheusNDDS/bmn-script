@@ -707,92 +707,92 @@ pkg_parser(){
 	fi
 }
 pkg_install(){
-#Distro Pkgs
-	if [[ -z $1 ]]
+## Distro Pkgs ##
+if [[ -z $1 ]]
+then
+	pkg_parser parse packages
+else
+	pkg_parser parse $1/packages
+fi
+if [ $pkg_flag != "null" ]
+then
+	$pnl
+	output -p $pm "Installing Packages"
+	pkg_parser list_pkgs
+	if [[ $pm_update = 1 ]]
 	then
-		pkg_parser parse packages
-	else
-		pkg_parser parse $1/packages
+		output -p $pm "Updating Packages"
+		pma -u
 	fi
-	if [ $pkg_flag != "null" ]
-	then
-		$pnl
-		output -p $pm "Installing Packages"
-		pkg_parser list_pkgs
-		if [[ $pm_update = 1 ]]
+	pkg_parser check pma
+	for i in ${to_install[*]}
+	do
+		if [[ "$pkgs_in" = *"$i"* ]]
 		then
-			output -p $pm "Updating Packages"
-			pma -u
+			output -t "$pm/installing: $i"
+			output -s "$pm" "$i is already installed"
+		else
+			output -t "$pm/installing: $i"
+			pma -i $i
 		fi
-		pkg_parser check pma
-		for i in ${to_install[*]}
-		do
-			if [[ "$pkgs_in" = *"$i"* ]]
-			then
-				output -t "$pm/installing: $i"
-				output -s "$pm" "$i is already installed"
-			else
-				output -t "$pm/installing: $i"
-				pma -i $i
-			fi
-		done
-		pkg_parser check pma
-		for i in ${to_remove[*]}
-		do
-			if [[ "$pkgs_in" = *"$i"* ]]
-			then
-				output -t "$pm/removing: $i"
-				pma -r $i
-			else
-				output -t "$pm/removing: $i"
-				output -s "$pm" "$i is not installed"
-			fi
-		done
-		pkg_parser clean
-	fi
-#Flatpaks
-	if [[ -z $1 ]]
-	then
-		pkg_parser parse flatpaks
-	else
-		pkg_parser parse $1/flatpaks
-	fi
-	if [ $pkg_flag != "null" ]
-	then
-		$pnl
-		output -p Flatpak "Installing Flatpaks"
-		pkg_parser list_pkgs
-		if [[ $pm_update = 1 ]]
+	done
+	pkg_parser check pma
+	for i in ${to_remove[*]}
+	do
+		if [[ "$pkgs_in" = *"$i"* ]]
 		then
-			output -t 'Uptating Flathub'
-			$ir flatpak update -y
+			output -t "$pm/removing: $i"
+			pma -r $i
+		else
+			output -t "$pm/removing: $i"
+			output -s "$pm" "$i is not installed"
 		fi
-		pkg_parser check fp
-		for i in ${to_install[*]}
-		do
-			if [[ "$pkgs_in" = *"$i"* ]]
-			then
-				output -t "flatpak/installing: $i"
-				output -s "flatpak" "$i is already installed"
-			else
-				output -t "flatpak/installing: $i"
-				$ir flatpak $fp_mode install $fp_remote $i -y
-			fi
-		done
-		pkg_parser check fp
-		for i in ${to_remove[*]}
-		do
-			if [[ "$pkgs_in" = *"$i"* ]]
-			then
-				output -t "flatpak/removing: $i"
-				$ir flatpak uninstall $fp_mode $i -y
-			else
-				output -t "flatpak/removing: $i"
-				output -s "flatpak" "$i is not installed"
-			fi
-		done
-		pkg_parser clean
+	done
+	pkg_parser clean
+fi
+## Flatpaks ##
+if [[ -z $1 ]]
+then
+	pkg_parser parse flatpaks
+else
+	pkg_parser parse $1/flatpaks
+fi
+if [ $pkg_flag != "null" ]
+then
+	$pnl
+	output -p Flatpak "Installing Flatpaks"
+	pkg_parser list_pkgs
+	if [[ $pm_update = 1 ]]
+	then
+		output -t 'Uptating Flathub'
+		$ir flatpak update -y
 	fi
+	pkg_parser check fp
+	for i in ${to_install[*]}
+	do
+		if [[ "$pkgs_in" = *"$i"* ]]
+		then
+			output -t "flatpak/installing: $i"
+			output -s "flatpak" "$i is already installed"
+		else
+			output -t "flatpak/installing: $i"
+			$ir flatpak $fp_mode install $fp_remote $i -y
+		fi
+	done
+	pkg_parser check fp
+	for i in ${to_remove[*]}
+	do
+		if [[ "$pkgs_in" = *"$i"* ]]
+		then
+			output -t "flatpak/removing: $i"
+			$ir flatpak uninstall $fp_mode $i -y
+		else
+			output -t "flatpak/removing: $i"
+			output -s "flatpak" "$i is not installed"
+		fi
+	done
+	pkg_parser clean
+fi
 }
 
 ## Bundle Processes
