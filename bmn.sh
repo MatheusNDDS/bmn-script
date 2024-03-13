@@ -62,7 +62,7 @@ bmn_data(){
 	script="$(pwd)/${name}.sh"
 	file_format="tar"
 	pkg_flag="null"
-	args=$*
+	args=($*)
 	cmd="$1"
 	rex="$r bash recipe"
 	editor="nano"
@@ -109,7 +109,7 @@ bmn_init(){
 	if [[ $1 = '-i' ]] || [[ $1 = '--install' ]]
 	then
 		btest -root ; $err_cmd
-		for i in ${args[@]:2}
+		for i in ${args[@]:1}
 		do
 			bnd_parser $i
 			if [[ "${release[@]}" = *"$bndf "* ]] || [[ ${release[0]} = $bndf ]] || [[ ${release[-1]} = $bndf ]] #checks if the bundle exists in the repository.
@@ -132,7 +132,7 @@ bmn_init(){
 		btest -root ; $err_cmd
 		bnd_ignore=()
 		output -hT "Importing bundles"
-		for i in ${args[@]:3}
+		for i in ${args[@]:1}
 		do
 			if [[ $i = *"$file_format" ]]
 			then
@@ -150,7 +150,7 @@ bmn_init(){
 				bnd_ignore+=($i)
 			fi
 		done
-		for i in ${args[@]:3}
+		for i in ${args[@]:1}
 		do
 			if [[ ${bnd_ignore[*]} != *"$i"* ]]
 			then
@@ -164,12 +164,12 @@ bmn_init(){
 				lc_inst=0
 			fi
 		done
-	elif [[ $1 = '-di' ]] || [[ $1 = '--dir-install' ]] && [[ ! -z "${args[@]:3}" ]]
+	elif [[ $1 = '-di' ]] || [[ $1 = '--dir-install' ]] && [[ ! -z "${args[@]:1}" ]]
 	then
 		btest -root ; $err_cmd
 		bnd_ignore=()
 		output -hT "Importing dir bundles"
-		for i in ${args[@]:3}
+		for i in ${args[@]:1}
 		do
 			bnd_parser $i
 			if [ -d $bndf ]
@@ -181,7 +181,7 @@ bmn_init(){
 				bnd_ignore+=($i)
 			fi
 		done
-		for i in ${args[@]:3}
+		for i in ${args[@]:1}
 		do
 			if [[ ${bnd_ignore[*]} != *"$i"* ]]
 			then
@@ -196,27 +196,27 @@ bmn_init(){
 	elif [[ $1 = "-iu" ]]
 	then
 		pm_update=1
-		bmn_init -i ${args[@]:3}
+		bmn_init -i ${args[@]:1}
 	elif [[ $1 = "-liu" ]]
 	then
 		pm_update=1
-		bmn_init -li ${args[@]:4}
+		bmn_init -li ${args[@]:1}
 	elif [[ $1 = "-diu" ]]
 	then
 		pm_update=1
-		bmn_init -di ${args[@]:4}
+		bmn_init -di ${args[@]:1}
 	elif [[ $1 = '-e' ]] || [[ $1 = '--enable-extras' ]]
 	then
 		enable_extras $*
 	elif [[ $1 = '-bdl' ]] || [[ $1 = '--bnd-dowload' ]]
 	then
-		for dbnd in ${args[@]:4}
+		for dbnd in ${args[@]:1}
 		do
 			download $dbnd 1
 		done
 	elif [[ $1 = '-bp' ]] || [[ $1 = '--bnd-pack' ]]
 	then
-		for i in ${args[@]:3}
+		for i in ${args[@]:1}
 		do
 			bnd_pack $i
 		done
@@ -234,7 +234,7 @@ bmn_init(){
 		qwerry_bnd $1
 	elif [[ $1 = '-l' ]] || [[ $1 = '--list-bnds' ]]
 	then
-		qwerry_bnd ${args[@]:2}
+		qwerry_bnd ${args[@]:1}
 	elif [[ $1 = '-p' ]] || [[ $1 = '--properties' ]]
 	then
 		output 0
@@ -246,10 +246,10 @@ bmn_init(){
 		output 3
 	elif [[ ! -z $2 ]] && [[ $1 = '-rl' ]]
 	then
-		bl -glf ${args[@]:4}
+		bl -glf ${args[@]:1}
 	elif [[ ! -z $2 ]] && [[ $1 = '-rd' ]]
         then
-                bl -gd ${args[@]:4}
+                bl -gd ${args[@]:1}
 	elif [[ $1 = '-h' ]] || [[ $1 = '--help' ]]
 	then
 		output 0
