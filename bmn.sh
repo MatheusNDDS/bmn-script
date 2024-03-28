@@ -46,14 +46,16 @@ bmn_data(){
 	hsr="$h/.local/share" #home share
 	hlc="$h/.local" #home local
 	cfg="$h/.config"
+	rapp="/usr/share/applications/"
+	happ="$hsr/applications/"
 	etc="/etc"
 	dev="/dev"
 	mdi="/media"
 	mnt="/mnt"
 	tmp="/temp"
 	sus="/etc/sudoers"
-	xss="$rsr/xsessions/"
-	wss="$rsr/wayland-sessions/"
+	xss="$rsr/xsessions"
+	wss="$rsr/wayland-sessions"
 
 ## Script Variables : Change this variables may broke you bundle execution ##
 	#References
@@ -100,6 +102,7 @@ bmn_data(){
 	hsr="$h/.local/share"
 	hlc="$h/.local"
 	cfg="$h/.config"
+	happ="$hsr/applications/"
 	set_owner="$cho -R $u:$u"  #set dirs owner to current user
 	set_owner_forced="$set_owner $(echo $h/.* $h/* | sed s/$(echo $lc_dir | sed s/'\/'/'\\\/'/g)//) &> $dnull" #force $set_owner in entire $HOME (slow)
 }
@@ -1074,7 +1077,7 @@ btest(){
 }
 live_shell(){
 	btest -root; $err_cmd
-	current_dir=$(pwd)
+	export current_dir=$(pwd)
 	cd $pdir
 	$ir bash --init-file $init_file
 	bl -rgt @bsh_login
