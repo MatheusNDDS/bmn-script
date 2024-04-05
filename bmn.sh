@@ -923,9 +923,9 @@ setup(){
 #Saving environment variables
 	if [ -z "$2" ] && [[ $2 != *"srcd="* ]] || [ -z "$3" ] && [[ $3 != *"srcd="* ]]
 	then
-		if [ -e repo ]
+		if [ -e config ]
 		then
-			$prt "pm=$pm_detected h=$h u=$u \n$(cat repo)" > $cfg_file
+			$prt "pm=$pm_detected h=$h u=$u \n$(cat config)" > $cfg_file
 			$src $cfg_file
 #Downloading repository releas
 			qwerry_bnd -rU
