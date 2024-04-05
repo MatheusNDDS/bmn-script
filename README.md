@@ -6,7 +6,7 @@ Install syntax:
 
 ``sudo bash bmn.sh -s “repository”``  
 - The repository field can be from github raw content or any other direct downloadable URL.  
-- You can insert the repository in the "repo" file and you won't need to specify this field.
+- You can insert the repository in the ``repo`` variable in config file and you won't need to specify this field.
 
 # Usage instructions
 Syntax: ``sudo bmn ”command” “arguments” ``  
