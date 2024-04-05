@@ -8,13 +8,13 @@ bmn_data(){
 	chm="$ir chmod"
 	cho="$ir chown"
 	cp="$ir cp -r"
-	rm="$ir rm -rf"
-	rmd="$ir rmdir --ignore-fail-on-non-empty"
+	rm="sfm -r"
+	rmd="sfm -rd"
 	mv="$ir mv"
-	mk="$ir touch"
-	mkd="$ir mkdir"
+	mk="sfm -f"
+	mkd="sfm -d"
 	elf="$ir chmod 755"
-	cat="$ir cat"
+	cat="sfm -c"
 	prt="echo -e"
 	dl="$ir wget"
 	gitc="$ir git clone"
@@ -73,7 +73,6 @@ bmn_data(){
 	sfm_verbose=0 #Enable verbose log for SFM
 	bkc=@
 	date_f=('§' '%d-%m-%Y,%H:%M')
-	sysdbl=/*
 
 	#Working Directories
 	pdir="/etc/$name"
@@ -82,6 +81,10 @@ bmn_data(){
 	lsh_init="$pdir/.lshrc"
 	cmd_srcd="/bin"
 	log="$pdir/.log"
+	rootfs_dirs=(/*)
+	rootfs_dirs2=($(for bldir in ${rootfs_dirs[@]};do $prt "$bldir/ ";done))
+	rootfs_dirs3=($($prt ${rootfs_dirs[@]} | tr '/' ' '))
+	sysdbl=(/ $pdir $pdir/*);for bldir in ${sysdbl[@]};do sysdbl+="$bldir/ ";done
 
 	#Flatpak Configuration
 	flathub="flathub https://flathub.org/repo/flathub.flatpakrepo"
@@ -421,46 +424,51 @@ pma_a=($*)
 }
 sfm(){
 sfm_a=($*)
+	[ -z $m ] && sysdbl=( 'unrestricted' )
 	for dof in ${sfm_a[@]:1}
 	do
-		if [ "$dof" != "/" ] || [ " $sysdbl " != *" $dof "* -a $1 = "-r" ] || [ "$dof" != "$pdir" ] || [ $pdir/* != *"$dof"* ]
+		sdof=$(realpath $dof)
+		if [[ " ${sysdbl[@]} " != *"$sdof"* ]] || [[ $1 = '-r' && " ${sysdbl[@]} " != *"$sdof"* && "${sfm_a[@]:1}" != "${rootfs_dirs[@]}" && "${sfm_a[@]:1}" != "${rootfs_dirs2[@]}" && "${sfm_a[@]:1}" != "${rootfs_dirs3[@]}" ]] || [[ $1 = "-c" ]] || [[ $1 = "-rc" ]]
 		then
 			case ${sfm_a[0]} in
 				'-d')
 					if [ ! -d "$dof" ]
 					then
-						$mkd "$dof"
+						$ir mkdir "$dof"
 						[[ $sfm_verbose = 1 ]] && output -t "Directory “$dof” maked"
 					fi
 				;;
 				'-f') 
 					if [ ! -e "$dof" ]
 					then
-						$mk "$dof"
+						$ir touch "$dof"
 						[[ $sfm_verbose = 1 ]] && output -t "File “$dof” maked"
 					fi
 				;;
 				'-r') 
 					if [ -e "$dof" ]
 					then
-						$rm "$dof"
+						$ir rm -rf "$dof"
+						dof_exists=1
 					elif [ -d "$dof" ]
 					then
-						$rm "$dof"
+						$ir rm -rf "$dof"
+						dof_exists=1
 					fi
-					[[ $sfm_verbose = 1 ]] && output -t "File/Dir “$dof” removed"
+					[[ $sfm_verbose = 1 && $dof_exists = 1 ]] && output -t "“$dof” removed"
+					[[ $sfm_verbose = 1 && -z $dof_exists ]] && output  -a 'SFM' "“$dof” does not exist"
 				;;
 				'-rd') 
 					if [ -d "$dof" ]
 					then
-						$rmd "$dof"
+						$ir rmdir --ignore-fail-on-non-empty "$dof"
 					fi
 					[[ $sfm_verbose = 1 ]] && output -t "Dir “$dof” removed"
 				;;
 				'-c')
 					if [ -e "$dof" ]
 					then
-						$cat "$dof"
+						$ir cat "$dof"
 					fi
 				;;
 				'-rc')
@@ -471,7 +479,7 @@ sfm_a=($*)
 				;;
 			esac
 		else
-			output -a "SFM" "cannot remove “$dof” directory"
+			output -a "SFM $1" "Cannot alter “$dof”"
 		fi
 	done
 }
