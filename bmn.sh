@@ -68,7 +68,7 @@ bmn_data(){
 	cmd="$1"
 	rex="$r bash recipe"
 	editor="nano"
-	deps="wget bash $ir $editor"
+	deps="wget bash $ir $editor shc"
 	script_src="https://github.com/MatheusNDDS/${name}-script/raw/main/${name}.sh"
 	sfm_verbose=0 #Enable verbose log for SFM
 	bkc=@
