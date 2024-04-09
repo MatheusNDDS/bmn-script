@@ -248,10 +248,12 @@ bmn_init(){
 		output 3
 	elif [[ ! -z $2 ]] && [[ $1 = '-rl' ]]
 	then
+		[[ "${args[1]}"  = "db="* ]] && log=$($prt ${args[1]} | sed "s/db=//" ) && unset args[1]
 		bl -glf ${args[@]:1}
 	elif [[ ! -z $2 ]] && [[ $1 = '-rd' ]]
-        then
-                bl -gd ${args[@]:1}
+	then
+		[[ "${args[1]}"  = "db="* ]] && log=$($prt ${args[1]} | sed "s/db=//" ) && unset args[1]
+		bl -gd ${args[@]:1}
 	elif [[ $1 = '-h' ]] || [[ $1 = '--help' ]]
 	then
 		output 0
@@ -274,7 +276,7 @@ out_a=($*)
 	declare -A t
 	[ $1 = 0 ] && t[0]="\033[01;36m-=/Automation Bundles Manager/=-\033[00m \n~ MatheusNDDS : https://github.com/MatheusNDDS\n"
 	[ $1 = 1 ] && t[1]="\033[01;33m[Properties]\033[00m\n User: $u\n Home: $h\n PkgM: $pm\n Repo: $repo"
-	[ $1 = 2 ] && t[2]="\033[01;33m[Commands]\033[00m\n$(output -t "Bundles managment")\n --install,-i : Install bundles from repository, use “-iu” to update $pm packages during installation.\n --lc-install,-li : Install bundles from $file_format file path, use “-liu” to update $pm packages during installation.\n --dir-install,-di : Install bundles from unpacked dir path, use “-diu” to update $pm packages during installation.\n --dowload,-bdl : Download bundles from repository.\n --list-bnds,-l : List or search for bundles in repo file.\n --repo-update,-rU : Update repository release file, use this regularly.\n\n$(output -t "Script tools")\n --$name-update,-U : Update $name script from Repo source or local script.\n --bnd-pack, -bp : Pack a bundle from a directory.\n --live-shell,-sh : Run live shell for testing $name functions.\n --properties,-p : Prints the user information that $name uses.\n\n$(output -t "Read bmn log data")\n -rl : Print a log line.\n -rd : Print log line data.\n\n --help,-h : Print help text."
+	[ $1 = 2 ] && t[2]="\033[01;33m[Commands]\033[00m\n$(output -t "Bundles managment")\n --install,-i : Install bundles from repository, use “-iu” to update $pm packages during installation.\n --lc-install,-li : Install bundles from $file_format file path, use “-liu” to update $pm packages during installation.\n --dir-install,-di : Install bundles from unpacked dir path, use “-diu” to update $pm packages during installation.\n --dowload,-bdl : Download bundles from repository.\n --list-bnds,-l : List or search for bundles in repo file.\n --repo-update,-rU : Update repository release file, use this regularly.\n\n$(output -t "Script tools")\n --$name-update,-U : Update $name script from Repo source or local script.\n --bnd-pack, -bp : Pack a bundle from a directory.\n --live-shell,-sh : Run live shell for testing $name functions.\n --properties,-p : Prints the user information that $name uses.\n\n$(output -t "Read bmn log data")\n -rl : Print a log line. Use “db=filename” before to change database file.\n -rd : Print log line data. Use “db=filename” before to change database file.\n\n --help,-h : Print help text."
 	[ $1 = 3 ] && t[3]="bndp_a=(${bndp_a[*]})\nbndf=$bndf\nbnd_raw_name=$bnd_raw_name\nbnd_pre_name=(${bnd_pre_name[*]})\nbnd_name=$bnd_name\nflags=(${bnd_flags[*]})"
 	
 ## Formatting arguments
@@ -427,7 +429,7 @@ sfm_a=($*)
 	
 	for dof in ${sfm_a[@]:1}
 	do
-		sdof=$(realpath $dof)
+		sdof=$([ -f $dof ] && realpath $dof || $prt $dof)
 		if [[ " ${sysdbl[@]} " != *"$sdof"* ]] || [[ $1 = '-r' && " ${sysdbl[@]} " != *"$sdof"* && "${sfm_a[@]:1}" != "${rootfs_dirs[@]}" && "${sfm_a[@]:1}" != "${rootfs_dirs2[@]}" && "${sfm_a[@]:1}" != "${rootfs_dirs3[@]}" ]] || [[ $1 = "-c" ]] || [[ $1 = "-rc" ]]
 		then
 			case ${sfm_a[0]} in
@@ -826,6 +828,7 @@ bndp_a=($($prt $1|sed "s/:/ /"))
 	esac
 }
 download(){
+	btest -master || return
 	$srm $1.$file_format
 	if [ $lc_repo = 0 ] || [ $2 = 1 ]
 	then
@@ -840,6 +843,7 @@ download(){
 	output -l "files" "$(ls . | grep $1.$file_format)"
 }
 unpack(){
+	btest -master || return
 	output -p $name "Unpacking “$1”"
 	$srm $1/
 	$smkd $1/
@@ -848,6 +852,7 @@ unpack(){
 	output -l "files" "$(ls $bnd_dir/$1/)"
 }
 cook(){
+	btest -master || return
 	bndid=$1
 	cd $bndid/
 	pkg_install
