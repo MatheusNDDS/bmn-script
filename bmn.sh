@@ -81,9 +81,6 @@ bmn_data(){
 	lsh_init="$pdir/.lshrc"
 	cmd_srcd="/bin"
 	log="$pdir/.log"
-	rootfs_dirs=(/*)
-	rootfs_dirs2=($(for bldir in ${rootfs_dirs[@]};do $prt "$bldir/ ";done))
-	rootfs_dirs3=($($prt ${rootfs_dirs[@]} | tr '/' ' '))
 	sysdbl=(/ $pdir $pdir/*);for bldir in ${sysdbl[@]};do sysdbl+="$bldir/ ";done
 
 	#Flatpak Configuration
@@ -110,7 +107,6 @@ bmn_data(){
 	set_owner_forced="$set_owner $(echo $h/.* $h/* | sed s/$(echo $lc_dir | sed s/'\/'/'\\\/'/g)//) &> $dnull" #force $set_owner in entire $HOME (slow)
 }
 bmn_init(){
-	bmn_data $*
 	$smkd $lc_dir $bnd_dir && $cho -R root:root $lc_dir &> $dnull
 	if [[ $1 = '-i' ]] || [[ $1 = '--install' ]]
 	then
@@ -424,7 +420,11 @@ pma_a=($*)
 }
 sfm(){
 sfm_a=($*)
-	[ -z $m ] && sysdbl=( 'unrestricted' )
+	btest -master && sysdbl=( 'UNRESTR' )
+	rootfs_dirs=(/*)
+	rootfs_dirs2=($(for bldir in ${rootfs_dirs[@]};do $prt "$bldir/ ";done))
+	rootfs_dirs3=($($prt ${rootfs_dirs[@]} | tr '/' ' '))
+	
 	for dof in ${sfm_a[@]:1}
 	do
 		sdof=$(realpath $dof)
@@ -806,7 +806,7 @@ then
 fi
 }
 
-## Bundle Processes
+## Bundle Process
 bnd_parser(){
 bndp_a=($($prt $1|sed "s/:/ /"))
 	case $1 in
@@ -857,8 +857,8 @@ cook(){
 		$elf recipe
 		$rex $bndid ${bnd_flags[@]}
 	fi
-	recipe_log=($(bl -gal @$bndid))
-	bl -rma @$bndid
+	recipe_log=($(bl -gal '@$bndid '))
+	bl -rma '@$bndid '
 	if [[ " ${recipe_log[@]} " = *" -a "* ]]
 	then
 		output -ahT "“$bndid$(bnd_parser -pbf)” Returned Alerts"
@@ -881,9 +881,9 @@ bnd_pack(){
 	fi
 }
 
-## Script Managment
+## Script Management
 setup(){
-	btest -root ; $err_cmd
+	btest -root -installer || return
 #Detect custom bin path
 	if [[ $2 = *"srcd="* ]]
 	then
@@ -945,7 +945,7 @@ setup(){
 	bl -rgt @setup "$name target “$cmd_srcd”. pm=$pm, h=$h, u=$u, repo=$repo"
 }
 bmn_update(){
-	btest -root ; $err_cmd
+	btest -root -master || return
 	output -hT "Updating $name_upper Script"
 	bin_srcd=($(cat $init_file))
 	cmd_bin=${bin_srcd[3]}
@@ -1027,7 +1027,7 @@ qwerry_bnd(){
 	fi
 }
 enable_extras(){
-	btest -net -root ; $err_cmd
+	btest -net -root || return
 	for i in $*
 	do
 		if [ $i = flatpak ]
@@ -1064,27 +1064,36 @@ btest(){
 	declare -A bterr
 	bterr['-root']="-ahT “ $name $cmd ” needs root privileges"
 	bterr['-net']="-ehT No internet connection"
+	bterr['-master']="-ahT no permission"
+	ef=0
 	# tests
 	for err_type in $*
 	do
 		case $err_type in 
 		'-root')
-			[ $UID != 0 ] &&  err_out=${bterr[$err_type]} && err_cmd="exit 1"
+			[ $UID != 0 ] &&  err_out=${bterr[$err_type]} && ef=1
 		;;
 		'-net')
 			wget -q --spider www.google.com
-			if [ $? != 0 ]
-			then
-				err_out=${bterr[$err_type]}
-				err_cmd="exit 1"
-			fi
+			[ $? != 0 ] && err_out=${bterr[$err_type]} && ef=1
+		;;
+		'-master')
+			ef=1
+			init_data=($(cat $init_file))
+			[[ ! -z "$init_data" && $0 = "${init_data[3]}" || $0 = "/usr/bin/bmn" && "${init_data[3]}" = '/bin/bmn' ]] || [[ $0 = "bmn.sh" ]]  && ef=0
+			unset init_data
+		;;
+		'-installer')
+			[[ $0 = "$name.sh" ]] && ef=0
 		;;
 		esac
 		[ ! -z "$err_out" ] && output $err_out
+		[[ $ef = 1 ]] && break
 	done
+	return $ef
 }
 live_shell(){
-	btest -root; $err_cmd
+	btest -root -installer -master || return
 	export current_dir=$(pwd)
 	cd $pdir
 	$ir bash --init-file $init_file
@@ -1096,4 +1105,4 @@ null(){
 }
 
 ### Program Start ###
-[[ -z $m ]] && bmn_init $* || bmn_data $*
+bmn_data $* && btest -installer -master && bmn_init $*
