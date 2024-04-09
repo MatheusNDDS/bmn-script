@@ -904,7 +904,7 @@ setup(){
 	$cp $script $cmd_srcd/$name
 	$elf $cmd_srcd/$name
 #init file buid
-	$prt "m=1 && source $cmd_srcd/$name" > $init_file
+	$prt "source $cmd_srcd/$name" > $init_file
 	$prt 'export PS1="\\n“\w”\\n$(output -d $name)"\nalias q="exit 0"\nalias x="clear"\nalias c="$editor $cfg_file"\nalias i="$editor $init_file"\nalias r="$editor $pdir/release"\nalias l="$editor $log"\nalias h="$prt +\\n c: edit config\\n i: edit init\\n r: edit release\\n l: edit log\\n x: clear prompt\\n h: help\\n q: exit+"\nblog_verbose=1\nsfm_verbose=1' | tr '+' "'" >> $init_file
 #Package manager autodetect
 	output -p $name "Detecting Package Manager"
@@ -953,7 +953,7 @@ bmn_update(){
 	btest -root -master || return
 	output -hT "Updating $name_upper Script"
 	bin_srcd=($(cat $init_file))
-	cmd_bin=${bin_srcd[3]}
+	cmd_bin=${bin_srcd[1]}
 	if [[ $1 = "" ]]
 	then
 		current_dir=$(pwd)
@@ -1085,7 +1085,7 @@ btest(){
 		'-master')
 			ef=1
 			init_data=($(cat $init_file))
-			[[ ! -z "$init_data" && $0 = "${init_data[3]}" || $0 = "/usr/bin/bmn" && "${init_data[3]}" = '/bin/bmn' ]] || [[ $0 = "bmn.sh" ]]  && ef=0
+			[[ ! -z "$init_data" && $0 = "${init_data[1]}" || $0 = "/usr/bin/bmn" && "${init_data[1]}" = '/bin/bmn' ]] || [[ $0 = "bmn.sh" ]]  && ef=0
 			unset init_data
 		;;
 		'-installer')
@@ -1110,4 +1110,6 @@ null(){
 }
 
 ### Program Start ###
-bmn_data $* && btest -installer -master && bmn_init $*
+bmn_data $*
+[ $0 = "bmn.sh"  ] && btest -installer && bmn_init $*
+[ $0 != "bmn.sh" ] && btest -master    && bmn_init $*
