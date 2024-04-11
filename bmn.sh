@@ -26,19 +26,12 @@ bmn_data(){
 	pwd="$ir pwd"
 	pkgi="pkg_install"
 	header="output -bH"
+	src="sfm -rc"
 	
 	#Redirect points
 	d0="/dev/0"
 	dnull="/dev/null"
 	tmpf="/tmp/$(date | tr ' :-' "$(date)")" #generate a unique temporary file
-	
-	#Safe File Manager Commands Varariables
-	srm="sfm -r"
-	srmd="sfm -rd"
-	smk="sfm -f"
-	smkd="sfm -d"
-	scat="sfm -c"
-	src="sfm -rc"
 	
 	#Directorys collection
 	rsr="/usr/share" #root share
@@ -46,7 +39,7 @@ bmn_data(){
 	hsr="$h/.local/share" #home share
 	hlc="$h/.local" #home local
 	cfg="$h/.config"
-	rapp="/usr/share/applications/"
+	rapp="$rsr/applications/"
 	happ="$hsr/applications/"
 	etc="/etc"
 	dev="/dev"
@@ -57,7 +50,7 @@ bmn_data(){
 	xss="$rsr/xsessions"
 	wss="$rsr/wayland-sessions"
 
-## Script Variables : Change this variables may broke you bundle execution ##
+## Script Variables : Change this variables broke bundle execution ##
 	#References
 	name="bmn"
 	name_upper="$($prt $name|tr [:lower:] [:upper:])"
@@ -74,14 +67,13 @@ bmn_data(){
 	bkc=@
 	date_f=('§' '%d-%m-%Y,%H:%M')
 
-	#Working Directories
+	#Work Directories
 	pdir="/etc/$name"
 	cfg_file="$pdir/cfg"
 	init_file="$pdir/init"
 	lsh_init="$pdir/.lshrc"
 	cmd_srcd="/bin"
 	log="$pdir/.log"
-	sysdbl=(/ $pdir $pdir/*);for bldir in ${sysdbl[@]};do sysdbl+="$bldir/ ";done
 
 	#Flatpak Configuration
 	flathub="flathub https://flathub.org/repo/flathub.flatpakrepo"
@@ -91,7 +83,7 @@ bmn_data(){
 	#External Data Import ##
 	$src $cfg_file
 	$src /etc/os-release
-	release=($($scat $pdir/release))
+	release=($($cat $pdir/release))
 	
 	#Configure pm,u,h variables
 	detect_user_props
@@ -107,22 +99,24 @@ bmn_data(){
 	set_owner_forced="$set_owner $(echo $h/.* $h/* | sed s/$(echo $lc_dir | sed s/'\/'/'\\\/'/g)//) &> $dnull" #force $set_owner in entire $HOME (slow)
 }
 bmn_init(){
-	$smkd $lc_dir $bnd_dir && $cho -R root:root $lc_dir &> $dnull
+	bmn_data $*
+	btest -master || return
+	$mkd $lc_dir $bnd_dir && $cho -R root:root $lc_dir &> $dnull
 	if [[ $1 = '-i' ]] || [[ $1 = '--install' ]]
 	then
-		btest -root ; $err_cmd
+		btest -env -root || return
 		for i in ${args[@]:1}
 		do
 			bnd_parser $i
 			if [[ "${release[@]}" = *"$bndf "* ]] || [[ ${release[0]} = $bndf ]] || [[ ${release[-1]} = $bndf ]] #checks if the bundle exists in the repository.
 			then
 				output -hT "Configuring “$bnd_name$(bnd_parser -pbf)”"
-				$srm $bnd_dir/$bnd_name
+				$rm $bnd_dir/$bnd_name
 				cd $bnd_dir/
 				download $bnd_name 0
 				unpack $bnd_name
 				cook $bnd_name ${bnd_flags[@]}
-				$srm $bnd_dir/$bnd_name
+				$rm $bnd_dir/$bnd_name
 				lc_inst=0
 			else
 				output -a $name "“$bnd_name” bundle not found in repository"
@@ -131,7 +125,7 @@ bmn_init(){
 		done
 	elif [[ $1 = '-li' ]] || [[ $1 = '--lc-install' ]] && [[ ! -z "${args[@]:3}" ]]
 	then
-		btest -root ; $err_cmd
+		btest -env -root || return
 		bnd_ignore=()
 		output -hT "Importing bundles"
 		for i in ${args[@]:1}
@@ -158,17 +152,17 @@ bmn_init(){
 			then
 				bnd_parser $i
 				output -hT "Configuring “$bnd_name$(bnd_parser -pbf)”"
-				$srm $bnd_dir/$bnd_name
+				$rm $bnd_dir/$bnd_name
 				cd $bnd_dir/
 				unpack $bnd_name
 				cook $bnd_name ${bnd_flags[@]}
-				$srm $bnd_dir/$bnd_name
+				$rm $bnd_dir/$bnd_name
 				lc_inst=0
 			fi
 		done
 	elif [[ $1 = '-di' ]] || [[ $1 = '--dir-install' ]] && [[ ! -z "${args[@]:1}" ]]
 	then
-		btest -root ; $err_cmd
+		btest -env -root || return
 		bnd_ignore=()
 		output -hT "Importing dir bundles"
 		for i in ${args[@]:1}
@@ -191,7 +185,7 @@ bmn_init(){
 				output -hT "Configuring “$bnd_name$(bnd_parser -pbf)”"
 				cd $bnd_dir/
 				cook $bnd_name ${bnd_flags[@]}
-				$srm $bnd_dir/$bnd_name
+				$rm $bnd_dir/$bnd_name
 				lc_inst=0
 			fi
 		done
@@ -274,28 +268,28 @@ bmn_init(){
 output(){
 out_a=($*)
 	declare -A t
-	[ $1 = 0 ] && t[0]="\033[01;36m-=/Automation Bundles Manager/=-\033[00m \n~ MatheusNDDS : https://github.com/MatheusNDDS\n"
-	[ $1 = 1 ] && t[1]="\033[01;33m[Properties]\033[00m\n User: $u\n Home: $h\n PkgM: $pm\n Repo: $repo"
-	[ $1 = 2 ] && t[2]="\033[01;33m[Commands]\033[00m\n$(output -t "Bundles managment")\n --install,-i : Install bundles from repository, use “-iu” to update $pm packages during installation.\n --lc-install,-li : Install bundles from $file_format file path, use “-liu” to update $pm packages during installation.\n --dir-install,-di : Install bundles from unpacked dir path, use “-diu” to update $pm packages during installation.\n --dowload,-bdl : Download bundles from repository.\n --list-bnds,-l : List or search for bundles in repo file.\n --repo-update,-rU : Update repository release file, use this regularly.\n\n$(output -t "Script tools")\n --$name-update,-U : Update $name script from Repo source or local script.\n --bnd-pack, -bp : Pack a bundle from a directory.\n --live-shell,-sh : Run live shell for testing $name functions.\n --properties,-p : Prints the user information that $name uses.\n\n$(output -t "Read bmn log data")\n -rl : Print a log line. Use “db=filename” before to change database file.\n -rd : Print log line data. Use “db=filename” before to change database file.\n\n --help,-h : Print help text."
-	[ $1 = 3 ] && t[3]="bndp_a=(${bndp_a[*]})\nbndf=$bndf\nbnd_raw_name=$bnd_raw_name\nbnd_pre_name=(${bnd_pre_name[*]})\nbnd_name=$bnd_name\nflags=(${bnd_flags[*]})"
-	
+	[[ $1 = 0 ]] && t[0]="\033[01;36m-=/Automation Bundles Manager/=-\033[00m \n~ MatheusNDDS : https://github.com/MatheusNDDS\n"
+	[[ $1 = 1 ]] && t[1]="\033[01;33m[Properties]\033[00m\n User: $u\n Home: $h\n PkgM: $pm\n Repo: $repo"
+	[[ $1 = 2 ]] && t[2]="\033[01;33m[Commands]\033[00m\n$(output -t "Bundles managment")\n --install,-i : Install bundles from repository, use “-iu” to update $pm packages during installation.\n --lc-install,-li : Install bundles from $file_format file path, use “-liu” to update $pm packages during installation.\n --dir-install,-di : Install bundles from unpacked dir path, use “-diu” to update $pm packages during installation.\n --dowload,-bdl : Download bundles from repository.\n --list-bnds,-l : List or search for bundles in repo file.\n --repo-update,-rU : Update repository release file, use this regularly.\n\n$(output -t "Script tools")\n --$name-update,-U : Update $name script from Repo source or local script.\n --bnd-pack, -bp : Pack a bundle from a directory.\n --live-shell,-sh : Run live shell for testing $name functions.\n --properties,-p : Prints the user information that $name uses.\n\n$(output -t "Read bmn log data")\n -rl : Print a log line. Use “db=filename” before to change database file.\n -rd : Print log line data. Use “db=filename” before to change database file.\n\n --help,-h : Print help text."
+	[[ $1 = 3 ]] && t[3]="bndp_a=(${bndp_a[*]})\nbndf=$bndf\nbnd_raw_name=$bnd_raw_name\nbnd_pre_name=(${bnd_pre_name[*]})\nbnd_name=$bnd_name\nflags=(${bnd_flags[*]})"
+
 ## Formatting arguments
 #Text output formatting arguments are also used by bl() to register logs and data.
-	[ $1 = '-p' ]    || [ $1 = '-qi' ] && t['-p']="\033[01;35m [$2]: -=- $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") -=-\033[00m" #Process
-	[ $1 = '-l' ]    || [ $1 = '-qi' ] && t['-l']="\033[01m $2[ $($prt $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")|tr ' ' ', ') ]\033[00m " #List itens
-	[ $1 = '-hT' ]   || [ $1 = '-qi' ] &&  t['-hT']="\n\033[01;36m******** [ ${out_a[*]:1} ] ********\033[00m\n" #High Title
-	[ $1 = '-ahT' ]  || [ $1 = '-qi' ] &&  t['-ahT']="\n\033[01;33m******** / ${out_a[*]:1} / ********\033[00m\n" #Alert High Title
-	[ $1 = '-shT' ]  || [ $1 = '-qi' ] &&  t['-shT']="\n\033[01;31m******** ( ${out_a[*]:1} ) ********\033[00m\n" #Sucess High Title
-	[ $1 = '-ehT' ]  || [ $1 = '-qi' ] &&  t['-ehT']="\n\033[01;31m*#*#*#*# { $( echo "${out_a[*]:1}" | tr [:lower:] [:upper:]) } #*#*#*#*\033[00m\n" #Error High Title
-	[ $1 = '-T' ]    || [ $1 = '-qi' ] &&  t['-T']="\n\033[01;36m ## ${out_a[*]:1} ##\033[00m\n" #Title
-	[ $1 = '-t' ]    || [ $1 = '-qi' ] &&  t['-t']="\033[01;33m - ${out_a[*]:1}\033[00m" #Subtitle
-	[ $1 = '-d' ]    || [ $1 = '-qi' ] &&  t['-d']="\033[01m [$2]: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Dialog, bl Data
-	[ $1 = '-e' ]    || [ $1 = '-qi' ] &&  t['-e']="\033[01;31m {$2}: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Error Dialog
-	[ $1 = '-s' ]    || [ $1 = '-qi' ] &&  t['-s']="\033[01;32m ($2): $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Sucess Dialog
-	[ $1 = '-a' ]    || [ $1 = '-qi' ] &&  t['-a']="\033[01;33m /$2/: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Alert Dialog
-	[ $1 = '-bH' ]   || [ $1 = '-qi' ] &&  t['-bH']="\033[01;36m ### $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") ###\n ~ $2 ~\033[00m\n" #Bundle Header
-	
-	if [[ $1 != "-qi" ]]
+	[[ $1 = '-p' ]]    || [[ $1 = '-qi' ]] && t['-p']="\033[01;35m [$2]: -=- $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") -=-\033[00m" #Process
+	[[ $1 = '-l' ]]    || [[ $1 = '-qi' ]] && t['-l']="\033[01m $2[ $($prt $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")|tr ' ' ', ') ]\033[00m " #List itens
+	[[ $1 = '-hT' ]]   || [[ $1 = '-qi' ]] &&  t['-hT']="\n\033[01;36m******** [ ${out_a[*]:1} ] ********\033[00m\n" #High Title
+	[[ $1 = '-ahT' ]]  || [[ $1 = '-qi' ]] &&  t['-ahT']="\n\033[01;33m******** / ${out_a[*]:1} / ********\033[00m\n" #Alert High Title
+	[[ $1 = '-shT' ]]  || [[ $1 = '-qi' ]] &&  t['-shT']="\n\033[01;31m******** ( ${out_a[*]:1} ) ********\033[00m\n" #Sucess High Title
+	[[ $1 = '-ehT' ]]  || [[ $1 = '-qi' ]] &&  t['-ehT']="\n\033[01;31m*#*#*#*# { $( echo "${out_a[*]:1}" | tr [:lower:] [:upper:]) } #*#*#*#*\033[00m\n" #Error High Title
+	[[ $1 = '-T' ]]    || [[ $1 = '-qi' ]] &&  t['-T']="\n\033[01;36m ## ${out_a[*]:1} ##\033[00m\n" #Title
+	[[ $1 = '-t' ]]    || [[ $1 = '-qi' ]] &&  t['-t']="\033[01;33m - ${out_a[*]:1}\033[00m" #Subtitle
+	[[ $1 = '-d' ]]    || [[ $1 = '-qi' ]] &&  t['-d']="\033[01m [$2]: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Dialog, bl Data
+	[[ $1 = '-e' ]]    || [[ $1 = '-qi' ]] &&  t['-e']="\033[01;31m {$2}: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Error Dialog
+	[[ $1 = '-s' ]]    || [[ $1 = '-qi' ]] &&  t['-s']="\033[01;32m ($2): $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Sucess Dialog
+	[[ $1 = '-a' ]]    || [[ $1 = '-qi' ]] &&  t['-a']="\033[01;33m /$2/: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Alert Dialog
+	[[ $1 = '-bH' ]]   || [[ $1 = '-qi' ]] &&  t['-bH']="\033[01;36m ### $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") ###\n ~ $2 ~\033[00m\n" #Bundle Header
+
+	if [[ "$1" != "-qi" ]]
 	then
 		$prt "${t[$1]}"
 	else
@@ -423,10 +417,10 @@ pma_a=($*)
 sfm(){
 sfm_a=($*)
 	btest -master && sysdbl=( 'UNRESTR' )
+	sysdbl=(/ $pdir $pdir/*);for bldir in ${sysdbl[@]};do sysdbl+="$bldir/ ";done
 	rootfs_dirs=(/*)
 	rootfs_dirs2=($(for bldir in ${rootfs_dirs[@]};do $prt "$bldir/ ";done))
 	rootfs_dirs3=($($prt ${rootfs_dirs[@]} | tr '/' ' '))
-	
 	for dof in ${sfm_a[@]:1}
 	do
 		sdof=$([ -f $dof ] && realpath $dof || $prt $dof)
@@ -720,92 +714,90 @@ pkg_parser(){
 	fi
 }
 pkg_install(){
-## Distro Pkgs ##
-if [[ -z $1 ]]
-then
-	pkg_parser parse packages
-else
-	pkg_parser parse $1/packages
-fi
-if [ $pkg_flag != "null" ]
-then
-	$pnl
-	output -p $pm "Installing Packages"
-	pkg_parser list_pkgs
-	if [[ $pm_update = 1 ]]
+	## Distro Pkgs
+	if [[ -z $1 ]]
 	then
-		output -p $pm "Updating Packages"
-		pma -u
+		pkg_parser parse packages
+	else
+		pkg_parser parse $1/packages
 	fi
-	pkg_parser check pma
-	for i in ${to_install[*]}
-	do
-		if [[ "$pkgs_in" = *"$i"* ]]
-		then
-			output -t "$pm/installing: $i"
-			output -s "$pm" "$i is already installed"
-		else
-			output -t "$pm/installing: $i"
-			pma -i $i
-		fi
-	done
-	pkg_parser check pma
-	for i in ${to_remove[*]}
-	do
-		if [[ "$pkgs_in" = *"$i"* ]]
-		then
-			output -t "$pm/removing: $i"
-			pma -r $i
-		else
-			output -t "$pm/removing: $i"
-			output -s "$pm" "$i is not installed"
-		fi
-	done
-	pkg_parser clean
-fi
-## Flatpaks ##
-if [[ -z $1 ]]
-then
-	pkg_parser parse flatpaks
-else
-	pkg_parser parse $1/flatpaks
-fi
-if [ $pkg_flag != "null" ]
-then
-	$pnl
-	output -p Flatpak "Installing Flatpaks"
-	pkg_parser list_pkgs
-	if [[ $pm_update = 1 ]]
+	if [ $pkg_flag != "null" ]
 	then
-		output -t 'Uptating Flathub'
-		$ir flatpak update -y
+		$pnl && output -p $pm "Installing Packages"
+		pkg_parser list_pkgs
+		if [[ $pm_update = 1 ]]
+		then
+			output -p $pm "Updating Packages"
+			pma -u
+		fi
+		pkg_parser check pma
+		for i in ${to_install[*]}
+		do
+			if [[ "$pkgs_in" = *"$i"* ]]
+			then
+				output -t "$pm/installing: $i"
+				output -s "$pm" "$i is already installed"
+			else
+				output -t "$pm/installing: $i"
+				pma -i $i
+			fi
+		done
+		pkg_parser check pma
+		for i in ${to_remove[*]}
+		do
+			if [[ "$pkgs_in" = *"$i"* ]]
+			then
+				output -t "$pm/removing: $i"
+				pma -r $i
+			else
+				output -t "$pm/removing: $i"
+				output -s "$pm" "$i is not installed"
+			fi
+		done
+		pkg_parser clean
 	fi
-	pkg_parser check fp
-	for i in ${to_install[*]}
-	do
-		if [[ "$pkgs_in" = *"$i"* ]]
+	## Flatpaks
+	if [[ -z $1 ]]
+	then
+		pkg_parser parse flatpaks
+	else
+		pkg_parser parse $1/flatpaks
+	fi
+	if [ $pkg_flag != "null" ]
+	then
+		$pnl && output -p Flatpak "Installing Flatpaks"
+		pkg_parser list_pkgs
+		if [[ $pm_update = 1 ]]
 		then
-			output -t "flatpak/installing: $i"
-			output -s "flatpak" "$i is already installed"
-		else
-			output -t "flatpak/installing: $i"
-			$ir flatpak $fp_mode install $fp_remote $i -y
+			output -t 'Uptating Flathub'
+			$ir flatpak update -y
 		fi
-	done
-	pkg_parser check fp
-	for i in ${to_remove[*]}
-	do
-		if [[ "$pkgs_in" = *"$i"* ]]
-		then
-			output -t "flatpak/removing: $i"
-			$ir flatpak uninstall $fp_mode $i -y
-		else
-			output -t "flatpak/removing: $i"
-			output -s "flatpak" "$i is not installed"
-		fi
-	done
-	pkg_parser clean
-fi
+		pkg_parser check fp
+		for i in ${to_install[*]}
+		do
+			if [[ "$pkgs_in" = *"$i"* ]]
+			then
+				output -t "flatpak/installing: $i"
+				output -s "flatpak" "$i is already installed"
+			else
+				output -t "flatpak/installing: $i"
+				$ir flatpak $fp_mode install $fp_remote $i -y
+			fi
+		done
+		pkg_parser check fp
+		for i in ${to_remove[*]}
+		do
+			if [[ "$pkgs_in" = *"$i"* ]]
+			then
+				output -t "flatpak/removing: $i"
+				$ir flatpak uninstall $fp_mode $i -y
+			else
+				output -t "flatpak/removing: $i"
+				output -s "flatpak" "$i is not installed"
+			fi
+		done
+		pkg_parser clean
+	fi
 }
 
 ## Bundle Process
@@ -828,12 +820,12 @@ bndp_a=($($prt $1|sed "s/:/ /"))
 	esac
 }
 download(){
-	btest -master || return
-	$srm $1.$file_format
+	btest -env -master || return
+	$rm $1.$file_format
 	if [ $lc_repo = 0 ] || [ $2 = 1 ]
 	then
 		output -p $name "Downloading “$1”"
-		btest -net ; $err_cmd
+		btest -net || return
 		$dl $repo/$1.$file_format
 	else
 		output -p $name "Importing “$1”"
@@ -843,16 +835,16 @@ download(){
 	output -l "files" "$(ls . | grep $1.$file_format)"
 }
 unpack(){
-	btest -master || return
+	btest -env -master || return
 	output -p $name "Unpacking “$1”"
-	$srm $1/
-	$smkd $1/
+	$rm $1/
+	$mkd $1/
 	tar -xf $1.$file_format -C $1/
-	$srm $1.$file_format
+	$rm $1.$file_format
 	output -l "files" "$(ls $bnd_dir/$1/)"
 }
 cook(){
-	btest -master || return
+	btest -env -master || return
 	bndid=$1
 	cd $bndid/
 	pkg_install
@@ -950,7 +942,7 @@ setup(){
 	bl -rgt @setup "$name target “$cmd_srcd”. pm=$pm, h=$h, u=$u, repo=$repo"
 }
 bmn_update(){
-	btest -root -master || return
+	btest -env -root -master || return
 	output -hT "Updating $name_upper Script"
 	bin_srcd=($(cat $init_file))
 	cmd_bin=${bin_srcd[1]}
@@ -958,7 +950,7 @@ bmn_update(){
 	then
 		current_dir=$(pwd)
 		output -p $name 'Downloading Script'
-		btest -net ; $err_cmd
+		btest -net || return
 		output -d 'Source' $script_src
 		cd $pdir
 		$dl $script_src
@@ -976,17 +968,17 @@ bmn_update(){
 	output -hT "$name_upper Script Updated"
 }
 qwerry_bnd(){
-	if [[ $1 = '-rU' ]]
+	if [[ $1 = '-rU' ]] #Condition for update release file
 	then
-		btest -root ; $err_cmd
+		btest -env -root || return
 		current_dir=$(pwd)
 		output -hT "Updating Repository"
 		cd $pdir
-		$srm $pdir/release
+		$rm $pdir/release
 		if [ $lc_repo = 0 ]
 		then
 			output -p $name "Downloading Release"
-			btest -net ; $err_cmd
+			btest -net || return
 			$dl $repo/release
 		else
 			output -p $name "Importing Release"
@@ -994,27 +986,27 @@ qwerry_bnd(){
 			$cp $lc_repo/release .
 		fi
 		bl -rm @release
-		bl -rgt @release $($scat $pdir/release)
+		bl -rgt @release $($cat $pdir/release)
 		output -hT "Repository Updated"
 		cd $current_dir
-	else
-		# Import and verify release file
+	else #Until search bundles in current release file
+		## Import and verify release file
 		if [[ ! -e $pdir/release ]]
 		then
 			output -e "Error / No release file' 'Use “$name -rU” to download."
-			exit
+			return
 		fi
-		# Bundles list output
+		## Bundles list and search output
 		rel_h=()
 		case $1 in
-		"")
+		"") #List all
 			output -hT "Avaliable bundles"
 			for bnd in ${release[@]}
 			do
 				output -t "$bnd"
 			done
 		;;
-		*)
+		*) #List using regex
 			output -hT "Results for “$1”"
 			for argb in $*
 			do
@@ -1065,40 +1057,44 @@ detect_user_props(){
 	fi
 }
 btest(){
-	# error texts database
+	## Error Texts BataBase
 	declare -A bterr
 	bterr['-root']="-ahT “ $name $cmd ” needs root privileges"
 	bterr['-net']="-ehT No internet connection"
-	bterr['-master']="-ahT no permission"
+	bterr['-env']="-ahT BMN environment not correctly configured"
 	ef=0
-	# tests
+	
+	## Tests
 	for err_type in $*
 	do
 		case $err_type in 
-		'-root')
-			[ $UID != 0 ] &&  err_out=${bterr[$err_type]} && ef=1
-		;;
-		'-net')
-			wget -q --spider www.google.com
-			[ $? != 0 ] && err_out=${bterr[$err_type]} && ef=1
-		;;
-		'-master')
-			ef=1
-			init_data=($(cat $init_file))
-			[[ ! -z "$init_data" && $0 = "${init_data[1]}" || $0 = "/usr/bin/bmn" && "${init_data[1]}" = '/bin/bmn' ]] || [[ $0 = "bmn.sh" ]]  && ef=0
-			unset init_data
-		;;
-		'-installer')
-			[[ $0 = "$name.sh" ]] && ef=0
-		;;
+			'-root')
+				[ $UID != 0 ] &&  err_out=${bterr[$err_type]} && ef=1
+			;;
+			'-net')
+				wget -q --spider www.google.com
+				[ $? != 0 ] && err_out=${bterr[$err_type]} && ef=1
+			;;
+			'-master')
+				ef=1
+				init_data=($(cat $init_file))
+				[[ ! -z "$init_data" && $0 = "${init_data[1]}" || $0 = "/usr/bin/bmn" && "${init_data[1]}" = '/bin/bmn' ]] || [[ $0 = "bmn.sh" ]] && ef=0
+				unset init_data
+			;;
+			'-installer')
+				ef=1 && [[ $0 = "bmn.sh" ]] && ef=0
+			;;
+			'-env')
+				[[ ! -d $pdir && ! -d $bnd_dir && ! -f $init_file && ! -f $log && ! -f $cfg_file ]] && err_out=${bterr[$err_type]} && ef=1
+			;;
 		esac
-		[ ! -z "$err_out" ] && output $err_out
-		[[ $ef = 1 ]] && break
+		[[ ! -z "${bterr[$err_type]}" && $ef = 1 ]] && output ${bterr[$err_type]}
+		[[ $ef = 1 ]] && return $ef
 	done
 	return $ef
 }
 live_shell(){
-	btest -root -installer -master || return
+	btest -env -root -master || return
 	export current_dir=$(pwd)
 	cd $pdir
 	$ir bash --init-file $init_file
@@ -1106,10 +1102,8 @@ live_shell(){
 	cd $current_dir
 }
 null(){
-	exit $?
+	return $?
 }
 
 ### Program Start ###
-bmn_data $*
-[ $0 = "bmn.sh"  ] && btest -installer && bmn_init $*
-[ $0 != "bmn.sh" ] && btest -master    && bmn_init $*
+bmn_init $*
