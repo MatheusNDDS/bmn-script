@@ -73,7 +73,7 @@ bmn_data(){
 	init_file="$pdir/init"
 	lsh_init="$pdir/.lshrc"
 	cmd_srcd="/bin"
-	log="$pdir/.log"
+	bmr_db="$pdir/.log"
 
 	#Flatpak Configuration
 	flathub="flathub https://flathub.org/repo/flathub.flatpakrepo"
@@ -242,12 +242,12 @@ bmn_init(){
 		output 3
 	elif [[ ! -z $2 ]] && [[ $1 = '-rl' ]]
 	then
-		[[ "${args[1]}"  = "db="* ]] && log=$($prt ${args[1]} | sed "s/db=//" ) && unset args[1]
-		bl -glf ${args[@]:1}
+		[[ "${args[1]}"  = "db="* ]] && bmr_db=$($prt ${args[1]} | sed "s/db=//" ) && unset args[1]
+		bmr -glf ${args[@]:1}
 	elif [[ ! -z $2 ]] && [[ $1 = '-rd' ]]
 	then
-		[[ "${args[1]}"  = "db="* ]] && log=$($prt ${args[1]} | sed "s/db=//" ) && unset args[1]
-		bl -gd ${args[@]:1}
+		[[ "${args[1]}"  = "db="* ]] && bmr_db=$($prt ${args[1]} | sed "s/db=//" ) && unset args[1]
+		bmr -gd ${args[@]:1}
 	elif [[ $1 = '-h' ]] || [[ $1 = '--help' ]]
 	then
 		output 0
@@ -283,7 +283,7 @@ out_a=($*)
 	[[ $1 = '-ehT' ]]  || [[ $1 = '-qi' ]] &&  t['-ehT']="\n\033[01;31m*#*#*#*# { $( echo "${out_a[*]:1}" | tr [:lower:] [:upper:]) } #*#*#*#*\033[00m\n" #Error High Title
 	[[ $1 = '-T' ]]    || [[ $1 = '-qi' ]] &&  t['-T']="\n\033[01;36m ## ${out_a[*]:1} ##\033[00m\n" #Title
 	[[ $1 = '-t' ]]    || [[ $1 = '-qi' ]] &&  t['-t']="\033[01;33m - ${out_a[*]:1}\033[00m" #Subtitle
-	[[ $1 = '-d' ]]    || [[ $1 = '-qi' ]] &&  t['-d']="\033[01m [$2]: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Dialog, bl Data
+	[[ $1 = '-d' ]]    || [[ $1 = '-qi' ]] &&  t['-d']="\033[01m [$2]: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Dialog, bmr Data
 	[[ $1 = '-e' ]]    || [[ $1 = '-qi' ]] &&  t['-e']="\033[01;31m {$2}: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Error Dialog
 	[[ $1 = '-s' ]]    || [[ $1 = '-qi' ]] &&  t['-s']="\033[01;32m ($2): $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Sucess Dialog
 	[[ $1 = '-a' ]]    || [[ $1 = '-qi' ]] &&  t['-a']="\033[01;33m /$2/: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Alert Dialog
@@ -479,10 +479,10 @@ sfm_a=($*)
 		fi
 	done
 }
-bl(){
-bl_a=($@)
-	log_hist=($(cat $log))
-	line=($(grep -- "${bl_a[1]} ${bl_a[2]}" $log))
+bmr(){
+bmr_a=($@)
+	log_hist=($(cat $bmr_db))
+	line=($(grep -- "${bmr_a[1]} ${bmr_a[2]}" $bmr_db))
 	output_index="$(output -qi)"
 	blog_date_str="${date_f[0]}$(date +${date_f[1]})"
 	
@@ -490,172 +490,172 @@ bl_a=($@)
 		'-rg'|'-rgt'|'-srg'|'-srgt'|'-gl'|'-glf'|'-gd'|'-rm'|'-o')
 			if [[  $output_index != *"$2"* ]]
 			then
-				bl_a=($1 '-d' ${bl_a[@]:1})
-				line=($(grep -- "${bl_a[1]} ${bl_a[2]}" $log))
+				bmr_a=($1 '-d' ${bmr_a[@]:1})
+				line=($(grep -- "${bmr_a[1]} ${bmr_a[2]}" $bmr_db))
 			fi
 		;;
 		'@'*)
-			bl_a=('-a' ${bl_a[@]:0})
-			line=($(grep -- "${bl_a[1]} ${bl_a[2]}" $log))
+			bmr_a=('-a' ${bmr_a[@]:0})
+			line=($(grep -- "${bmr_a[1]} ${bmr_a[2]}" $bmr_db))
 		;;
 	esac
-	case ${bl_a[0]} in
+	case ${bmr_a[0]} in
 	"-a"|"-e"|"-d") #quick alert and error register for bundles
-	if [[ $output_index != *"${bl_a[0]}"* ]] || [[ ${bl_a[1]} != "${bkc}"* ]] || [[ ${bl_a[@]:2} = *"${bkc}"* ]]
+	if [[ $output_index != *"${bmr_a[0]}"* ]] || [[ ${bmr_a[1]} != "${bkc}"* ]] || [[ ${bmr_a[@]:2} = *"${bkc}"* ]]
 	then
-		output -a syntax "bl ${bl_a[0]} “${bkc}key” “text arguments (cannot contain ${bkc})”"
+		output -a syntax "bmr ${bmr_a[0]} “${bkc}key” “text arguments (cannot contain ${bkc})”"
 		output -d dataTypes ${output_index[@]}
 	else
-		line=($(grep -- "${bl_a[0]} ${bl_a[1]}" $log))
-		if [[ ! -z $line ]] && [[ ${bl_a[0]} != "-d" ]] && [[ $line != "-e" ]]
+		line=($(grep -- "${bmr_a[0]} ${bmr_a[1]}" $bmr_db))
+		if [[ ! -z $line ]] && [[ ${bmr_a[0]} != "-d" ]] && [[ $line != "-e" ]]
 		then
-			sed -i "/${bl_a[0]} ${bl_a[1]}/d" $log
+			sed -i "/${bmr_a[0]} ${bmr_a[1]}/d" $bmr_db
 		fi
-		if [[ $line != *"-e"* ]] || [[ ${bl_a[0]} != "-a" ]]
+		if [[ $line != *"-e"* ]] || [[ ${bmr_a[0]} != "-a" ]]
 		then
-			echo "${bl_a[*]}" >> $log
+			echo "${bmr_a[*]}" >> $bmr_db
 		fi
 		if [[ $blog_verbose = 1 ]]
 		then
-			output $(echo "${bl_a[*]}" | sed "s/${bkc}//g")
+			output $(echo "${bmr_a[*]}" | sed "s/${bkc}//g")
 		fi
 	fi
 	;;
 	'-o')
-		if [[ $output_index != *"${bl_a[1]}"* ]] || [[ ${bl_a[2]}  != "${bkc}"* ]] || [[ ${bl_a[@]:3} = *"${bkc}"* ]]
+		if [[ $output_index != *"${bmr_a[1]}"* ]] || [[ ${bmr_a[2]}  != "${bkc}"* ]] || [[ ${bmr_a[@]:3} = *"${bkc}"* ]]
 		then
-			output -a syntax "bl ${bl_a[0]} “-d” “${bkc}key” “text arguments (cannot contain ${bkc})”"
+			output -a syntax "bmr ${bmr_a[0]} “-d” “${bkc}key” “text arguments (cannot contain ${bkc})”"
 			output -d dataTypes ${output_index[@]}
 		else
 			output $(echo "${line[*]}" | sed "s/${bkc}//g")
 		fi
 	;;
 	"-rg"|"-rgt") #register a custom value
-		if [[ $output_index != *"${bl_a[1]}"* ]] || [[ ${bl_a[2]}  != "${bkc}"* ]] || [[ ${bl_a[@]:3} = *"${bkc}"* ]]
+		if [[ $output_index != *"${bmr_a[1]}"* ]] || [[ ${bmr_a[2]}  != "${bkc}"* ]] || [[ ${bmr_a[@]:3} = *"${bkc}"* ]]
 		then
-			output -a syntax "bl ${bl_a[0]} “-d” “${bkc}key” “text arguments (cannot contain ${bkc})”"
+			output -a syntax "bmr ${bmr_a[0]} “-d” “${bkc}key” “text arguments (cannot contain ${bkc})”"
 			output -d dataTypes ${output_index[@]}
 		else
-			if [ ${bl_a[0]} = '-rgt' ]
+			if [ ${bmr_a[0]} = '-rgt' ]
 			then
-				bl_a[2]="${bl_a[2]}$blog_date_str"
+				bmr_a[2]="${bmr_a[2]}$blog_date_str"
 			fi
-			echo "${bl_a[*]:1}" | sed "s/\n//g" >> $log
+			echo "${bmr_a[*]:1}" | sed "s/\n//g" >> $bmr_db
 			if [[ $blog_verbose = 1 ]]
 			then
-				output $(echo "${bl_a[*]:1}" | sed "s/${bkc}//g")
+				output $(echo "${bmr_a[*]:1}" | sed "s/${bkc}//g")
 			fi
 		fi
 	;;
 	"-srg"|"-srgt") # safe register, if there is data replace it with the newest one.
-		if [[ $output_index != *"${bl_a[1]}"* ]] || [[ ${bl_a[2]}  != "${bkc}"* ]] || [[ ${bl_a[@]:3} = *"${bkc}"* ]]
+		if [[ $output_index != *"${bmr_a[1]}"* ]] || [[ ${bmr_a[2]}  != "${bkc}"* ]] || [[ ${bmr_a[@]:3} = *"${bkc}"* ]]
 		then
-			output -a syntax "bl ${bl_a[0]} “-d” “${bkc}key” “text arguments (cannot contain ${bkc})”"
+			output -a syntax "bmr ${bmr_a[0]} “-d” “${bkc}key” “text arguments (cannot contain ${bkc})”"
 			output -d dataTypes ${output_index[@]}
 		else
-			if [ ${bl_a[0]} = '-srgt' ]
+			if [ ${bmr_a[0]} = '-srgt' ]
 			then
-				bl_a[2]="${bl_a[2]}$blog_date_str"
+				bmr_a[2]="${bmr_a[2]}$blog_date_str"
 			fi
-			if [ -z "$(bl -gl ${bl_a[1]} ${bl_a[2]})" ]
+			if [ -z "$(bmr -gl ${bmr_a[1]} ${bmr_a[2]})" ]
 			then
-				echo "${bl_a[*]:1}" | sed "s/\n//g" >> $log
+				echo "${bmr_a[*]:1}" | sed "s/\n//g" >> $bmr_db
 			else
-				sed -i "/${bl_a[1]} ${bl_a[2]}/d" $log
-				echo "${bl_a[*]:1}" | sed "s/\n//g" >> $log
+				sed -i "/${bmr_a[1]} ${bmr_a[2]}/d" $bmr_db
+				echo "${bmr_a[*]:1}" | sed "s/\n//g" >> $bmr_db
 			fi
 		fi
 	;;
 	"-ail"|"-ril") #add and remove items in a line 
-		if [[ $output_index != *"${bl_a[1]}"* ]] || [[ $3 != *"@"* ]] || [[ ${bl_a[@]:3} = *"${bkc}"* ]]
+		if [[ $output_index != *"${bmr_a[1]}"* ]] || [[ $3 != *"@"* ]] || [[ ${bmr_a[@]:3} = *"${bkc}"* ]]
 		then
-			output -a syntax "bl ${bl_a[0]} “-d” “${bkc}keyQwerry” “text arguments (cannot contain ${bkc})”"
+			output -a syntax "bmr ${bmr_a[0]} “-d” “${bkc}keyQwerry” “text arguments (cannot contain ${bkc})”"
 			output -d dataTypes ${output_index[@]}
 		else
 			if [[ ! -z $line ]]
 			then
-				if [ ${bl_a[0]} = "-ail" ]
+				if [ ${bmr_a[0]} = "-ail" ]
 				then
-					sed -i "/${bl_a[1]} ${bl_a[2]}/d" $log
-					echo "${line[*]} ${bl_a[*]:3}" | sed "s/\n//g" >> $log
+					sed -i "/${bmr_a[1]} ${bmr_a[2]}/d" $bmr_db
+					echo "${line[*]} ${bmr_a[*]:3}" | sed "s/\n//g" >> $bmr_db
 				else
-					for item in ${bl_a[@]:3}
+					for item in ${bmr_a[@]:3}
 					do
-						bl -sub ${bl_a[1]} ${bl_a[2]} $(echo "${line[*]}" | sed "s/$item//g")
+						bmr -sub ${bmr_a[1]} ${bmr_a[2]} $(echo "${line[*]}" | sed "s/$item//g")
 					done
 				fi
 			fi
 		fi
 	;;
 	"-ed") #edit a line, keeps the previous key
-		if [[ $output_index != *"${bl_a[1]}"* ]] || [[ $3 != *"${bkc}"* ]] || [[ ${bl_a[@]:3} = *"${bkc}"* ]]
+		if [[ $output_index != *"${bmr_a[1]}"* ]] || [[ $3 != *"${bkc}"* ]] || [[ ${bmr_a[@]:3} = *"${bkc}"* ]]
 		then
-			output -a syntax "bl ${bl_a[0]} “-d” “${bkc}keyQwerry” “text arguments (cannot contain ${bkc})”"
+			output -a syntax "bmr ${bmr_a[0]} “-d” “${bkc}keyQwerry” “text arguments (cannot contain ${bkc})”"
 			output -d dataTypes ${output_index[@]}
 		else
 			if [[ ! -z $line ]]
 			then
-				sed -i "/${bl_a[1]} ${bl_a[2]}/d" $log
-				echo "${bl_a[1]} ${bl_a[2]} ${bl_a[*]:3}" | sed "s/\n//g" >> $log
+				sed -i "/${bmr_a[1]} ${bmr_a[2]}/d" $bmr_db
+				echo "${bmr_a[1]} ${bmr_a[2]} ${bmr_a[*]:3}" | sed "s/\n//g" >> $bmr_db
 			fi
 		fi
 	;;
 	"-sub") #substitute the line
-		if [[ $output_index != *"${bl_a[1]}"* ]] || [[ ${bl_a[2]}  != "${bkc}"* ]] ||  [[ $output_index != *"$4"* ]] || [[ $5 != "${bkc}"* ]] || [[ ${bl_a[@]:5} = *"${bkc}"* ]] 
+		if [[ $output_index != *"${bmr_a[1]}"* ]] || [[ ${bmr_a[2]}  != "${bkc}"* ]] ||  [[ $output_index != *"$4"* ]] || [[ $5 != "${bkc}"* ]] || [[ ${bmr_a[@]:5} = *"${bkc}"* ]]
 		then
-			output -a syntax "bl ${bl_a[0]} “-d” “${bkc}keyQwerry” “-d” “${bkc}key” “text arguments (cannot contain ${bkc})”"
+			output -a syntax "bmr ${bmr_a[0]} “-d” “${bkc}keyQwerry” “-d” “${bkc}key” “text arguments (cannot contain ${bkc})”"
 			output -d dataTypes ${output_index[@]}
 		else
 			if [[ ! -z $line ]]
 			then
-				sed -i "/${bl_a[1]} ${bl_a[2]}/d" $log
-				echo "${bl_a[*]:3}" | sed "s/\n//g" >> $log
+				sed -i "/${bmr_a[1]} ${bmr_a[2]}/d" $bmr_db
+				echo "${bmr_a[*]:3}" | sed "s/\n//g" >> $bmr_db
 			fi
 		fi
 	;;
 	"-rm") #removes a especific type and key line
-		if  [[ $output_index != *"${bl_a[1]}"* ]] || [[ ${bl_a[2]}  != "${bkc}"* ]]
+		if  [[ $output_index != *"${bmr_a[1]}"* ]] || [[ ${bmr_a[2]}  != "${bkc}"* ]]
 		then
-			output -a syntax "bl ${bl_a[0]} “-d” “${bkc}key”"
+			output -a syntax "bmr ${bmr_a[0]} “-d” “${bkc}key”"
 			output -d dataTypes ${output_index[@]}
 		else
-			sed -i "/${bl_a[1]} ${bl_a[2]}/d" $log
+			sed -i "/${bmr_a[1]} ${bmr_a[2]}/d" $bmr_db
 		fi
 	;;
 	"-rma") #delete all key lines
-		if  [[ "${bl_a[1]}" != "${bkc}"* ]]
+		if  [[ "${bmr_a[1]}" != "${bkc}"* ]]
 		then
-			output -a syntax 'bl -del “${bkc}key”'
+			output -a syntax 'bmr -del “${bkc}key”'
 		else
-			sed -i "/${bl_a[1]}/d" $log
+			sed -i "/${bmr_a[1]}/d" $bmr_db
 		fi
 	;;
 	"-gl"|"-glf") #returns the line with the found value, -glf for remove @.
-		if  [[ $output_index != *"${bl_a[1]}"* ]] || [[ ${bl_a[2]}  != "${bkc}"* ]]
+		if  [[ $output_index != *"${bmr_a[1]}"* ]] || [[ ${bmr_a[2]}  != "${bkc}"* ]]
 		then
-			output -a syntax "bl ${bl_a[0]} “-d” “${bkc}key”"
+			output -a syntax "bmr ${bmr_a[0]} “-d” “${bkc}key”"
 			output -d dataTypes ${output_index[@]}
 		else
-			if [[ ${bl_a[0]} = "-gl" ]]
+			if [[ ${bmr_a[0]} = "-gl" ]]
 			then
-				[ ! -z $line ] && grep -- "${bl_a[1]} ${bl_a[2]}" $log
+				[ ! -z $line ] && grep -- "${bmr_a[1]} ${bmr_a[2]}" $bmr_db
 			else
-				[ ! -z $line ] && grep -- "${bl_a[1]} ${bl_a[2]}" $log | sed "s/${bkc}//" | sed "s/${date_f[0]}/ /" | sed "s/${bl_a[1]}//"
+				[ ! -z $line ] && grep -- "${bmr_a[1]} ${bmr_a[2]}" $bmr_db | sed "s/${bkc}//" | sed "s/${date_f[0]}/ /" | sed "s/${bmr_a[1]}//"
 			fi
 		fi
 	;;
 	"-gal") #returns all the key lines
-		if  [[ "${bl_a[1]}" != "${bkc}"* ]]
+		if  [[ "${bmr_a[1]}" != "${bkc}"* ]]
 		then
-			output -d "syntax" "bl ${bl_a[0]} “${bkc}key”"
+			output -d "syntax" "bmr ${bmr_a[0]} “${bkc}key”"
 		else
-			grep -- "${bl_a[1]}" $log
+			grep -- "${bmr_a[1]}" $bmr_db
 		fi
 	;;
 	"-gd") #returns only the data without type or key
-		if  [[ $output_index != *"${bl_a[1]}"* ]] || [[ ${bl_a[2]}  != "${bkc}"* ]]
+		if  [[ $output_index != *"${bmr_a[1]}"* ]] || [[ ${bmr_a[2]}  != "${bkc}"* ]]
 		then
-			output -a syntax "bl ${bl_a[0]} “-d” “${bkc}key”"
+			output -a syntax "bmr ${bmr_a[0]} “-d” “${bkc}key”"
 			output -d dataTypes ${output_index[@]}
 		else
 			[ ! -z $line ] && echo "${line[*]:2}"
@@ -854,8 +854,8 @@ cook(){
 		$elf recipe
 		$rex $bndid ${bnd_flags[@]}
 	fi
-	recipe_log=($(bl -gal '@$bndid '))
-	bl -rma '@$bndid '
+	recipe_log=($(bmr -gal '@$bndid '))
+	bmr -rma '@$bndid '
 	if [[ " ${recipe_log[@]} " = *" -a "* ]]
 	then
 		output -ahT "“$bndid$(bnd_parser -pbf)” Returned Alerts"
@@ -892,12 +892,12 @@ setup(){
 #Creating directories
 	output -hT "$name_upper installation"
 	sfm -d $pdir $bnd_dir $cfg $hlc $hsr
-	sfm -f $cfg_file $init_file $log
+	sfm -f $cfg_file $init_file $bmr_db
 	$cp $script $cmd_srcd/$name
 	$elf $cmd_srcd/$name
 #init file buid
 	$prt "source $cmd_srcd/$name" > $init_file
-	$prt 'export PS1="\\n“\w”\\n$(output -d $name)"\nalias q="exit 0"\nalias x="clear"\nalias c="$editor $cfg_file"\nalias i="$editor $init_file"\nalias r="$editor $pdir/release"\nalias l="$editor $log"\nalias h="$prt +\\n c: edit config\\n i: edit init\\n r: edit release\\n l: edit log\\n x: clear prompt\\n h: help\\n q: exit+"\nblog_verbose=1\nsfm_verbose=1' | tr '+' "'" >> $init_file
+	$prt 'export PS1="\\n“\w”\\n$(output -d $name)"\nalias q="exit 0"\nalias x="clear"\nalias c="$editor $cfg_file"\nalias i="$editor $init_file"\nalias r="$editor $pdir/release"\nalias l="$editor $bmr_db"\nalias h="$prt +\\n c: edit config\\n i: edit init\\n r: edit release\\n l: edit log\\n x: clear prompt\\n h: help\\n q: exit+"\nblog_verbose=1\nsfm_verbose=1' | tr '+' "'" >> $init_file
 #Package manager autodetect
 	output -p $name "Detecting Package Manager"
 	pma -qpm 2> .log
@@ -939,7 +939,7 @@ setup(){
 		qwerry_bnd -rU
 		output -hT "$name_upper instaled"
 	fi
-	bl -rgt @setup "$name target “$cmd_srcd”. pm=$pm, h=$h, u=$u, repo=$repo"
+	bmr -rgt @setup "$name target “$cmd_srcd”. pm=$pm, h=$h, u=$u, repo=$repo"
 }
 bmn_update(){
 	btest -env -root -master || return
@@ -961,7 +961,7 @@ bmn_update(){
 		output -d 'local' $script_src
 		$cp $script_src $pdir/
 	fi
-	bl -rgt @update "from “$script_src”."
+	bmr -rgt @update "from “$script_src”."
 	output -p $name 'Installing Script'
 	$mv "$pdir/$name.sh" $cmd_bin
 	$elf $cmd_bin
@@ -985,8 +985,8 @@ qwerry_bnd(){
 			output -d "dir" $lc_repo
 			$cp $lc_repo/release .
 		fi
-		bl -rm @release
-		bl -rgt @release $($cat $pdir/release)
+		bmr -rm @release
+		bmr -rgt @release $($cat $pdir/release)
 		output -hT "Repository Updated"
 		cd $current_dir
 	else #Until search bundles in current release file
@@ -1035,7 +1035,7 @@ enable_extras(){
 			output -p $name "Adding Flathub"
 			$flatpak_remote $flathub
 			output -hT "flatpak enabled"
-			bl -rgt @extras "“flatpak” enabled -> remote=“$flathub”, mode=“$fp_mode”."
+			bmr -rgt @extras "“flatpak” enabled -> remote=“$flathub”, mode=“$fp_mode”."
 		fi
 		if [ $i = snap ]
 		then
@@ -1085,7 +1085,7 @@ btest(){
 				ef=1 && [[ $0 = "bmn.sh" ]] && ef=0
 			;;
 			'-env')
-				[[ ! -d $pdir && ! -d $bnd_dir && ! -f $init_file && ! -f $log && ! -f $cfg_file ]] && err_out=${bterr[$err_type]} && ef=1
+				[[ ! -d $pdir && ! -d $bnd_dir && ! -f $init_file && ! -f $bmr_db && ! -f $cfg_file ]] && err_out=${bterr[$err_type]} && ef=1
 			;;
 		esac
 		[[ ! -z "${bterr[$err_type]}" && $ef = 1 ]] && output ${bterr[$err_type]}
@@ -1098,7 +1098,7 @@ live_shell(){
 	export current_dir=$(pwd)
 	cd $pdir
 	$ir bash --init-file $init_file
-	bl -rgt @bsh_login
+	bmr -rgt @bsh_login
 	cd $current_dir
 }
 null(){
