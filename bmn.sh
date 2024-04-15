@@ -73,7 +73,7 @@ bmn_data(){
 	init_file="$pdir/init"
 	lsh_init="$pdir/.lshrc"
 	cmd_srcd="/bin"
-	bmr_db="$pdir/.log"
+	bmr_db="$pdir/.globaldb"
 
 	#Flatpak Configuration
 	flathub="flathub https://flathub.org/repo/flathub.flatpakrepo"
