@@ -252,8 +252,10 @@ bmn_init(){
 	elif [[ ! -z $2 ]] && [[ $1 = '-rg' ]]
 	then
 		btest -env -root || return
+		bmn_old_bv=$blog_verbose ; blog_verbose=1
 		[[ "${args[1]}"  = "db="* ]] && bmr_db=$($prt ${args[1]} | sed "s/db=//" ) && unset args[1]
 		bmr ${args[@]:1}
+		blog_verbose=$bmn_old_bv
 	elif [[ $1 = '-h' ]] || [[ $1 = '--help' ]]
 	then
 		output 0
