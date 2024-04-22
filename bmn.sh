@@ -49,6 +49,7 @@ bmn_data(){
 	sus="/etc/sudoers"
 	xss="$rsr/xsessions"
 	wss="$rsr/wayland-sessions"
+	skel="$etc/skel"
 
 ## Script Variables : Change this variables broke bundle execution ##
 	#References
@@ -546,10 +547,7 @@ bmr_a=($@)
 				bmr_a[2]="${bmr_a[2]}$blog_date_str"
 			fi
 			echo "${bmr_a[*]:1}" | sed "s/\n//g" >> $bmr_db
-			if [[ $blog_verbose = 1 ]]
-			then
-				output $(echo "${bmr_a[*]:1}" | sed "s/${bkc}//g")
-			fi
+			[[ $blog_verbose = 1 ]] && output -s "bmr" "Line “$(echo "${bmr_a[*]:1}")” registered"
 		fi
 	;;
 	"-srg"|"-srgt") # safe register, if there is data replace it with the newest one.
@@ -569,6 +567,7 @@ bmr_a=($@)
 				sed -i "/${bmr_a[1]} ${bmr_a[2]}/d" $bmr_db
 				echo "${bmr_a[*]:1}" | sed "s/\n//g" >> $bmr_db
 			fi
+			[[ $blog_verbose = 1 ]] && output -s "bmr" "Safe line “$(echo "${bmr_a[*]:1}")” registered"
 		fi
 	;;
 	"-ail"|"-ril") #add and remove items in a line 
@@ -583,11 +582,20 @@ bmr_a=($@)
 				then
 					sed -i "/${bmr_a[1]} ${bmr_a[2]}/d" $bmr_db
 					echo "${line[*]} ${bmr_a[*]:3}" | sed "s/\n//g" >> $bmr_db
+					[[ $blog_verbose = 1 ]] && output -s "bmr" "Added “${bmr_a[*]:3}” in line “${line[*]}”"
 				else
+					bmr_last_bv=$blog_verbose
+					bmr_last_line="${line[*]}"
+					bmr_irm="${bmr_a[*]:3}"
+					blog_verbose=0
 					for item in ${bmr_a[@]:3}
 					do
-						bmr -sub ${bmr_a[1]} ${bmr_a[2]} $(echo "${line[*]}" | sed "s/$item//g")
+						[[ -z $sbl ]] && sbl="${line[*]:2}"
+						sbl="$(echo "$sbl" | sed "s/$item//")"
 					done
+					bmr -sub ${bmr_a[1]} ${bmr_a[2]} ${bmr_a[1]} ${bmr_a[2]} $sbl
+					blog_verbose=$bmr_last_bv
+					[[ $blog_verbose = 1 ]] && output -s "bmr" "Removed “$bmr_irm” in line “$bmr_last_line”"
 				fi
 			fi
 		fi
@@ -602,6 +610,7 @@ bmr_a=($@)
 			then
 				sed -i "/${bmr_a[1]} ${bmr_a[2]}/d" $bmr_db
 				echo "${bmr_a[1]} ${bmr_a[2]} ${bmr_a[*]:3}" | sed "s/\n//g" >> $bmr_db
+				[[ $blog_verbose = 1 ]] && output -s "bmr" "Line “${line[1]}” edited : [${line[@]:2}] >> [${bmr_a[*]:3}]"
 			fi
 		fi
 	;;
@@ -615,6 +624,7 @@ bmr_a=($@)
 			then
 				sed -i "/${bmr_a[1]} ${bmr_a[2]}/d" $bmr_db
 				echo "${bmr_a[*]:3}" | sed "s/\n//g" >> $bmr_db
+				[[ $blog_verbose = 1 ]] && output -s "bmr" "Line “${line[@]}” substituted to “$(echo "${bmr_a[*]:3}")”"
 			fi
 		fi
 	;;
@@ -625,6 +635,7 @@ bmr_a=($@)
 			output -d dataTypes ${output_index[@]}
 		else
 			sed -i "/${bmr_a[1]} ${bmr_a[2]}/d" $bmr_db
+			[[ $blog_verbose = 1 ]] && output -a "bmr" "Line “${line[@]}” removed"
 		fi
 	;;
 	"-rma") #delete all key lines
@@ -633,6 +644,7 @@ bmr_a=($@)
 			output -a syntax 'bmr -del “${bkc}key”'
 		else
 			sed -i "/${bmr_a[1]}/d" $bmr_db
+			[[ $blog_verbose = 1 ]] && output -a "bmr" "All lines with the key “${bmr_a[1]}” removed"
 		fi
 	;;
 	"-gl"|"-glf") #returns the line with the found value, -glf for remove @.
