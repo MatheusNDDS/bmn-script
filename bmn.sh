@@ -286,7 +286,7 @@ out_a=($*)
 	[[ $1 = '-p' ]]    || [[ $1 = '-qi' ]] && t['-p']="\033[01;35m [$2]: -=- $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") -=-\033[00m" #Process
 	[[ $1 = '-l' ]]    || [[ $1 = '-qi' ]] && t['-l']="\033[01m $2[ $($prt $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")|tr ' ' ', ') ]\033[00m " #List itens
 	[[ $1 = '-hT' ]]   || [[ $1 = '-qi' ]] &&  t['-hT']="\n\033[01;36m******** [ ${out_a[*]:1} ] ********\033[00m\n" #High Title
-	[[ $1 = '-ahT' ]]  || [[ $1 = '-qi' ]] &&  t['-ahT']="\n\033[01;33m******** / ${out_a[*]:1} / ********\033[00m\n" #Alert High Title
+	[[ $1 = '-ahT' ]]  || [[ $1 = '-qi' ]] &&  t['-ahT']="\n\033[01;33m******** // ${out_a[*]:1} // ********\033[00m\n" #Alert High Title
 	[[ $1 = '-shT' ]]  || [[ $1 = '-qi' ]] &&  t['-shT']="\n\033[01;31m******** ( ${out_a[*]:1} ) ********\033[00m\n" #Sucess High Title
 	[[ $1 = '-ehT' ]]  || [[ $1 = '-qi' ]] &&  t['-ehT']="\n\033[01;31m*#*#*#*# { $( echo "${out_a[*]:1}" | tr [:lower:] [:upper:]) } #*#*#*#*\033[00m\n" #Error High Title
 	[[ $1 = '-T' ]]    || [[ $1 = '-qi' ]] &&  t['-T']="\n\033[01;36m ## ${out_a[*]:1} ##\033[00m\n" #Title
@@ -425,6 +425,7 @@ pma_a=($*)
 sfm(){
 sfm_a=($*)
 	btest -master && sysdbl=( 'UNRESTR' )
+	btest -master && smf_verbose=0 || sfm_verbose=1
 	sysdbl=(/ $pdir $pdir/*);for bldir in ${sysdbl[@]};do sysdbl+="$bldir/ ";done
 	rootfs_dirs=(/*)
 	rootfs_dirs2=($(for bldir in ${rootfs_dirs[@]};do $prt "$bldir/ ";done))
@@ -493,7 +494,7 @@ bmr_a=($@)
 	line=($(grep -- "${bmr_a[1]} ${bmr_a[2]}" $bmr_db))
 	output_index="$(output -qi)"
 	blog_date_str="${date_f[0]}$(date +${date_f[1]})"
-	
+	btest -master && blog_verbose=0 || blog_verbose=1
 	case $1 in
 		'-rg'|'-rgt'|'-srg'|'-srgt'|'-gl'|'-glf'|'-gd'|'-rm'|'-o')
 			if [[  $output_index != *"$2"* ]]
@@ -866,14 +867,24 @@ cook(){
 	btest -env -master || return
 	bndid=$1
 	cd $bndid/
+
+	## Auto writing file systems
+	[[ -e rootfs ]] && output -p $name "Writing “$bndid” root file system" && $cp rootfs/* rootfs/.* / 2> $dnull
+	[[ -e homefs ]] && output -p $name "Writing “$bndid” home file system" && $cp homefs/* homefs/.* $h/ 2> $dnull
+
+	## Packages installation
 	pkg_install
+
+	## Recipe file process
 	if [ -e recipe ]
 	then
 		output -hT "Executing “$bndid$(bnd_parser -pbf)” Recipe"
 		$elf recipe
 		$rex $bndid ${bnd_flags[@]}
 	fi
-	recipe_log=($(bmr -gal '@$bndid '))
+
+	## Verify alerts in BMR Database
+	recipe_log=($(bmr -gal "@$bndid "))
 	bmr -rma '@$bndid '
 	if [[ " ${recipe_log[@]} " = *" -a "* ]]
 	then
@@ -916,7 +927,7 @@ setup(){
 	$elf $cmd_srcd/$name
 #init file buid
 	$prt "source $cmd_srcd/$name" > $init_file
-	$prt 'export PS1="\\n“\w”\\n$(output -d $name)"\nalias q="exit 0"\nalias x="clear"\nalias c="$editor $cfg_file"\nalias i="$editor $init_file"\nalias r="$editor $pdir/release"\nalias l="$editor $bmr_db"\nalias h="$prt +\\n c: edit config\\n i: edit init\\n r: edit release\\n l: edit log\\n x: clear prompt\\n h: help\\n q: exit+"\nblog_verbose=1\nsfm_verbose=1' | tr '+' "'" >> $init_file
+	$prt 'export PS1="\\n“\w”\\n$(output -d $name)"\nalias q="exit 0"\nalias x="clear"\nalias c="$editor $cfg_file"\nalias i="$editor $init_file"\nalias r="$editor $pdir/release"\nalias l="$editor $bmr_db"\nalias h="$prt +\\n c: edit config\\n i: edit init\\n r: edit release\\n l: edit log\\n x: clear prompt\\n h: help\\n q: exit+"' | tr '+' "'" >> $init_file
 #Package manager autodetect
 	output -p $name "Detecting Package Manager"
 	pma -qpm 2> .log
