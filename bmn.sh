@@ -31,7 +31,7 @@ bmn_data(){
 	#Redirect points
 	d0="/dev/0"
 	dnull="/dev/null"
-	tmpf="/tmp/$(date | tr ' :-' "$(date)")" #generate a unique temporary file
+	tmpf="/tmp/$$" #generate a unique temporary file
 	
 	#Directorys collection
 	rsr="/usr/share" #root share
@@ -101,21 +101,21 @@ bmn_data(){
 }
 bmn_init(){
 	bmn_data $*
-	btest -master || return
+	btest -master || return 1
 	$mkd $lc_dir $bnd_dir && $cho -R root:root $lc_dir &> $dnull
 	if [[ $1 = '-i' ]] || [[ $1 = '--install' ]]
 	then
-		btest -env -root || return
+		btest -env -root || return 1
 		for i in ${args[@]:1}
 		do
 			bnd_parser $i
-			if [[ "${release[@]}" = *"$bndf "* ]] || [[ ${release[0]} = $bndf ]] || [[ ${release[-1]} = $bndf ]] #checks if the bundle exists in the repository.
+			if [[ " ${release[@]} " = *" $bndf "* ]] #checks if the bundle exists in the repository release.
 			then
 				output -hT "Configuring “$bnd_name$(bnd_parser -pbf)”"
 				$rm $bnd_dir/$bnd_name
 				cd $bnd_dir/
-				download $bnd_name 0
-				unpack $bnd_name
+				download $bnd_name 0 || return 1
+				unpack $bnd_name  || return 1
 				cook $bnd_name ${bnd_flags[@]}
 				$rm $bnd_dir/$bnd_name
 				lc_inst=0
@@ -124,9 +124,9 @@ bmn_init(){
 				output -d i "Maybe the relese file has outdated, try “$name -rU”."
 			fi
 		done
-	elif [[ $1 = '-li' ]] || [[ $1 = '--lc-install' ]] && [[ ! -z "${args[@]:3}" ]]
+	elif [[ $1 = '-li' ]] || [[ $1 = '--lc-install' ]] && [[ ! -z "${args[@]:1}" ]]
 	then
-		btest -env -root || return
+		btest -env -root || return 1
 		bnd_ignore=()
 		output -hT "Importing bundles"
 		for i in ${args[@]:1}
@@ -137,7 +137,7 @@ bmn_init(){
 				if [ -f $bndf ]
 				then
 					output -p $name "Importing “$bnd_name”"
-					$cp $bndf $bnd_dir/
+					$cp $bndf $bnd_dir/ || return 1
 				else
 					output -a $name "File “$i” does not exists"
 					bnd_ignore+=($i)
@@ -155,7 +155,7 @@ bmn_init(){
 				output -hT "Configuring “$bnd_name$(bnd_parser -pbf)”"
 				$rm $bnd_dir/$bnd_name
 				cd $bnd_dir/
-				unpack $bnd_name
+				unpack $bnd_name || return 1
 				cook $bnd_name ${bnd_flags[@]}
 				$rm $bnd_dir/$bnd_name
 				lc_inst=0
@@ -163,7 +163,7 @@ bmn_init(){
 		done
 	elif [[ $1 = '-di' ]] || [[ $1 = '--dir-install' ]] && [[ ! -z "${args[@]:1}" ]]
 	then
-		btest -env -root || return
+		btest -env -root || return 1
 		bnd_ignore=()
 		output -hT "Importing dir bundles"
 		for i in ${args[@]:1}
@@ -172,7 +172,8 @@ bmn_init(){
 			if [ -d $bndf ]
 			then
 				output -p $name "Importing “$bnd_name”"
-				$cp $bndf $bnd_dir/
+				$cp $bndf $bnd_dir/ || return 1
+				output -l "files" $(ls $bnd_dir/$bnd_name/)
 			else
 				output -a $name "Directory “$bnd_name” does not exists"
 				bnd_ignore+=($i)
@@ -251,7 +252,7 @@ bmn_init(){
 		bmr -gd ${args[@]:1}
 	elif [[ ! -z $2 ]] && [[ $1 = '-rg' ]]
 	then
-		btest -env -root || return
+		btest -env -root || return 1
 		bmn_old_bv=$blog_verbose ; blog_verbose=1
 		[[ "${args[1]}"  = "db="* ]] && bmr_db=$($prt ${args[1]} | sed "s/db=//" ) && unset args[1]
 		bmr ${args[@]:1}
@@ -265,6 +266,18 @@ bmn_init(){
 		output 0
 		output 1
 		output 2
+	elif [[ $1 = '-c' ]] || [[ $1 = '--clean' ]]
+	then
+		btest -env -root || return 1
+		bmn_invbnds="$(ls $bnd_dir/)"
+		if [[ ! -z "$bmn_invbnd" ]]
+		then
+			output -p $name "Cleaning invalid bundles residues"
+			output -l "bnds" $bmn_invbnds
+			$rm $bnd_dir/*
+		else
+			output -s $name "No invalid b bundles found"
+		fi
 	elif [[ $1 = '-sh' ]] || [[ "$1" = '--live-shell' ]]
 	then
 		live_shell
@@ -278,7 +291,7 @@ out_a=($*)
 	declare -A t
 	[[ $1 = 0 ]] && t[0]="\033[01;36m-=/Automation Bundles Manager/=-\033[00m \n~ MatheusNDDS : https://github.com/MatheusNDDS\n"
 	[[ $1 = 1 ]] && t[1]="\033[01;33m[Properties]\033[00m\n User: $u\n Home: $h\n PkgM: $pm\n Repo: $repo"
-	[[ $1 = 2 ]] && t[2]="\033[01;33m[Commands]\033[00m\n$(output -t "Bundles managment")\n --install,-i : Install bundles from repository, use “-iu” to update $pm packages during installation.\n --lc-install,-li : Install bundles from $file_format file path, use “-liu” to update $pm packages during installation.\n --dir-install,-di : Install bundles from unpacked dir path, use “-diu” to update $pm packages during installation.\n --dowload,-bdl : Download bundles from repository.\n --list-bnds,-l : List or search for bundles in repo file.\n --repo-update,-rU : Update repository release file, use this regularly.\n\n$(output -t "Script tools")\n --$name-update,-U : Update $name script from Repo source or local script.\n --bnd-pack, -bp : Pack a bundle from a directory.\n --live-shell,-sh : Run live shell for testing $name functions.\n --properties,-p : Prints the user information that $name uses.\n\n$(output -t "BMN Register commands")\n Use “db=yourdbfile” in second argument to change database file.\n -rl : Read a Line.\n -rd : Read a line data only.\n -rg : Register and alter a line or use other BMR functions.\n\n --help,-h : Print help text."
+	[[ $1 = 2 ]] && t[2]="\033[01;33m[Commands]\033[00m\n$(output -t "Bundles managment")\n --install,-i : Install bundles from repository, use “-iu” to update $pm packages during installation.\n --lc-install,-li : Install bundles from $file_format file path, use “-liu” to update $pm packages during installation.\n --dir-install,-di : Install bundles from unpacked dir path, use “-diu” to update $pm packages during installation.\n --dowload,-bdl : Download bundles from repository.\n --list-bnds,-l : List or search for bundles in repo file.\n --repo-update,-rU : Update repository release file, use this regularly.\n --clean,-c : Clean invalid bundles residues.\n\n$(output -t "Script tools")\n --$name-update,-U : Update $name script from Repo source or local script.\n --bnd-pack, -bp : Pack a bundle from a directory.\n --live-shell,-sh : Run live shell for testing $name functions.\n --properties,-p : Prints the user information that $name uses.\n\n$(output -t "BMN Register commands")\n Use “db=yourdbfile” in second argument to change database file.\n -rl : Read a Line.\n -rd : Read a line data only.\n -rg : Register and alter a line or use other BMR functions.\n\n --help,-h : Print help text."
 	[[ $1 = 3 ]] && t[3]="bndp_a=(${bndp_a[*]})\nbndf=$bndf\nbnd_raw_name=$bnd_raw_name\nbnd_pre_name=(${bnd_pre_name[*]})\nbnd_name=$bnd_name\nflags=(${bnd_flags[*]})"
 
 ## Formatting arguments
@@ -735,15 +748,10 @@ pkg_parser(){
 }
 pkg_install(){
 	## Distro Pkgs
-	if [[ -z $1 ]]
-	then
-		pkg_parser parse packages
-	else
-		pkg_parser parse $1/packages
-	fi
+	[[ -z $1 ]] && pkg_parser parse packages || pkg_parser parse $1/packages
 	if [ $pkg_flag != "null" ]
 	then
-		$pnl && output -p $pm "Installing Packages"
+		output -p $pm "Installing Packages"
 		pkg_parser list_pkgs
 		if [[ $pm_update = 1 ]]
 		then
@@ -777,15 +785,10 @@ pkg_install(){
 		pkg_parser clean
 	fi
 	## Flatpaks
-	if [[ -z $1 ]]
-	then
-		pkg_parser parse flatpaks
-	else
-		pkg_parser parse $1/flatpaks
-	fi
+	[[ -z $1 ]] && pkg_parser parse flatpaks || pkg_parser parse $1/flatpaks
 	if [ $pkg_flag != "null" ]
 	then
-		$pnl && output -p Flatpak "Installing Flatpaks"
+		$pnl ; output -p Flatpak "Installing Flatpaks"
 		pkg_parser list_pkgs
 		if [[ $pm_update = 1 ]]
 		then
@@ -840,12 +843,12 @@ bndp_a=($($prt $1|sed "s/:/ /"))
 	esac
 }
 download(){
-	btest -env -master || return
+	btest -env -master || return 1
 	$rm $1.$file_format
 	if [ $lc_repo = 0 ] || [ $2 = 1 ]
 	then
 		output -p $name "Downloading “$1”"
-		btest -net || return
+		btest -net || return 1
 		$dl $repo/$1.$file_format
 	else
 		output -p $name "Importing “$1”"
@@ -855,7 +858,7 @@ download(){
 	output -l "files" "$(ls . | grep $1.$file_format)"
 }
 unpack(){
-	btest -env -master || return
+	btest -env -master || return 1
 	output -p $name "Unpacking “$1”"
 	$rm $1/
 	$mkd $1/
@@ -864,7 +867,7 @@ unpack(){
 	output -l "files" "$(ls $bnd_dir/$1/)"
 }
 cook(){
-	btest -env -master || return
+	btest -env -master || return 1
 	bndid=$1
 	cd $bndid/
 
@@ -873,6 +876,7 @@ cook(){
 	[[ -e homefs ]] && output -p $name "Writing “$bndid” home file system" && $cp homefs/* homefs/.* $h/ 2> $dnull
 
 	## Packages installation
+	[[ -f packages ]] || [[ -f flatpaks ]] && output -hT "Installing “$bnd_name” packages"
 	pkg_install
 
 	## Recipe file process
@@ -910,7 +914,7 @@ bnd_pack(){
 
 ## Script Management
 setup(){
-	btest -root -installer || return
+	btest -root -installer || return 1
 #Detect custom bin path
 	if [[ $2 = *"srcd="* ]]
 	then
@@ -972,7 +976,7 @@ setup(){
 	bmr -rgt @setup "$name target “$cmd_srcd”. pm=$pm, h=$h, u=$u, repo=$repo"
 }
 bmn_update(){
-	btest -env -root -master || return
+	btest -env -root -master || return 1
 	output -hT "Updating $name_upper Script"
 	bin_srcd=($(cat $init_file))
 	cmd_bin=${bin_srcd[1]}
@@ -980,7 +984,7 @@ bmn_update(){
 	then
 		current_dir=$(pwd)
 		output -p $name 'Downloading Script'
-		btest -net || return
+		btest -net || return 1
 		output -d 'Source' $script_src
 		cd $pdir
 		$dl $script_src
@@ -1000,7 +1004,7 @@ bmn_update(){
 qwerry_bnd(){
 	if [[ $1 = '-rU' ]] #Condition for update release file
 	then
-		btest -env -root || return
+		btest -env -root || return 1
 		current_dir=$(pwd)
 		output -hT "Updating Repository"
 		cd $pdir
@@ -1008,7 +1012,7 @@ qwerry_bnd(){
 		if [ $lc_repo = 0 ]
 		then
 			output -p $name "Downloading Release"
-			btest -net || return
+			btest -net || return 1
 			$dl $repo/release
 		else
 			output -p $name "Importing Release"
@@ -1024,7 +1028,7 @@ qwerry_bnd(){
 		if [[ ! -e $pdir/release ]]
 		then
 			output -e "Error / No release file' 'Use “$name -rU” to download."
-			return
+			return 1
 		fi
 		## Bundles list and search output
 		rel_h=()
@@ -1054,7 +1058,7 @@ qwerry_bnd(){
 	fi
 }
 enable_extras(){
-	btest -net -root || return
+	btest -net -root || return 1
 	for i in $*
 	do
 		if [ $i = flatpak ]
@@ -1124,7 +1128,7 @@ btest(){
 	return $ef
 }
 live_shell(){
-	btest -env -root -master || return
+	btest -env -root -master || return 1
 	export current_dir=$(pwd)
 	cd $pdir
 	$ir bash --init-file $init_file
