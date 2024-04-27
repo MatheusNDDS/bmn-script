@@ -184,7 +184,7 @@ bmn_init(){
 			if [[ ${bnd_ignore[*]} != *"$i"* ]]
 			then
 				bnd_parser $i
-				output -hT "Configuring “$bnd_name$(bnd_parser -pbf)”"
+				$pnl ; output -hT "Configuring “$bnd_name$(bnd_parser -pbf)”"
 				cd $bnd_dir/
 				cook $bnd_name ${bnd_flags[@]}
 				$rm $bnd_dir/$bnd_name
