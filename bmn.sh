@@ -100,7 +100,6 @@ bmn_data(){
 	set_owner_forced="$set_owner $(echo $h/.* $h/* | sed s/$(echo $lc_dir | sed s/'\/'/'\\\/'/g)//) &> $dnull" #force $set_owner in entire $HOME (slow)
 }
 bmn_init(){
-	bmn_data $*
 	btest -master || return 1
 	$mkd $lc_dir $bnd_dir && $cho -R root:root $lc_dir &> $dnull
 	if [[ $1 = '-i' ]] || [[ $1 = '--install' ]]
@@ -184,7 +183,7 @@ bmn_init(){
 			if [[ ${bnd_ignore[*]} != *"$i"* ]]
 			then
 				bnd_parser $i
-				$pnl ; output -hT "Configuring “$bnd_name$(bnd_parser -pbf)”"
+				output -hT "Configuring “$bnd_name$(bnd_parser -pbf)”"
 				cd $bnd_dir/
 				cook $bnd_name ${bnd_flags[@]}
 				$rm $bnd_dir/$bnd_name
@@ -253,10 +252,8 @@ bmn_init(){
 	elif [[ ! -z $2 ]] && [[ $1 = '-rg' ]]
 	then
 		btest -env -root || return 1
-		bmn_old_bv=$blog_verbose ; blog_verbose=1
 		[[ "${args[1]}"  = "db="* ]] && bmr_db=$($prt ${args[1]} | sed "s/db=//" ) && unset args[1]
 		bmr ${args[@]:1}
-		blog_verbose=$bmn_old_bv
 	elif [[ $1 = '-h' ]] || [[ $1 = '--help' ]]
 	then
 		output 0
@@ -277,6 +274,17 @@ bmn_init(){
 			$rm $bnd_dir/*
 		else
 			output -s $name "No invalid b bundles found"
+		fi
+	elif [[ $1 = '-api' ]]
+	then
+		btest -env -api || return 1
+		if [[ $2 = 'bmr' ]]
+		then
+			btest -root || return 1
+			[[ "${args[2]}"  = "db="* ]] && bmr_db=$($prt ${args[2]} | sed "s/db=//" ) && unset args[2]
+			bmr ${args[@]:2}
+		else
+			$2 ${args[@]:2}
 		fi
 	elif [[ $1 = '-sh' ]] || [[ "$1" = '--live-shell' ]]
 	then
@@ -334,6 +342,13 @@ pma_a=($*)
 	pm_s[apt]="search"
 	pm_u[apt]="update"
 	pm_g[apt]="upgrade"
+##apt##
+	pm_i['nix-env']="-iA"
+	pm_r['nix-env']="-e"
+	pm_l['nix-env']="--qwery --installed"
+	pm_s['nix-env']="--qwery --avaliable"
+	pm_u['nix-env']="--upgrade"
+	pm_g['nix-env']=0
 ##pacman##
 	pm_i[pacman]="-S"
 	pm_r[pacman]="-Rs"
@@ -351,7 +366,7 @@ pma_a=($*)
 ##slackpkg##
 	pm_i[slackpkg]=@
 	pm_r[slackpkg]=@
-	pm_l[slackpkg]="| null ; ls /var/log/packages"
+	pm_l[slackpkg]="2> $dnull ; ls /var/log/packages"
 	pm_s[slackpkg]=@
 	pm_u[slackpkg]="upgrade"
 	pm_g[slackpkg]=0
@@ -371,7 +386,7 @@ pma_a=($*)
 	pm_g[apx]=@
 	
 	## options for pma ##
-	if [ $1 = "-qpm" ] #Qwerry Package Manager
+	if [[ $1 = "-qpm" ]] #Qwerry Package Manager
 	then
 		bin_dirs=($(echo $PATH | tr ':' ' '))
 		for dir in ${bin_dirs[@]}
@@ -385,50 +400,50 @@ pma_a=($*)
 				pm_detected=$pmc
 			fi
 		done
-	elif [ $1 = "-i" ] # Install
+	elif [[ $1 = "-i" ]] # Install
 	then
-		if [ "${pm_i[$pm]}" = "@" ]
+		if [[ "${pm_i[$pm]}" = "@" ]]
 		then
 			$r $pm ${pm_i[apt]} ${pkgs} -y
 		else
 			$r $pm ${pm_i[$pm]} ${pkgs} -y
 		fi 
-	elif [ $1 = "-r" ] # Remove
+	elif [[ $1 = "-r" ]] # Remove
 	then
-		if [ "${pm_r[$pm]}" = "@" ]
+		if [[ "${pm_r[$pm]}" = "@" ]]
 		then
 			$r $pm ${pm_r[apt]} ${pkgs} -y
 		else
 			$r $pm ${pm_r[$pm]} ${pkgs} -y
 		fi
-	elif [ $1 = '-s' ] # Search
+	elif [[ $1 = '-s' ]] # Search
 	then
-		if [ "${pm_s[$pm]}" = "@" ]
+		if [[ "${pm_s[$pm]}" = "@" ]]
 		then
 			$r $pm ${pm_s[apt]} ${pkgs}
 		else
 			$r $pm ${pm_s[$pm]} ${pkgs}
 		fi 
-	elif [ $1 = "-l" ] # List installed
+	elif [[ $1 = "-l" ]] # List installed
 	then
-		if [ "${pm_l[$pm]}" = "@" ]
+		if [[ "${pm_l[$pm]}" = "@" ]]
 		then
 			$r $pm ${pm_l[apt]}
 		else
 			$r $pm ${pm_l[$pm]}
 		fi 
-	elif [ $1 = "-u" ] # Update and Upgrade
+	elif [[ $1 = "-u" ]] # Update and Upgrade
 	then
-		if [ "${pm_u[$pm]}" = "@" ]
+		if [[ "${pm_u[$pm]}" = "@" ]]
 		then
 			$r $pm ${pm_u[apt]} -y
-			if [ ${pm_g[$pm]} != 0 ]
+			if [[ ${pm_g[$pm]} != 0 ]]
 			then
 				$r $pm ${pm_g[apt]} -y
 			fi
 		else
 			$r $pm ${pm_u[$pm]} -y
-			if [ ${pm_g[$pm]} != 0 ]
+			if [[ ${pm_g[$pm]} != 0 ]]
 			then
 				$r $pm ${pm_g[$pm]} -y
 			fi
@@ -437,9 +452,9 @@ pma_a=($*)
 }
 sfm(){
 sfm_a=($*)
+	sysdbl=(/ $pdir $pdir/*);for bldir in ${sysdbl[@]};do sysdbl+="$bldir/ ";done
 	btest -master && sysdbl=( 'UNRESTR' )
 	btest -master && smf_verbose=0 || sfm_verbose=1
-	sysdbl=(/ $pdir $pdir/*);for bldir in ${sysdbl[@]};do sysdbl+="$bldir/ ";done
 	rootfs_dirs=(/*)
 	rootfs_dirs2=($(for bldir in ${rootfs_dirs[@]};do $prt "$bldir/ ";done))
 	rootfs_dirs3=($($prt ${rootfs_dirs[@]} | tr '/' ' '))
@@ -915,6 +930,8 @@ bnd_pack(){
 ## Script Management
 setup(){
 	btest -root -installer || return 1
+	unset pm u h repo lc_repo
+	source config
 #Detect custom bin path
 	if [[ $2 = *"srcd="* ]]
 	then
@@ -933,9 +950,15 @@ setup(){
 	$prt "source $cmd_srcd/$name" > $init_file
 	$prt 'export PS1="\\n“\w”\\n$(output -d $name)"\nalias q="exit 0"\nalias x="clear"\nalias c="$editor $cfg_file"\nalias i="$editor $init_file"\nalias r="$editor $pdir/release"\nalias l="$editor $bmr_db"\nalias h="$prt +\\n c: edit config\\n i: edit init\\n r: edit release\\n l: edit log\\n x: clear prompt\\n h: help\\n q: exit+"' | tr '+' "'" >> $init_file
 #Package manager autodetect
-	output -p $name "Detecting Package Manager"
-	pma -qpm 2> .log
-	output -t "Package Manager : $pm_detected"
+	if [[ -z $pm ]]
+	then
+		output -p $name "Detecting Package Manager"
+		pma -qpm 2> .log
+		pm=$pm_detected
+	else
+		output -p $name "Custom Package Manager from “config”"
+	fi
+	output -t "Package Manager : $pm"
 #Detecting home and user
 	output -p $name "Detecting Home Directory and User"
 	detect_user_props
@@ -944,7 +967,6 @@ setup(){
 	output -a ATTENTION "If you run this program outside your home directory the directory defined in this setup will be used."
 #Installing dependencies
 	output -p $name "Installing Dependencies"
-	pm=$pm_detected
 	pma -u
 	for i in ${deps[@]}
 	do
@@ -956,7 +978,7 @@ setup(){
 	then
 		if [ -e config ]
 		then
-			$prt "pm=$pm_detected h=$h u=$u \n$(cat config)" > $cfg_file
+			$prt "pm=$pm h=$h u=$u \nrepo=$repo \nlc_repo=$lc_repo" > $cfg_file
 			$src $cfg_file
 #Downloading repository releas
 			qwerry_bnd -rU
@@ -967,7 +989,7 @@ setup(){
 			exit 1
 		fi
 	else
-		$prt "pm=$pm_detected h=$h u=$u \nrepo=$2 \nlc_repo=0" > $cfg_file
+		$prt "pm=$pm h=$h u=$u \nrepo=$2 \nlc_repo=0" > $cfg_file
 		$src $cfg_file
 #Downloading repository release
 		qwerry_bnd -rU
@@ -1096,6 +1118,7 @@ btest(){
 	bterr['-root']="-ahT “ $name $cmd ” needs root privileges"
 	bterr['-net']="-ehT No internet connection"
 	bterr['-env']="-ahT BMN environment not correctly configured"
+	bterr['-api']="-ahT Invalid “${args[1]}” api call"
 	ef=0
 	
 	## Tests
@@ -1121,6 +1144,9 @@ btest(){
 			'-env')
 				[[ ! -d $pdir && ! -d $bnd_dir && ! -f $init_file && ! -f $bmr_db && ! -f $cfg_file ]] && err_out=${bterr[$err_type]} && ef=1
 			;;
+			'api')
+				[[ ${args[1]} != 'pma' || ${args[1]} != 'output' || ${args[1]} != 'bmr' ]] && ef=1
+			;;
 		esac
 		[[ ! -z "${bterr[$err_type]}" && $ef = 1 ]] && output ${bterr[$err_type]}
 		[[ $ef = 1 ]] && return $ef
@@ -1140,4 +1166,4 @@ null(){
 }
 
 ### Program Start ###
-bmn_init $*
+bmn_data $* && bmn_init $*
