@@ -34,6 +34,7 @@ bmn_data(){
 	tmpf="/tmp/$$" #generate a unique temporary file
 	
 	#Directorys collection
+	bin="/usr/bin"
 	rsr="/usr/share" #root share
 	rlc="/usr/local" #root local
 	hsr="$h/.local/share" #home share
