@@ -300,7 +300,7 @@ out_a=($*)
 	declare -A t
 	[[ $1 = 0 ]] && t[0]="\033[01;36m-=/Automation Bundles Manager/=-\033[00m \n~ MatheusNDDS : https://github.com/MatheusNDDS\n"
 	[[ $1 = 1 ]] && t[1]="\033[01;33m[Properties]\033[00m\n User: $u\n Home: $h\n PkgM: $pm\n Repo: $repo"
-	[[ $1 = 2 ]] && t[2]="\033[01;33m[Commands]\033[00m\n$(output -t "Bundles managment")\n --install,-i : Install bundles from repository, use “-iu” to update $pm packages during installation.\n --lc-install,-li : Install bundles from $file_format file path, use “-liu” to update $pm packages during installation.\n --dir-install,-di : Install bundles from unpacked dir path, use “-diu” to update $pm packages during installation.\n --dowload,-bdl : Download bundles from repository.\n --list-bnds,-l : List or search for bundles in repo file.\n --repo-update,-rU : Update repository release file, use this regularly.\n --clean,-c : Clean invalid bundles residues.\n\n$(output -t "Script tools")\n --$name-update,-U : Update $name script from Repo source or local script.\n --bnd-pack, -bp : Pack a bundle from a directory.\n --live-shell,-sh : Run live shell for testing $name functions.\n --properties,-p : Prints the user information that $name uses.\n\n$(output -t "BMN Register commands")\n Use “db=yourdbfile” in second argument to change database file.\n -rl : Read a Line.\n -rd : Read a line data only.\n -rg : Register and alter a line or use other BMR functions.\n\n --help,-h : Print help text."
+	[[ $1 = 2 ]] && t[2]="\033[01;33m[Commands]\033[00m\n$(output -t "Bundles managment")\n --install,-i : Install bundles from repository, use “-iu” to update $pm packages during installation.\n --lc-install,-li : Install bundles from $file_format file path, use “-liu” to update $pm packages during installation.\n --dir-install,-di : Install bundles from unpacked dir path, use “-diu” to update $pm packages during installation.\n --dowload,-bdl : Download bundles from repository.\n --list-bnds,-l : List or search for bundles in repo file.\n --repo-update,-rU : Update repository release file, use this regularly.\n --clean,-c : Clean invalid bundles residues.\n\n$(output -t "Script tools")\n --$name-update,-U : Update $name script from Repo source or local script.\n --bnd-pack, -bp : Pack a bundle from a directory.\n --live-shell,-sh : Run live shell for testing $name functions.\n --properties,-p : Prints the user information that $name uses.\n\n$(output -t "BMN Register commands")\n Use “db=yourdbfile” in second argument to change database file.\n -rl : Read a Line.\n -rd : Read a line data only.\n -rg : Register and alter a line or use other BMR functions.\n\n$(output -t "API Commands")\n  Use $name -api “command”.\n  output : The function used to format text in $name_upper and automation bundles. Use “-qi” to show all the formatting args.\n  pma : The Package Manager Abstractor, it's a simple and extensible program for abstract package management across some Linux distros. For help use “-h”.\n  bmr : The $name_upper Register, provide a simple database for the automation bundles, also cam be used to send alert and errors signals to $name main process. Use “-h” to help.\n\n --help,-h : Print help text."
 	[[ $1 = 3 ]] && t[3]="bndp_a=(${bndp_a[*]})\nbndf=$bndf\nbnd_raw_name=$bnd_raw_name\nbnd_pre_name=(${bnd_pre_name[*]})\nbnd_name=$bnd_name\nflags=(${bnd_flags[*]})"
 
 ## Formatting arguments
@@ -387,7 +387,11 @@ pma_a=($*)
 	pm_g[apx]=@
 	
 	## options for pma ##
-	if [[ $1 = "-qpm" ]] #Qwerry Package Manager
+	if [[ $1 = "-h" ]]
+	then
+		output -d "suported" ${!pm_l[@]}
+		$prt "$(output -t "Commands")\n  -i : Install package.\n  -r : Remove package.\n  -l : List instaled.\n  -s : Search in repository."
+	elif [[ $1 = "-qpm" ]] #Qwerry Package Manager
 	then
 		bin_dirs=($(echo $PATH | tr ':' ' '))
 		for dir in ${bin_dirs[@]}
@@ -524,6 +528,7 @@ bmr_a=($@)
 	output_index="$(output -qi)"
 	blog_date_str="${date_f[0]}$(date +${date_f[1]})"
 	btest -master && blog_verbose=0 || blog_verbose=1
+	[[ $1 = "-h" ]] && $prt "$(output -t "Commands")\n  -rg : Register a line. Use “-rgt” instead to instert a timestamp.\n  -srg : Register a single line that can only be updated. Use “-srgt” instead to instert a timestamp.\n  -rm : Remove lines by @key.\n  -gl : Get lines by @key. Use “-glf” instead to format the line for visibility.\n  -gd : Get the line data by @key. Works fine only with single data lines.\n  -ed : Substitutes a the data line and keep the @key.\n  -sub : Substitutes one line to another.\n  -ail : Insert items in a line.\n  -ril : Remove items in a line.\n  -o : Format the line using the output function. Works fine only with single data lines."
 	case $1 in
 		'-rg'|'-rgt'|'-srg'|'-srgt'|'-gl'|'-glf'|'-gd'|'-rm'|'-o')
 			if [[  $output_index != *"$2"* ]]
@@ -777,7 +782,7 @@ pkg_install(){
 		pkg_parser check pma
 		for i in ${to_install[*]}
 		do
-			if [[ "$pkgs_in" = *"$i"* ]]
+			if [[ " $pkgs_in " = *" $i"* ]]
 			then
 				output -t "$pm/installing: $i"
 				output -s "$pm" "$i is already installed"
@@ -789,7 +794,7 @@ pkg_install(){
 		pkg_parser check pma
 		for i in ${to_remove[*]}
 		do
-			if [[ "$pkgs_in" = *"$i"* ]]
+			if [[ " $pkgs_in" = *" $i"* ]]
 			then
 				output -t "$pm/removing: $i"
 				pma -r $i
@@ -1135,7 +1140,7 @@ btest(){
 			;;
 			'-master')
 				ef=1
-				init_data=($(cat $init_file))
+				init_data=($([ -f $init_file ] && cat $init_file))
 				[[ ! -z "$init_data" && $0 = "${init_data[1]}" || $0 = "/usr/bin/bmn" && "${init_data[1]}" = '/bin/bmn' ]] || [[ $0 = "bmn.sh" ]] && ef=0
 				unset init_data
 			;;
