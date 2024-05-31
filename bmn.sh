@@ -40,8 +40,8 @@ bmn_data(){
 	hsr="$h/.local/share" #home share
 	hlc="$h/.local" #home local
 	cfg="$h/.config"
-	rapp="$rsr/applications/"
-	happ="$hsr/applications/"
+	rapp="$rsr/applications"
+	happ="$hsr/applications"
 	etc="/etc"
 	dev="/dev"
 	mdi="/media"
@@ -50,6 +50,7 @@ bmn_data(){
 	sus="/etc/sudoers"
 	xss="$rsr/xsessions"
 	wss="$rsr/wayland-sessions"
+	xdga="/etc/xdg/autostart"
 	skel="$etc/skel"
 
 ## Script Variables : Change this variables broke bundle execution ##
@@ -281,6 +282,7 @@ bmn_init(){
 		btest -env -api || return 1
 		if [[ $2 = 'bmr' ]]
 		then
+			output -t $3
 			btest -root || return 1
 			[[ "${args[2]}"  = "db="* ]] && bmr_db=$($prt ${args[2]} | sed "s/db=//" ) && unset args[2]
 			bmr ${args[@]:2}
@@ -300,7 +302,7 @@ out_a=($*)
 	declare -A t
 	[[ $1 = 0 ]] && t[0]="\033[01;36m-=/Automation Bundles Manager/=-\033[00m \n~ MatheusNDDS : https://github.com/MatheusNDDS\n"
 	[[ $1 = 1 ]] && t[1]="\033[01;33m[Properties]\033[00m\n User: $u\n Home: $h\n PkgM: $pm\n Repo: $repo"
-	[[ $1 = 2 ]] && t[2]="\033[01;33m[Commands]\033[00m\n$(output -t "Bundles managment")\n --install,-i : Install bundles from repository, use “-iu” to update $pm packages during installation.\n --lc-install,-li : Install bundles from $file_format file path, use “-liu” to update $pm packages during installation.\n --dir-install,-di : Install bundles from unpacked dir path, use “-diu” to update $pm packages during installation.\n --dowload,-bdl : Download bundles from repository.\n --list-bnds,-l : List or search for bundles in repo file.\n --repo-update,-rU : Update repository release file, use this regularly.\n --clean,-c : Clean invalid bundles residues.\n\n$(output -t "Script tools")\n --$name-update,-U : Update $name script from Repo source or local script.\n --bnd-pack, -bp : Pack a bundle from a directory.\n --live-shell,-sh : Run live shell for testing $name functions.\n --properties,-p : Prints the user information that $name uses.\n\n$(output -t "BMN Register commands")\n Use “db=yourdbfile” in second argument to change database file.\n -rl : Read a Line.\n -rd : Read a line data only.\n -rg : Register and alter a line or use other BMR functions.\n\n$(output -t "API Commands")\n  Use $name -api “command”.\n  output : The function used to format text in $name_upper and automation bundles. Use “-qi” to show all the formatting args.\n  pma : The Package Manager Abstractor, it's a simple and extensible program for abstract package management across some Linux distros. For help use “-h”.\n  bmr : The $name_upper Register, provide a simple database for the automation bundles, also cam be used to send alert and errors signals to $name main process. Use “-h” to help.\n\n --help,-h : Print help text."
+	[[ $1 = 2 ]] && t[2]="\033[01;33m[Commands]\033[00m\n$(output -t "Bundles managment")\n --install,-i : Install bundles from repository, use “-iu” to update $pm packages during installation.\n --lc-install,-li : Install bundles from $file_format file path, use “-liu” to update $pm packages during installation.\n --dir-install,-di : Install bundles from unpacked dir path, use “-diu” to update $pm packages during installation.\n --dowload,-bdl : Download bundles from repository.\n --list-bnds,-l : List or search for bundles in repo file.\n --repo-update,-rU : Update repository release file, use this regularly.\n --clean,-c : Clean invalid bundles residues.\n\n$(output -t "Script tools")\n --$name-update,-U : Update $name script from Repo source or local script.\n --bnd-pack, -bp : Pack a bundle from a directory.\n --live-shell,-sh : Run live shell for testing $name functions.\n --properties,-p : Prints the user information that $name uses.\n\n$(output -t "BMN Register commands")\n Use “db=yourdbfile” in second argument to change database file.\n -rl : Read a Line.\n -rd : Read a line data only.\n -rg : Register and alter a line or use other BMR functions.\n\n\033[01;33m[$name_upper API]\033[00m\n Some useful functions used in $name_upper that cam be acessible for every shell script language.\n Syntax: $name -api “command”.\n\n$(output -t "Comands")\n  output : The function used to format text in $name_upper and automation bundles. Use “-qi” to show all the formatting options.\n  pma : The Package Manager Abstractor, it's a simple and extensible program for abstract package management across some Linux distros. For help use “-h”.\n  bmr : The $name_upper Register, provide a simple database for the automation bundles, also cam be used to send alert and errors signals to $name main process. Use “-h” to help.\n\n --help,-h : Print help text."
 	[[ $1 = 3 ]] && t[3]="bndp_a=(${bndp_a[*]})\nbndf=$bndf\nbnd_raw_name=$bnd_raw_name\nbnd_pre_name=(${bnd_pre_name[*]})\nbnd_name=$bnd_name\nflags=(${bnd_flags[*]})"
 
 ## Formatting arguments
@@ -328,6 +330,8 @@ out_a=($*)
 }
 pma(){
 pma_a=($*)
+
+### Database ###
 	declare -A pm_i
 	declare -A pm_r
 	declare -A pm_l
@@ -386,7 +390,7 @@ pma_a=($*)
 	pm_u[apx]=@
 	pm_g[apx]=@
 	
-	## options for pma ##
+	## Options for PMA ##
 	if [[ $1 = "-h" ]]
 	then
 		output -d "suported" ${!pm_l[@]}
@@ -463,6 +467,7 @@ sfm_a=($*)
 	rootfs_dirs=(/*)
 	rootfs_dirs2=($(for bldir in ${rootfs_dirs[@]};do $prt "$bldir/ ";done))
 	rootfs_dirs3=($($prt ${rootfs_dirs[@]} | tr '/' ' '))
+	
 	for dof in ${sfm_a[@]:1}
 	do
 		sdof=$([ -f $dof ] && realpath $dof || $prt $dof)
@@ -523,25 +528,32 @@ sfm_a=($*)
 }
 bmr(){
 bmr_a=($@)
+	## Data
 	log_hist=($(cat $bmr_db))
 	line=($(grep -- "${bmr_a[1]} ${bmr_a[2]}" $bmr_db))
 	output_index="$(output -qi)"
 	blog_date_str="${date_f[0]}$(date +${date_f[1]})"
+	
+	## Switches the bmr verbosity for untrusted executions.
 	btest -master && blog_verbose=0 || blog_verbose=1
+	
+	## Helper
 	[[ $1 = "-h" ]] && $prt "$(output -t "Commands")\n  -rg : Register a line. Use “-rgt” instead to instert a timestamp.\n  -srg : Register a single line that can only be updated. Use “-srgt” instead to instert a timestamp.\n  -rm : Remove lines by @key.\n  -gl : Get lines by @key. Use “-glf” instead to format the line for visibility.\n  -gd : Get the line data by @key. Works fine only with single data lines.\n  -ed : Substitutes a the data line and keep the @key.\n  -sub : Substitutes one line to another.\n  -ail : Insert items in a line.\n  -ril : Remove items in a line.\n  -o : Format the line using the output function. Works fine only with single data lines."
 	case $1 in
-		'-rg'|'-rgt'|'-srg'|'-srgt'|'-gl'|'-glf'|'-gd'|'-rm'|'-o')
+		'-rg'|'-rgt'|'-srg'|'-srgt'|'-gl'|'-glf'|'-gd'|'-rm'|'-o') #automatically adds a “-d” data type to a line in some insertions for convenience.
 			if [[  $output_index != *"$2"* ]]
 			then
 				bmr_a=($1 '-d' ${bmr_a[@]:1})
 				line=($(grep -- "${bmr_a[1]} ${bmr_a[2]}" $bmr_db))
 			fi
 		;;
-		'@'*)
+		'@'*) #adds a alert data type when the arguments are no insertion instructions and a @key are passed, useful for generate bundles alerts quickly.
 			bmr_a=('-a' ${bmr_a[@]:0})
 			line=($(grep -- "${bmr_a[1]} ${bmr_a[2]}" $bmr_db))
 		;;
 	esac
+	
+	## Insertion Instructions
 	case ${bmr_a[0]} in
 	"-a"|"-e"|"-d") #quick alert and error register for bundles
 	if [[ $output_index != *"${bmr_a[0]}"* ]] || [[ ${bmr_a[1]} != "${bkc}"* ]] || [[ ${bmr_a[@]:2} = *"${bkc}"* ]]
@@ -564,7 +576,7 @@ bmr_a=($@)
 		fi
 	fi
 	;;
-	'-o')
+	'-o') #redirects the line output to the “output()” function.
 		if [[ $output_index != *"${bmr_a[1]}"* ]] || [[ ${bmr_a[2]}  != "${bkc}"* ]] || [[ ${bmr_a[@]:3} = *"${bkc}"* ]]
 		then
 			output -a syntax "bmr ${bmr_a[0]} “-d” “${bkc}key” “text arguments (cannot contain ${bkc})”"
