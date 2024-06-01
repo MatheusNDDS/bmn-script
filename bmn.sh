@@ -344,7 +344,7 @@ pma_a=($*)
 	pm_i[apt]="install"
 	pm_r[apt]="remove"
 	pm_l[apt]="list --installed"
-	pm_s[apt]="search"
+	pm_s[apt]="list"
 	pm_u[apt]="update"
 	pm_g[apt]="upgrade"
 ##apt##
@@ -365,26 +365,26 @@ pma_a=($*)
 	pm_i[apk]="add"
 	pm_r[apk]="del"
 	pm_l[apk]="info"
-	pm_s[apk]=@
+	pm_s[apk]="search"
 	pm_u[apk]=@
 	pm_g[apk]=@
 ##slackpkg##
 	pm_i[slackpkg]=@
 	pm_r[slackpkg]=@
 	pm_l[slackpkg]="2> $dnull ; ls /var/log/packages"
-	pm_s[slackpkg]=@
+	pm_s[slackpkg]="search"
 	pm_u[slackpkg]="upgrade"
 	pm_g[slackpkg]=0
 ##dnf##
 	pm_i[dnf]=@
 	pm_r[dnf]=@
 	pm_l[dnf]=@
-	pm_s[dnf]=@
+	pm_s[dnf]="search"
 	pm_u[dnf]=@
 	pm_g[dnf]=0
 ##apx##
 	pm_i[apx]=@
-	pm_r[apx]=@
+	pm_r[apx]="search"
 	pm_l[apx]=@
 	pm_s[apx]=@
 	pm_u[apx]=@
@@ -732,81 +732,82 @@ bmr_a=($@)
 
 ## Package Install
 pkg_parser(){
-	if [ $1 = "parse" -a -e $2 ]
-	then
-		for i in $(cat $2)
-		do
-			if [ $i = "#install" ]
-			then
-				pkg_flag=$i
-			elif [ $i = "#remove" ]
-			then
-				pkg_flag=$i
-			else
-				if [ $pkg_flag = "#install" ]
-				then
-					to_install+=($i)
-				fi
-				if [ $pkg_flag = "#remove" ]
-				then
-					to_remove+=($i)
-				fi
-			fi
-		done
-	elif [ $1 = "list_pkgs" ]
-	then
-		if [ -n "${to_install[*]}" ]
-		then
-			output -l "install" "${to_install[*]}"
-		fi
-		if [ -n "${to_remove[*]}" ]
-		then
-			output -l "remove" "${to_remove[*]}"
-		fi
-	elif [ $1 = "clean" ]
-	then
-		unset to_install
-		unset to_remove
-		pkg_flag="null"
-	elif [ $1 = "check" ]
-	then
-		if [ $2 = "fp" ]
-		then
-			pkgs_in=$(flatpak list)
-		elif [ $2 = "pma" ]
-		then
-			pkgs_in="$(pma -l)"
-		fi
-	fi
+	case $1 in
+		'parse')
+			[[ ! -e $2 ]] && return 1
+			for i in $(cat $2)
+			do
+				case $i in
+				'#install'|'#remove')
+					pkg_flag=$i
+				;;
+				*)
+					[[ $pkg_flag = "#install" ]] && to_install+=($i)
+					[[ $pkg_flag = "#remove" ]] && to_remove+=($i)
+				;;
+				esac
+			done
+		;;
+		'list_pkgs')
+			[[ -n "${to_install[*]}" ]] && output -l "to install" "${to_install[*]}"
+			[[ -n "${to_remove[*]}" ]] && output -l "to remove" "${to_remove[*]}"
+		;;
+		'clean')
+			unset to_install to_remove
+			pkg_flag="null"
+		;;
+		'check')
+			case $2 in
+				'fp')
+					pkgs_in=$(flatpak list)
+				;;
+				'pma')
+					pkgs_in=($(pma -l "${to_install[*]}"))
+				;;
+				'pma-in')
+					pkg_parser check pma
+					pkgs_in_repo=($(pma -s "${to_install[*]}"))
+				;;
+			esac
+		;;
+	esac
 }
 pkg_install(){
 	## Distro Pkgs
 	[[ -z $1 ]] && pkg_parser parse packages || pkg_parser parse $1/packages
 	if [ $pkg_flag != "null" ]
 	then
+		output -p $pm "Validate packages for installation"
+		pkg_parser check pma-in
+
 		output -p $pm "Installing Packages"
 		pkg_parser list_pkgs
+
 		if [[ $pm_update = 1 ]]
 		then
 			output -p $pm "Updating Packages"
 			pma -u
 		fi
-		pkg_parser check pma
+
 		for i in ${to_install[*]}
 		do
-			if [[ " $pkgs_in " = *" $i"* ]]
+			if [[ " ${pkgs_in[@]} " = *" $i"* ]]
 			then
 				output -t "$pm/installing: $i"
 				output -s "$pm" "$i is already installed"
 			else
 				output -t "$pm/installing: $i"
-				pma -i $i
+				[[ " ${pkgs_in_repo[@]} " = *" $i"* ]] && pma -i "$i" || output -s "$pm" "$i not found in repository"
 			fi
 		done
+
+		[[ -z $to_remove ]] && return 1
+		$pnl && output -p $pm "Validate installed packages for remove"
 		pkg_parser check pma
+
 		for i in ${to_remove[*]}
 		do
-			if [[ " $pkgs_in" = *" $i"* ]]
+			if [[ " ${pkgs_in[@]} " = *" $i"* ]]
 			then
 				output -t "$pm/removing: $i"
 				pma -r $i
@@ -821,7 +822,7 @@ pkg_install(){
 	[[ -z $1 ]] && pkg_parser parse flatpaks || pkg_parser parse $1/flatpaks
 	if [ $pkg_flag != "null" ]
 	then
-		$pnl ; output -p Flatpak "Installing Flatpaks"
+		$pnl && output -p Flatpak "Installing Flatpaks"
 		pkg_parser list_pkgs
 		if [[ $pm_update = 1 ]]
 		then
@@ -840,6 +841,8 @@ pkg_install(){
 				$ir flatpak $fp_mode install $fp_remote $i -y
 			fi
 		done
+
+		[[ -z $to_remove ]] && return 1
 		pkg_parser check fp
 		for i in ${to_remove[*]}
 		do
@@ -906,7 +909,9 @@ cook(){
 
 	## Auto writing file systems
 	[[ -e rootfs ]] && output -p $name "Writing “$bndid” root file system" && $cp rootfs/* rootfs/.* / 2> $dnull
+	[[ -e rootfs ]] && output -l "rootfs_dirs" "$(ls rootfs/)"
 	[[ -e homefs ]] && output -p $name "Writing “$bndid” home file system" && $cp homefs/* homefs/.* $h/ 2> $dnull
+	[[ -e homefs ]] && output -l "homefs_dirs" "$(ls homefs/)"
 
 	## Packages installation
 	[[ -f packages ]] || [[ -f flatpaks ]] && output -hT "Installing “$bnd_name” packages"
