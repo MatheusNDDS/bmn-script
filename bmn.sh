@@ -311,7 +311,7 @@ out_a=($*)
 	[[ $1 = '-l' ]]    || [[ $1 = '-qi' ]] && t['-l']="\033[01m $2[ $($prt $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")|tr ' ' ', ') ]\033[00m " #List itens
 	[[ $1 = '-hT' ]]   || [[ $1 = '-qi' ]] &&  t['-hT']="\n\033[01;36m******** [ ${out_a[*]:1} ] ********\033[00m\n" #High Title
 	[[ $1 = '-ahT' ]]  || [[ $1 = '-qi' ]] &&  t['-ahT']="\n\033[01;33m******** // ${out_a[*]:1} // ********\033[00m\n" #Alert High Title
-	[[ $1 = '-shT' ]]  || [[ $1 = '-qi' ]] &&  t['-shT']="\n\033[01;31m******** ( ${out_a[*]:1} ) ********\033[00m\n" #Sucess High Title
+	[[ $1 = '-shT' ]]  || [[ $1 = '-qi' ]] &&  t['-shT']="\n\033[01;32m******** ( ${out_a[*]:1} ) ********\033[00m\n" #Sucess High Title
 	[[ $1 = '-ehT' ]]  || [[ $1 = '-qi' ]] &&  t['-ehT']="\n\033[01;31m*#*#*#*# { $( echo "${out_a[*]:1}" | tr [:lower:] [:upper:]) } #*#*#*#*\033[00m\n" #Error High Title
 	[[ $1 = '-T' ]]    || [[ $1 = '-qi' ]] &&  t['-T']="\n\033[01;36m ## ${out_a[*]:1} ##\033[00m\n" #Title
 	[[ $1 = '-t' ]]    || [[ $1 = '-qi' ]] &&  t['-t']="\033[01;33m - ${out_a[*]:1}\033[00m" #Subtitle
@@ -1151,8 +1151,7 @@ btest(){
 				[ $? != 0 ] && err_out=${bterr[$err_type]} && ef=1
 			;;
 			'-master')
-				ef=1
-				init_data=($([ -f $init_file ] && cat $init_file))
+				ef=1 && init_data=($([ -f $init_file ] && cat $init_file))
 				[[ ! -z "$init_data" && $0 = "${init_data[1]}" || $0 = "/usr/bin/bmn" && "${init_data[1]}" = '/bin/bmn' ]] || [[ $0 = "bmn.sh" ]] && ef=0
 				unset init_data
 			;;
