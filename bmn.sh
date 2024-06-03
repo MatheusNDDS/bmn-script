@@ -104,7 +104,7 @@ bmn_data(){
 bmn_init(){
 	btest -master || return 1
 	$mkd $lc_dir $bnd_dir && $cho -R root:root $lc_dir &> $dnull
-	if [[ $1 = '-i' ]] || [[ $1 = '--install' ]]
+	if [[ $1 = '-i' || $1 = '--install' ]]
 	then
 		btest -env -root || return 1
 		for i in ${args[@]:1}
@@ -125,7 +125,7 @@ bmn_init(){
 				output -d i "Maybe the relese file has outdated, try “$name -rU”."
 			fi
 		done
-	elif [[ $1 = '-li' ]] || [[ $1 = '--lc-install' ]] && [[ ! -z "${args[@]:1}" ]]
+	elif [[ $1 = '-li' || $1 = '--lc-install' && ! -z "${args[@]:1}" ]]
 	then
 		btest -env -root || return 1
 		bnd_ignore=()
@@ -162,7 +162,7 @@ bmn_init(){
 				lc_inst=0
 			fi
 		done
-	elif [[ $1 = '-di' ]] || [[ $1 = '--dir-install' ]] && [[ ! -z "${args[@]:1}" ]]
+	elif [[ $1 = '-di' || $1 = '--dir-install' && ! -z "${args[@]:1}" ]]
 	then
 		btest -env -root || return 1
 		bnd_ignore=()
@@ -204,59 +204,59 @@ bmn_init(){
 	then
 		pm_update=1
 		bmn_init -di ${args[@]:1}
-	elif [[ $1 = '-e' ]] || [[ $1 = '--enable-extras' ]]
+	elif [[ $1 = '-e' || $1 = '--enable-extras' ]]
 	then
 		enable_extras $*
-	elif [[ $1 = '-bdl' ]] || [[ $1 = '--bnd-dowload' ]]
+	elif [[ $1 = '-bdl' || $1 = '--bnd-dowload' ]]
 	then
 		for dbnd in ${args[@]:1}
 		do
 			download $dbnd 1
 		done
-	elif [[ $1 = '-bp' ]] || [[ $1 = '--bnd-pack' ]]
+	elif [[ $1 = '-bp' || $1 = '--bnd-pack' ]]
 	then
 		for i in ${args[@]:1}
 		do
 			bnd_pack $i
 		done
-	elif [[ $1 = '-s' ]] || [[ $1 = '--setup' ]]
+	elif [[ $1 = '-s' || $1 = '--setup' ]]
 	then
 		setup $*
-	elif [[ $1 = '-ss' ]] || [[ $1 = '--setup' ]]
+	elif [[ $1 = '-ss' || $1 = '--setup' ]]
 	then
 		bmn_update $script
-	elif [[ $1 = '-U' ]] || [[ $1 = "--$name-update" ]]
+	elif [[ $1 = '-U' || $1 = "--$name-update" ]]
 	then
 		bmn_update $2
-	elif [[ $1 = '-rU' ]] || [[ $1 = '--repo-update' ]]
+	elif [[ $1 = '-rU' || $1 = '--repo-update' ]]
 	then
 		qwerry_bnd $1
-	elif [[ $1 = '-l' ]] || [[ $1 = '--list-bnds' ]]
+	elif [[ $1 = '-l' || $1 = '--list-bnds' ]]
 	then
 		qwerry_bnd ${args[@]:1}
-	elif [[ $1 = '-p' ]] || [[ $1 = '--properties' ]]
+	elif [[ $1 = '-p' || $1 = '--properties' ]]
 	then
 		output 0
 		output 1
-	elif [[ ! -z $2 ]] && [[ $1 = '-bd' ]] || [[ $1 = '--bnd-data' ]]
+	elif [[ ! -z $2 && $1 = '-bd' || $1 = '--bnd-data' ]]
 	then
 		#output -hT "$2"
 		bnd_parser $2
 		output 3
-	elif [[ ! -z $2 ]] && [[ $1 = '-rl' ]]
+	elif [[ ! -z $2 && $1 = '-rl' ]]
 	then
 		[[ "${args[1]}"  = "db="* ]] && bmr_db=$($prt ${args[1]} | sed "s/db=//" ) && unset args[1]
 		bmr -glf ${args[@]:1}
-	elif [[ ! -z $2 ]] && [[ $1 = '-rd' ]]
+	elif [[ ! -z $2 && $1 = '-rd' ]]
 	then
 		[[ "${args[1]}"  = "db="* ]] && bmr_db=$($prt ${args[1]} | sed "s/db=//" ) && unset args[1]
 		bmr -gd ${args[@]:1}
-	elif [[ ! -z $2 ]] && [[ $1 = '-rg' ]]
+	elif [[ ! -z $2 && $1 = '-rg' ]]
 	then
 		btest -env -root || return 1
 		[[ "${args[1]}"  = "db="* ]] && bmr_db=$($prt ${args[1]} | sed "s/db=//" ) && unset args[1]
 		bmr ${args[@]:1}
-	elif [[ $1 = '-h' ]] || [[ $1 = '--help' ]]
+	elif [[ $1 = '-h' || $1 = '--help' ]]
 	then
 		output 0
 		output 2
@@ -265,7 +265,7 @@ bmn_init(){
 		output 0
 		output 1
 		output 2
-	elif [[ $1 = '-c' ]] || [[ $1 = '--clean' ]]
+	elif [[ $1 = '-c' || $1 = '--clean' ]]
 	then
 		btest -env -root || return 1
 		bmn_invbnds="$(ls $bnd_dir/)"
@@ -289,7 +289,7 @@ bmn_init(){
 		else
 			$2 ${args[@]:2}
 		fi
-	elif [[ $1 = '-sh' ]] || [[ "$1" = '--live-shell' ]]
+	elif [[ $1 = '-sh' || "$1" = '--live-shell' ]]
 	then
 		live_shell
 	fi
@@ -307,19 +307,19 @@ out_a=($*)
 
 ## Formatting arguments
 #Text output formatting arguments are also used by bl() to register logs and data.
-	[[ $1 = '-p' ]]    || [[ $1 = '-qi' ]] && t['-p']="\033[01;35m [$2]: -=- $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") -=-\033[00m" #Process
-	[[ $1 = '-l' ]]    || [[ $1 = '-qi' ]] && t['-l']="\033[01m $2[ $($prt $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")|tr ' ' ', ') ]\033[00m " #List itens
-	[[ $1 = '-hT' ]]   || [[ $1 = '-qi' ]] &&  t['-hT']="\n\033[01;36m******** [ ${out_a[*]:1} ] ********\033[00m\n" #High Title
-	[[ $1 = '-ahT' ]]  || [[ $1 = '-qi' ]] &&  t['-ahT']="\n\033[01;33m******** // ${out_a[*]:1} // ********\033[00m\n" #Alert High Title
-	[[ $1 = '-shT' ]]  || [[ $1 = '-qi' ]] &&  t['-shT']="\n\033[01;32m******** ( ${out_a[*]:1} ) ********\033[00m\n" #Sucess High Title
-	[[ $1 = '-ehT' ]]  || [[ $1 = '-qi' ]] &&  t['-ehT']="\n\033[01;31m*#*#*#*# { $( echo "${out_a[*]:1}" | tr [:lower:] [:upper:]) } #*#*#*#*\033[00m\n" #Error High Title
-	[[ $1 = '-T' ]]    || [[ $1 = '-qi' ]] &&  t['-T']="\n\033[01;36m ## ${out_a[*]:1} ##\033[00m\n" #Title
-	[[ $1 = '-t' ]]    || [[ $1 = '-qi' ]] &&  t['-t']="\033[01;33m - ${out_a[*]:1}\033[00m" #Subtitle
-	[[ $1 = '-d' ]]    || [[ $1 = '-qi' ]] &&  t['-d']="\033[01m [$2]: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Dialog, bmr Data
-	[[ $1 = '-e' ]]    || [[ $1 = '-qi' ]] &&  t['-e']="\033[01;31m {$2}: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Error Dialog
-	[[ $1 = '-s' ]]    || [[ $1 = '-qi' ]] &&  t['-s']="\033[01;32m ($2): $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Sucess Dialog
-	[[ $1 = '-a' ]]    || [[ $1 = '-qi' ]] &&  t['-a']="\033[01;33m /$2/: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Alert Dialog
-	[[ $1 = '-bH' ]]   || [[ $1 = '-qi' ]] &&  t['-bH']="\033[01;36m ### $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") ###\n ~ $2 ~\033[00m\n" #Bundle Header
+	[[ $1 = '-p' || $1 = '-qi' ]] && t['-p']="\033[01;35m [$2]: -=- $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") -=-\033[00m" #Process
+	[[ $1 = '-l' || $1 = '-qi' ]] && t['-l']="\033[01m $2[ $($prt $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")|tr ' ' ', ') ]\033[00m " #List itens
+	[[ $1 = '-hT' || $1 = '-qi' ]] &&  t['-hT']="\n\033[01;36m******** [ ${out_a[*]:1} ] ********\033[00m\n" #High Title
+	[[ $1 = '-ahT' || $1 = '-qi' ]] &&  t['-ahT']="\n\033[01;33m******** // ${out_a[*]:1} // ********\033[00m\n" #Alert High Title
+	[[ $1 = '-shT' || $1 = '-qi' ]] &&  t['-shT']="\n\033[01;32m******** ( ${out_a[*]:1} ) ********\033[00m\n" #Sucess High Title
+	[[ $1 = '-ehT' || $1 = '-qi' ]] &&  t['-ehT']="\n\033[01;31m*#*#*#*# { $( echo "${out_a[*]:1}" | tr [:lower:] [:upper:]) } #*#*#*#*\033[00m\n" #Error High Title
+	[[ $1 = '-T' || $1 = '-qi' ]] &&  t['-T']="\n\033[01;36m ## ${out_a[*]:1} ##\033[00m\n" #Title
+	[[ $1 = '-t' || $1 = '-qi' ]] &&  t['-t']="\033[01m -- ${out_a[*]:1}\033[00m" #Subtitle
+	[[ $1 = '-d' || $1 = '-qi' ]] &&  t['-d']="\033[01m [$2]: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Dialog, bmr Data
+	[[ $1 = '-e' || $1 = '-qi' ]] &&  t['-e']="\033[01;31m {$2}: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Error Dialog
+	[[ $1 = '-s' || $1 = '-qi' ]] &&  t['-s']="\033[01;32m ($2): $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Sucess Dialog
+	[[ $1 = '-a' || $1 = '-qi' ]] &&  t['-a']="\033[01;33m /$2/: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Alert Dialog
+	[[ $1 = '-bH' || $1 = '-qi' ]] &&  t['-bH']="\033[01;36m ### $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") ###\n ~ $2 ~\033[00m\n" #Bundle Header
 
 	if [[ "$1" != "-qi" ]]
 	then
@@ -384,9 +384,9 @@ pma_a=($*)
 	pm_g[dnf]=0
 ##apx##
 	pm_i[apx]=@
-	pm_r[apx]="search"
+	pm_r[apx]=@
 	pm_l[apx]=@
-	pm_s[apx]=@
+	pm_s[apx]="search"
 	pm_u[apx]=@
 	pm_g[apx]=@
 	
@@ -471,29 +471,29 @@ sfm_a=($*)
 	for dof in ${sfm_a[@]:1}
 	do
 		sdof=$([ -f $dof ] && realpath $dof || $prt $dof)
-		if [[ " ${sysdbl[@]} " != *"$sdof"* ]] || [[ $1 = '-r' && " ${sysdbl[@]} " != *"$sdof"* && "${sfm_a[@]:1}" != "${rootfs_dirs[@]}" && "${sfm_a[@]:1}" != "${rootfs_dirs2[@]}" && "${sfm_a[@]:1}" != "${rootfs_dirs3[@]}" ]] || [[ $1 = "-c" ]] || [[ $1 = "-rc" ]]
+		if [[ " ${sysdbl[@]} " != *"$sdof"* || $1 = '-r' && " ${sysdbl[@]} " != *"$sdof"* && "${sfm_a[@]:1}" != "${rootfs_dirs[@]}" && "${sfm_a[@]:1}" != "${rootfs_dirs2[@]}" && "${sfm_a[@]:1}" != "${rootfs_dirs3[@]}" || $1 = "-c" || $1 = "-rc" ]]
 		then
 			case ${sfm_a[0]} in
 				'-d')
-					if [ ! -d "$dof" ]
+					if [[ ! -d "$dof" ]]
 					then
 						$ir mkdir "$dof"
 						[[ $sfm_verbose = 1 ]] && output -t "Directory “$dof” maked"
 					fi
 				;;
 				'-f') 
-					if [ ! -e "$dof" ]
+					if [[ ! -e "$dof" ]]
 					then
 						$ir touch "$dof"
 						[[ $sfm_verbose = 1 ]] && output -t "File “$dof” maked"
 					fi
 				;;
 				'-r') 
-					if [ -e "$dof" ]
+					if [[ -e "$dof" ]]
 					then
 						$ir rm -rf "$dof"
 						dof_exists=1
-					elif [ -d "$dof" ]
+					elif [[ -d "$dof" ]]
 					then
 						$ir rm -rf "$dof"
 						dof_exists=1
@@ -502,20 +502,20 @@ sfm_a=($*)
 					[[ $sfm_verbose = 1 && -z $dof_exists ]] && output  -a 'SFM' "“$dof” does not exist"
 				;;
 				'-rd') 
-					if [ -d "$dof" ]
+					if [[ -d "$dof" ]]
 					then
 						$ir rmdir --ignore-fail-on-non-empty "$dof"
 					fi
 					[[ $sfm_verbose = 1 ]] && output -t "Dir “$dof” removed"
 				;;
 				'-c')
-					if [ -e "$dof" ]
+					if [[ -e "$dof" ]]
 					then
 						$ir cat "$dof"
 					fi
 				;;
 				'-rc')
-					if [ -e "$dof" ]
+					if [[ -e "$dof" ]]
 					then
 						source "$dof"
 					fi
@@ -556,17 +556,17 @@ bmr_a=($@)
 	## Insertion Instructions
 	case ${bmr_a[0]} in
 	"-a"|"-e"|"-d") #quick alert and error register for bundles
-	if [[ $output_index != *"${bmr_a[0]}"* ]] || [[ ${bmr_a[1]} != "${bkc}"* ]] || [[ ${bmr_a[@]:2} = *"${bkc}"* ]]
+	if [[ $output_index != *"${bmr_a[0]}"* || ${bmr_a[1]} != "${bkc}"* || ${bmr_a[@]:2} = *"${bkc}"* ]]
 	then
 		output -a syntax "bmr ${bmr_a[0]} “${bkc}key” “text arguments (cannot contain ${bkc})”"
 		output -d dataTypes ${output_index[@]}
 	else
 		line=($(grep -- "${bmr_a[0]} ${bmr_a[1]}" $bmr_db))
-		if [[ ! -z $line ]] && [[ ${bmr_a[0]} != "-d" ]] && [[ $line != "-e" ]]
+		if [[ ! -z $line && ${bmr_a[0]} != "-d" && $line != "-e" ]]
 		then
 			sed -i "/${bmr_a[0]} ${bmr_a[1]}/d" $bmr_db
 		fi
-		if [[ $line != *"-e"* ]] || [[ ${bmr_a[0]} != "-a" ]]
+		if [[ $line != *"-e"* || ${bmr_a[0]} != "-a" ]]
 		then
 			echo "${bmr_a[*]}" >> $bmr_db
 		fi
@@ -577,7 +577,7 @@ bmr_a=($@)
 	fi
 	;;
 	'-o') #redirects the line output to the “output()” function.
-		if [[ $output_index != *"${bmr_a[1]}"* ]] || [[ ${bmr_a[2]}  != "${bkc}"* ]] || [[ ${bmr_a[@]:3} = *"${bkc}"* ]]
+		if [[ $output_index != *"${bmr_a[1]}"* || ${bmr_a[2]}  != "${bkc}"* || ${bmr_a[@]:3} = *"${bkc}"* ]]
 		then
 			output -a syntax "bmr ${bmr_a[0]} “-d” “${bkc}key” “text arguments (cannot contain ${bkc})”"
 			output -d dataTypes ${output_index[@]}
@@ -586,7 +586,7 @@ bmr_a=($@)
 		fi
 	;;
 	"-rg"|"-rgt") #register a custom value
-		if [[ $output_index != *"${bmr_a[1]}"* ]] || [[ ${bmr_a[2]}  != "${bkc}"* ]] || [[ ${bmr_a[@]:3} = *"${bkc}"* ]]
+		if [[ $output_index != *"${bmr_a[1]}"* || ${bmr_a[2]}  != "${bkc}"* || ${bmr_a[@]:3} = *"${bkc}"* ]]
 		then
 			output -a syntax "bmr ${bmr_a[0]} “-d” “${bkc}key” “text arguments (cannot contain ${bkc})”"
 			output -d dataTypes ${output_index[@]}
@@ -600,7 +600,7 @@ bmr_a=($@)
 		fi
 	;;
 	"-srg"|"-srgt") # safe register, if there is data replace it with the newest one.
-		if [[ $output_index != *"${bmr_a[1]}"* ]] || [[ ${bmr_a[2]}  != "${bkc}"* ]] || [[ ${bmr_a[@]:3} = *"${bkc}"* ]]
+		if [[ $output_index != *"${bmr_a[1]}"* || ${bmr_a[2]}  != "${bkc}"* || ${bmr_a[@]:3} = *"${bkc}"* ]]
 		then
 			output -a syntax "bmr ${bmr_a[0]} “-d” “${bkc}key” “text arguments (cannot contain ${bkc})”"
 			output -d dataTypes ${output_index[@]}
@@ -620,7 +620,7 @@ bmr_a=($@)
 		fi
 	;;
 	"-ail"|"-ril") #add and remove items in a line 
-		if [[ $output_index != *"${bmr_a[1]}"* ]] || [[ $3 != *"@"* ]] || [[ ${bmr_a[@]:3} = *"${bkc}"* ]]
+		if [[ $output_index != *"${bmr_a[1]}"* || $3 != *"@"* || ${bmr_a[@]:3} = *"${bkc}"* ]]
 		then
 			output -a syntax "bmr ${bmr_a[0]} “-d” “${bkc}keyQwerry” “text arguments (cannot contain ${bkc})”"
 			output -d dataTypes ${output_index[@]}
@@ -650,7 +650,7 @@ bmr_a=($@)
 		fi
 	;;
 	"-ed") #edit a line, keeps the previous key
-		if [[ $output_index != *"${bmr_a[1]}"* ]] || [[ $3 != *"${bkc}"* ]] || [[ ${bmr_a[@]:3} = *"${bkc}"* ]]
+		if [[ $output_index != *"${bmr_a[1]}"* || $3 != *"${bkc}"* || ${bmr_a[@]:3} = *"${bkc}"* ]]
 		then
 			output -a syntax "bmr ${bmr_a[0]} “-d” “${bkc}keyQwerry” “text arguments (cannot contain ${bkc})”"
 			output -d dataTypes ${output_index[@]}
@@ -664,7 +664,7 @@ bmr_a=($@)
 		fi
 	;;
 	"-sub") #substitute the line
-		if [[ $output_index != *"${bmr_a[1]}"* ]] || [[ ${bmr_a[2]}  != "${bkc}"* ]] ||  [[ $output_index != *"$4"* ]] || [[ $5 != "${bkc}"* ]] || [[ ${bmr_a[@]:5} = *"${bkc}"* ]]
+		if [[ $output_index != *"${bmr_a[1]}"* || ${bmr_a[2]}  != "${bkc}"* ]] ||  [[ $output_index != *"$4"* || $5 != "${bkc}"* || ${bmr_a[@]:5} = *"${bkc}"* ]]
 		then
 			output -a syntax "bmr ${bmr_a[0]} “-d” “${bkc}keyQwerry” “-d” “${bkc}key” “text arguments (cannot contain ${bkc})”"
 			output -d dataTypes ${output_index[@]}
@@ -678,7 +678,7 @@ bmr_a=($@)
 		fi
 	;;
 	"-rm") #removes a especific type and key line
-		if  [[ $output_index != *"${bmr_a[1]}"* ]] || [[ ${bmr_a[2]}  != "${bkc}"* ]]
+		if  [[ $output_index != *"${bmr_a[1]}"* || ${bmr_a[2]}  != "${bkc}"* ]]
 		then
 			output -a syntax "bmr ${bmr_a[0]} “-d” “${bkc}key”"
 			output -d dataTypes ${output_index[@]}
@@ -697,7 +697,7 @@ bmr_a=($@)
 		fi
 	;;
 	"-gl"|"-glf") #returns the line with the found value, -glf for remove @.
-		if  [[ $output_index != *"${bmr_a[1]}"* ]] || [[ ${bmr_a[2]}  != "${bkc}"* ]]
+		if  [[ $output_index != *"${bmr_a[1]}"* || ${bmr_a[2]}  != "${bkc}"* ]]
 		then
 			output -a syntax "bmr ${bmr_a[0]} “-d” “${bkc}key”"
 			output -d dataTypes ${output_index[@]}
@@ -719,7 +719,7 @@ bmr_a=($@)
 		fi
 	;;
 	"-gd") #returns only the data without type or key
-		if  [[ $output_index != *"${bmr_a[1]}"* ]] || [[ ${bmr_a[2]}  != "${bkc}"* ]]
+		if  [[ $output_index != *"${bmr_a[1]}"* || ${bmr_a[2]}  != "${bkc}"* ]]
 		then
 			output -a syntax "bmr ${bmr_a[0]} “-d” “${bkc}key”"
 			output -d dataTypes ${output_index[@]}
@@ -759,13 +759,16 @@ pkg_parser(){
 		'check')
 			case $2 in
 				'fp')
+					output -t 'Checking installed flatpaks'
 					pkgs_in=$(flatpak list)
 				;;
 				'pma')
+					output -t 'Checking installed packages'
 					pkgs_in=($(pma -l "${to_install[*]}"))
 				;;
 				'pma-in')
 					pkg_parser check pma
+					output -t 'Checking packages in repository'
 					pkgs_in_repo=($(pma -s "${to_install[*]}"))
 				;;
 			esac
@@ -775,7 +778,7 @@ pkg_parser(){
 pkg_install(){
 	## Distro Pkgs
 	[[ -z $1 ]] && pkg_parser parse packages || pkg_parser parse $1/packages
-	if [ $pkg_flag != "null" ]
+	if [[ $pkg_flag != "null" ]]
 	then
 		output -p $pm "Validate packages for installation"
 		pkg_parser check pma-in
@@ -794,10 +797,10 @@ pkg_install(){
 			if [[ " ${pkgs_in[@]} " = *" $i"* ]]
 			then
 				output -t "$pm/installing: $i"
-				output -s "$pm" "$i is already installed"
+				output -s "$pm" "“$i” is already installed"
 			else
 				output -t "$pm/installing: $i"
-				[[ " ${pkgs_in_repo[@]} " = *" $i"* ]] && pma -i "$i" || output -s "$pm" "$i not found in repository"
+				[[ " ${pkgs_in_repo[@]} " = *" $i"* ]] && pma -i "$i" || output -s "$pm" "“$i” not found in repository or not avaliable for “$PRETTY_NAME”"
 			fi
 		done
 
@@ -813,14 +816,14 @@ pkg_install(){
 				pma -r $i
 			else
 				output -t "$pm/removing: $i"
-				output -s "$pm" "$i is not installed"
+				output -s "$pm" "“$i” is not installed"
 			fi
 		done
 		pkg_parser clean
 	fi
 	## Flatpaks
 	[[ -z $1 ]] && pkg_parser parse flatpaks || pkg_parser parse $1/flatpaks
-	if [ $pkg_flag != "null" ]
+	if [[ $pkg_flag != "null" ]]
 	then
 		$pnl && output -p Flatpak "Installing Flatpaks"
 		pkg_parser list_pkgs
@@ -835,7 +838,7 @@ pkg_install(){
 			if [[ "$pkgs_in" = *"$i"* ]]
 			then
 				output -t "flatpak/installing: $i"
-				output -s "flatpak" "$i is already installed"
+				output -s "flatpak" "“$i” is already installed"
 			else
 				output -t "flatpak/installing: $i"
 				$ir flatpak $fp_mode install $fp_remote $i -y
@@ -852,7 +855,7 @@ pkg_install(){
 				$ir flatpak uninstall $fp_mode $i -y
 			else
 				output -t "flatpak/removing: $i"
-				output -s "flatpak" "$i is not installed"
+				output -s "flatpak" "“$i” is not installed"
 			fi
 		done
 		pkg_parser clean
@@ -881,7 +884,7 @@ bndp_a=($($prt $1|sed "s/:/ /"))
 download(){
 	btest -env -master || return 1
 	$rm $1.$file_format
-	if [ $lc_repo = 0 ] || [ $2 = 1 ]
+	if [[ $lc_repo = 0 ]] || [ $2 = 1 ]
 	then
 		output -p $name "Downloading “$1”"
 		btest -net || return 1
@@ -914,11 +917,11 @@ cook(){
 	[[ -e homefs ]] && output -l "homefs_dirs" "$(ls homefs/)"
 
 	## Packages installation
-	[[ -f packages ]] || [[ -f flatpaks ]] && output -hT "Installing “$bnd_name” packages"
+	[[ -f packages || -f flatpaks ]] && output -hT "Installing “$bnd_name” packages"
 	pkg_install
 
 	## Recipe file process
-	if [ -e recipe ]
+	if [[ -e recipe ]]
 	then
 		output -hT "Executing “$bndid$(bnd_parser -pbf)” Recipe"
 		$elf recipe
@@ -940,7 +943,7 @@ cook(){
 }
 bnd_pack(){
 	current_dir=$(pwd)
-	if [ -d $1 ]
+	if [[ -d $1 ]]
 	then
 		cd $1
 		tar -zcvf "$current_dir/$1.$file_format" *
@@ -997,7 +1000,7 @@ setup(){
 		pma -i $i
 	done
 #Saving environment variables
-	if [ -z "$2" ] && [[ $2 != *"srcd="* ]] || [ -z "$3" ] && [[ $3 != *"srcd="* ]]
+	if [[ -z "$2" && $2 != *"srcd="* || -z "$3" && $3 != *"srcd="* ]]
 	then
 		if [ -e config ]
 		then
@@ -1054,7 +1057,7 @@ qwerry_bnd(){
 		output -hT "Updating Repository"
 		cd $pdir
 		$rm $pdir/release
-		if [ $lc_repo = 0 ]
+		if [[ $lc_repo = 0 ]]
 		then
 			output -p $name "Downloading Release"
 			btest -net || return 1
@@ -1091,7 +1094,7 @@ qwerry_bnd(){
 			do
 				for bnd in ${release[@]}
 				do
-					if [[ $bnd = *"$argb"* ]] && [[ ${rel_h[@]} != *"$bnd"* ]]
+					if [[ $bnd = *"$argb"* && ${rel_h[@]} != *"$bnd"* ]]
 					then
 						output -t "$bnd"
 						rel_h+=($bnd)
@@ -1106,7 +1109,7 @@ enable_extras(){
 	btest -net -root || return 1
 	for i in $*
 	do
-		if [ $i = flatpak ]
+		if [[ $i = flatpak ]]
 		then
 			output -hT "Configuring flatpak"
 			output -p $name "Installing flatpak"
@@ -1116,7 +1119,7 @@ enable_extras(){
 			output -hT "flatpak enabled"
 			bmr -rgt @extras "“flatpak” enabled -> remote=“$flathub”, mode=“$fp_mode”."
 		fi
-		if [ $i = snap ]
+		if [[ $i = snap ]]
 		then
 			$prt "soom..."
 		fi
@@ -1125,11 +1128,11 @@ exit
 }
 detect_user_props(){
 	pwdp=($(pwd|tr '/' ' '))
-	if [ "${pwdp[0]}" = "home" ]
+	if [[ "${pwdp[0]}" = "home" ]]
 	then
 		h="/home/${pwdp[1]}"
 		u="${pwdp[1]}"
-	elif [ "${pwdp[0]}" = "root" ]
+	elif [[ "${pwdp[0]}" = "root" ]]
 	then
 		h="/root"
 		u="root"
@@ -1149,15 +1152,15 @@ btest(){
 	do
 		case $err_type in 
 			'-root')
-				[ $UID != 0 ] &&  err_out=${bterr[$err_type]} && ef=1
+				[[ $UID != 0 ]] &&  err_out=${bterr[$err_type]} && ef=1
 			;;
 			'-net')
 				wget -q --spider www.google.com
-				[ $? != 0 ] && err_out=${bterr[$err_type]} && ef=1
+				[[ $? != 0 ]] && err_out=${bterr[$err_type]} && ef=1
 			;;
 			'-master')
 				ef=1 && init_data=($([ -f $init_file ] && cat $init_file))
-				[[ ! -z "$init_data" && $0 = "${init_data[1]}" || $0 = "/usr/bin/bmn" && "${init_data[1]}" = '/bin/bmn' ]] || [[ $0 = "bmn.sh" ]] && ef=0
+				[[ ! -z "$init_data" && $0 = "${init_data[1]}" || $0 = "/usr/bin/bmn" && "${init_data[1]}" = '/bin/bmn' || $0 = "bmn.sh" ]] && ef=0
 				unset init_data
 			;;
 			'-installer')
