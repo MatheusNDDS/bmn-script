@@ -64,7 +64,7 @@ bmn_data(){
 	cmd="$1"
 	rex="$r bash recipe"
 	editor="nano"
-	deps="wget bash $ir $editor shc"
+	deps="wget $ir $editor shc"
 	script_src="https://github.com/MatheusNDDS/${name}-script/raw/main/${name}.sh"
 	sfm_verbose=0 #Enable verbose log for SFM
 	bkc=@
@@ -282,7 +282,6 @@ bmn_init(){
 		btest -env -api || return 1
 		if [[ $2 = 'bmr' ]]
 		then
-			output -t $3
 			btest -root || return 1
 			[[ "${args[2]}"  = "db="* ]] && bmr_db=$($prt ${args[2]} | sed "s/db=//" ) && unset args[2]
 			bmr ${args[@]:2}
@@ -958,22 +957,18 @@ setup(){
 	btest -root -installer || return 1
 	unset pm u h repo lc_repo
 	source config
+	output 0
 #Detect custom bin path
-	if [[ $2 = *"srcd="* ]]
-	then
-		cmd_srcd=$($prt $2|sed "s/srcd=//g")
-	elif [[ $3 = *"srcd="* ]]
-	then
-		cmd_srcd=$($prt $3|sed "s/srcd=//g")
-	fi
+	[[ $2 = *"srcd="* ]] && cmd_srcd=$($prt $2|sed "s/srcd=//g") || [[ $3 = *"srcd="* ]] && cmd_srcd=$($prt $3|sed "s/srcd=//g")
 #Creating directories
 	output -hT "$name_upper installation"
 	sfm -d $pdir $bnd_dir $cfg $hlc $hsr
 	sfm -f $cfg_file $init_file $bmr_db
-	$cp $script $cmd_srcd/$name
-	$elf $cmd_srcd/$name
-#init file buid
-	$prt "source $cmd_srcd/$name" > $init_file
+	$cp $script "$pdir/source"
+	$prt "#!/bin/sh\nbash $pdir/source" '$*' > $cmd_srcd/$name
+	$elf $cmd_srcd/$name "$pdir/source"
+#Init file buid
+	$prt "source $pdir/source" > $init_file
 	$prt 'export PS1="\\n“\w”\\n$(output -d $name)"\nalias q="exit 0"\nalias x="clear"\nalias c="$editor $cfg_file"\nalias i="$editor $init_file"\nalias r="$editor $pdir/release"\nalias l="$editor $bmr_db"\nalias h="$prt +\\n c: edit config\\n i: edit init\\n r: edit release\\n l: edit log\\n x: clear prompt\\n h: help\\n q: exit+"' | tr '+' "'" >> $init_file
 #Package manager autodetect
 	if [[ -z $pm ]]
@@ -1141,7 +1136,7 @@ detect_user_props(){
 btest(){
 	## Error Texts BataBase
 	declare -A bterr
-	bterr['-root']="-ahT “ $name $cmd ” needs root privileges"
+	bterr['-root']="-ahT “$name $cmd” needs root privileges"
 	bterr['-net']="-ehT No internet connection"
 	bterr['-env']="-ahT BMN environment not correctly configured"
 	bterr['-api']="-ahT Invalid “${args[1]}” api call"
@@ -1160,7 +1155,7 @@ btest(){
 			;;
 			'-master')
 				ef=1 && init_data=($([ -f $init_file ] && cat $init_file))
-				[[ ! -z "$init_data" && $0 = "${init_data[1]}" || $0 = "/usr/bin/bmn" && "${init_data[1]}" = '/bin/bmn' || $0 = "bmn.sh" ]] && ef=0
+				[[ ! -z "$init_data" && $0 = "${init_data[1]}" || $0 = "/etc/bmn/source" && "${init_data[1]}" = '/etc/bmn/source' || $0 = "bmn.sh" ]] && ef=0
 				unset init_data
 			;;
 			'-installer')
