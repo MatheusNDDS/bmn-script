@@ -298,27 +298,26 @@ bmn_init(){
 ## Utilities
 output(){
 out_a=($*)
+	test_args=(1 2 3 4)
 	declare -A t
 	[[ $1 = 0 ]] && t[0]="\033[01;36m-=/Automation Bundles Manager/=-\033[00m \n~ MatheusNDDS : https://github.com/MatheusNDDS\n"
 	[[ $1 = 1 ]] && t[1]="\033[01;33m[Properties]\033[00m\n User: $u\n Home: $h\n PkgM: $pm\n Repo: $repo"
-	[[ $1 = 2 ]] && t[2]="\033[01;33m[Commands]\033[00m\n$(output -t "Bundles managment")\n --install,-i : Install bundles from repository, use “-iu” to update $pm packages during installation.\n --lc-install,-li : Install bundles from $file_format file path, use “-liu” to update $pm packages during installation.\n --dir-install,-di : Install bundles from unpacked dir path, use “-diu” to update $pm packages during installation.\n --dowload,-bdl : Download bundles from repository.\n --list-bnds,-l : List or search for bundles in repo file.\n --repo-update,-rU : Update repository release file, use this regularly.\n --clean,-c : Clean invalid bundles residues.\n\n$(output -t "Script tools")\n --$name-update,-U : Update $name script from Repo source or local script.\n --bnd-pack, -bp : Pack a bundle from a directory.\n --live-shell,-sh : Run live shell for testing $name functions.\n --properties,-p : Prints the user information that $name uses.\n\n$(output -t "BMN Register commands")\n Use “db=yourdbfile” in second argument to change database file.\n -rl : Read a Line.\n -rd : Read a line data only.\n -rg : Register and alter a line or use other BMR functions.\n\n\033[01;33m[$name_upper API]\033[00m\n Some useful functions used in $name_upper that cam be acessible for every shell script language.\n Syntax: $name -api “command”.\n\n$(output -t "Comands")\n  output : The function used to format text in $name_upper and automation bundles. Use “-qi” to show all the formatting options.\n  pma : The Package Manager Abstractor, it's a simple and extensible program for abstract package management across some Linux distros. For help use “-h”.\n  bmr : The $name_upper Register, provide a simple database for the automation bundles, also cam be used to send alert and errors signals to $name main process. Use “-h” to help.\n\n --help,-h : Print help text."
+	[[ $1 = 2 ]] && t[2]="\033[01;33m[Commands]\033[00m\n$(output -t "Bundles managment")\n --install,-i : Install bundles from repository, use “-iu” to update $pm packages during installation.\n --lc-install,-li : Install bundles from $file_format file path, use “-liu” to update $pm packages during installation.\n --dir-install,-di : Install bundles from unpacked dir path, use “-diu” to update $pm packages during installation.\n --dowload,-bdl : Download bundles from repository.\n --list-bnds,-l : List or search for bundles in repo file.\n --repo-update,-rU : Update repository release file, use this regularly.\n --clean,-c : Clean invalid bundles residues.\n\n$(output -t "Script tools")\n --$name-update,-U : Update $name script from Repo source or local script.\n --bnd-pack, -bp : Pack a bundle from a directory.\n --live-shell,-sh : Run live shell for testing $name functions.\n --properties,-p : Prints the user information that $name uses.\n\n$(output -t "BMN Register commands")\n Use “db=yourdbfile” in second argument to change database file.\n -rl : Read a Line.\n -rd : Read a line data only.\n -rg : Register and alter a line or use other BMR functions.\n\n\033[01;33m[Api]\033[00m\n Some useful functions used in $name_upper that cam be acessible for every shell script language.\n Syntax: $name -api “command”.\n\n$(output -t "Comands")\n \033[01m output :\033[00m The function used to format text in $name_upper and Recipe Srcipts. Use “output -h” for help.\n \033[01m pma :\033[00m The Package Manager Abstractor, a simple and extensible program for abstract package management across some Linux distros. Use “pma -h” for help.\n \033[01m bmr :\033[00m The $name_upper Register, provide a simple text based general prupose database, also cam be used in Recipe Scripts to send alerts and errors signals to $name main process or register data. Use “bmr -h” for help.\n\n --help,-h : Print help text."
 	[[ $1 = 3 ]] && t[3]="bndp_a=(${bndp_a[*]})\nbndf=$bndf\nbnd_raw_name=$bnd_raw_name\nbnd_pre_name=(${bnd_pre_name[*]})\nbnd_name=$bnd_name\nflags=(${bnd_flags[*]})"
-
-## Formatting arguments
-#Text output formatting arguments are also used by bl() to register logs and data.
-	[[ $1 = '-p' || $1 = '-qi' ]] && t['-p']="\033[01;35m [$2]: -=- $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") -=-\033[00m" #Process
-	[[ $1 = '-l' || $1 = '-qi' ]] && t['-l']="\033[01m $2[ $($prt $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")|tr ' ' ', ') ]\033[00m " #List itens
-	[[ $1 = '-hT' || $1 = '-qi' ]] &&  t['-hT']="\n\033[01;36m******** [ ${out_a[*]:1} ] ********\033[00m\n" #High Title
-	[[ $1 = '-ahT' || $1 = '-qi' ]] &&  t['-ahT']="\n\033[01;33m******** // ${out_a[*]:1} // ********\033[00m\n" #Alert High Title
-	[[ $1 = '-shT' || $1 = '-qi' ]] &&  t['-shT']="\n\033[01;32m******** ( ${out_a[*]:1} ) ********\033[00m\n" #Sucess High Title
-	[[ $1 = '-ehT' || $1 = '-qi' ]] &&  t['-ehT']="\n\033[01;31m*#*#*#*# { $( echo "${out_a[*]:1}" | tr [:lower:] [:upper:]) } #*#*#*#*\033[00m\n" #Error High Title
-	[[ $1 = '-T' || $1 = '-qi' ]] &&  t['-T']="\n\033[01;36m ## ${out_a[*]:1} ##\033[00m\n" #Title
-	[[ $1 = '-t' || $1 = '-qi' ]] &&  t['-t']="\033[01m -- ${out_a[*]:1}\033[00m" #Subtitle
+	[[ $1 = '-h' ]] && t['-h']="$(output -T "$name_upper Output Formatter")\n\n$(output -t "Titles")\n -hT : High Normal.\n -ahT : High Alert.\n -shT : High Sucess.\n -ehT : High Error.\n -T : Low Title.\n\n$(output -t "Dialogs")\n -d : Normal.\n -l : List.\n -p : Process.\n -t : Task.\n -a : Alert.\n -s : Sucess.\n -e : Error."
+	[[ $1 = '-p' ]] && t['-p']="\033[01;35m [$2]: -=- $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") -=-\033[00m" #Process
+	[[ $1 = '-l' ]] && t['-l']="\033[01m $2[ $($prt $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")|tr ' ' ', ') ]\033[00m " #List itens
+	[[ $1 = '-hT' ]] &&  t['-hT']="\n\033[01;36m******** [ ${out_a[*]:1} ] ********\033[00m\n" #High Title
+	[[ $1 = '-ahT' ]] &&  t['-ahT']="\n\033[01;33m******** // ${out_a[*]:1} // ********\033[00m\n" #Alert High Title
+	[[ $1 = '-shT' ]] &&  t['-shT']="\n\033[01;32m******** ( ${out_a[*]:1} ) ********\033[00m\n" #Sucess High Title
+	[[ $1 = '-ehT' ]] &&  t['-ehT']="\n\033[01;31m*#*#*#*# { $( echo "${out_a[*]:1}" | tr [:lower:] [:upper:]) } #*#*#*#*\033[00m\n" #Error High Title
+	[[ $1 = '-bH' ]] &&  t['-bH']="\033[01;36m ### $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") ###\n ~ $2 ~\033[00m\n" #Bundle Header
+	[[ $1 = '-T' ]] &&  t['-T']="\n\033[01;36m ## ${out_a[*]:1} ##\033[00m\n" #Title
+	[[ $1 = '-t' ]] &&  t['-t']="\033[01m -- ${out_a[*]:1}\033[00m" #Subtitle
 	[[ $1 = '-d' || $1 = '-qi' ]] &&  t['-d']="\033[01m [$2]: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Dialog, bmr Data
 	[[ $1 = '-e' || $1 = '-qi' ]] &&  t['-e']="\033[01;31m {$2}: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Error Dialog
 	[[ $1 = '-s' || $1 = '-qi' ]] &&  t['-s']="\033[01;32m ($2): $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Sucess Dialog
 	[[ $1 = '-a' || $1 = '-qi' ]] &&  t['-a']="\033[01;33m /$2/: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Alert Dialog
-	[[ $1 = '-bH' || $1 = '-qi' ]] &&  t['-bH']="\033[01;36m ### $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") ###\n ~ $2 ~\033[00m\n" #Bundle Header
 
 	if [[ "$1" != "-qi" ]]
 	then
@@ -388,14 +387,16 @@ pma_a=($*)
 	pm_s[apx]="search"
 	pm_u[apx]=@
 	pm_g[apx]=@
-	
-	## Options for PMA ##
-	if [[ $1 = "-h" ]]
-	then
-		output -d "suported" ${!pm_l[@]}
-		$prt "$(output -t "Commands")\n  -i : Install package.\n  -r : Remove package.\n  -l : List instaled.\n  -s : Search in repository."
-	elif [[ $1 = "-qpm" ]] #Qwerry Package Manager
-	then
+
+	#Command yes implementation
+	[[ $1 = *'y' ]] && pm_yes='-y' && pma_a[0]="$($prt ${pma_a[0]}|tr -d 'y')"
+	[[ ${pma_a[-1]} = '-y' ]] && pm_yes='-y' && unset pma_a[-1]
+
+	case "${pma_a[0]}" in
+	'-h')
+		$prt "$(output -T "$name_upper Package Manager Abstractor")\n$(output -d "suported" ${!pm_l[@]})\n\n$(output -t "Commands")\n  -i : Install package.\n  -r : Remove package.\n  -l : List instaled.\n  -s : Search in repository.\n\n$(output -t "“yes” command support")\n  Standard: “pma -i pkgs... \033[01;36m-y\033[00m”.\n  In-argument: “pma -i\033[01;36my\033[00m pkgs...”"
+	;;
+	'-qpm')
 		bin_dirs=($(echo $PATH | tr ':' ' '))
 		for dir in ${bin_dirs[@]}
 		do
@@ -408,55 +409,29 @@ pma_a=($*)
 				pm_detected=$pmc
 			fi
 		done
-	elif [[ $1 = "-i" ]] # Install
-	then
-		if [[ "${pm_i[$pm]}" = "@" ]]
-		then
-			$r $pm ${pm_i[apt]} ${pkgs} -y
-		else
-			$r $pm ${pm_i[$pm]} ${pkgs} -y
-		fi 
-	elif [[ $1 = "-r" ]] # Remove
-	then
-		if [[ "${pm_r[$pm]}" = "@" ]]
-		then
-			$r $pm ${pm_r[apt]} ${pkgs} -y
-		else
-			$r $pm ${pm_r[$pm]} ${pkgs} -y
-		fi
-	elif [[ $1 = '-s' ]] # Search
-	then
-		if [[ "${pm_s[$pm]}" = "@" ]]
-		then
-			$r $pm ${pm_s[apt]} ${pkgs}
-		else
-			$r $pm ${pm_s[$pm]} ${pkgs}
-		fi 
-	elif [[ $1 = "-l" ]] # List installed
-	then
-		if [[ "${pm_l[$pm]}" = "@" ]]
-		then
-			$r $pm ${pm_l[apt]}
-		else
-			$r $pm ${pm_l[$pm]}
-		fi 
-	elif [[ $1 = "-u" ]] # Update and Upgrade
-	then
-		if [[ "${pm_u[$pm]}" = "@" ]]
-		then
-			$r $pm ${pm_u[apt]} -y
-			if [[ ${pm_g[$pm]} != 0 ]]
-			then
-				$r $pm ${pm_g[apt]} -y
-			fi
-		else
-			$r $pm ${pm_u[$pm]} -y
-			if [[ ${pm_g[$pm]} != 0 ]]
-			then
-				$r $pm ${pm_g[$pm]} -y
-			fi
-		fi
-	fi
+	;;
+	'-i')
+		[[ -z "${pm_i[$pm]}" ]] && return 1 || [[ "${pm_i[$pm]}" = "@" ]] && pm_target='apt' || pm_target=$pm
+		$r $pm ${pm_i[$pm_target]} $pkgs $pm_yes
+	;;
+	'-r')
+		[[ -z "${pm_r[$pm]}" ]] && return 1 || [[ "${pm_r[$pm]}" = "@" ]] && pm_target='apt' || pm_target=$pm
+		$r $pm ${pm_r[$pm_target]} $pkgs $pm_yes
+	;;
+	'-l')
+		[[ -z "${pm_l[$pm]}" ]] && return 1 || [[ "${pm_l[$pm]}" = "@" ]] && pm_target='apt' || pm_target=$pm
+		$r $pm ${pm_l[$pm_target]}
+	;;
+	'-s')
+		[[ -z "${pm_s[$pm]}" ]] && return 1 || [[ "${pm_s[$pm]}" = "@" ]] && pm_target='apt' || pm_target=$pm
+		$r $pm ${pm_s[$pm_target]} $pkgs
+	;;
+	'-u')
+		[[ -z "${pm_u[$pm]}" ]] && return 1 || [[ "${pm_u[$pm]}" = "@" ]] && pm_target='apt' || pm_target=$pm
+		$r $pm ${pm_u[$pm_target]} $pm_yes
+		[[ -z ${pm_g[$pm_target]} || ${pm_g[$pm_target]} != 0 ]] && $r $pm ${pm_g[$pm_target]} $pm_yes
+	;;
+	esac
 }
 sfm(){
 sfm_a=($*)
@@ -535,9 +510,12 @@ bmr_a=($@)
 	
 	## Switches the bmr verbosity for untrusted executions.
 	btest -master && blog_verbose=0 || blog_verbose=1
-	
+
+	## change database file
+	[[ ${bmr_a[-1]} = 'bmr_db='* ]] && declare ${bmr_a[-1]} && unset bmr_a[-1]
+
 	## Helper
-	[[ $1 = "-h" ]] && $prt "$(output -t "Commands")\n  -rg : Register a line. Use “-rgt” instead to instert a timestamp.\n  -srg : Register a single line that can only be updated. Use “-srgt” instead to instert a timestamp.\n  -rm : Remove lines by @key.\n  -gl : Get lines by @key. Use “-glf” instead to format the line for visibility.\n  -gd : Get the line data by @key. Works fine only with single data lines.\n  -ed : Substitutes a the data line and keep the @key.\n  -sub : Substitutes one line to another.\n  -ail : Insert items in a line.\n  -ril : Remove items in a line.\n  -o : Format the line using the output function. Works fine only with single data lines."
+	[[ $1 = "-h" ]] && $prt "$(output -T "$name_upper Register")\n\n$(output -t "Commands")\n  -rg : Register a line. Use “-rgt” instead to instert a timestamp.\n  -srg : Register a single line that can only be updated. Use “-srgt” instead to instert a timestamp.\n  -rm : Remove lines by @key.\n  -gl : Get lines by @key. Use “-glf” instead to format the line for visibility.\n  -gd : Get the line data by @key. Works fine only with single data lines.\n  -ed : Substitutes a the data line and keep the @key.\n  -sub : Substitutes one line to another.\n  -ail : Insert items in a line.\n  -ril : Remove items in a line.\n  -o : Format the line using the output function. Works fine only with single data lines.\n\n$(output -t "Data Types")\n -d : Data.\n -a : Alert.\n -s : Sucess.\n -e : Error.\n\n$(output -t "Using other database")\n You can thange the database declaring the “bmr_db=yourdbfile” in your script or temporaly in the last agrument."
 	case $1 in
 		'-rg'|'-rgt'|'-srg'|'-srgt'|'-gl'|'-glf'|'-gd'|'-rm'|'-o') #automatically adds a “-d” data type to a line in some insertions for convenience.
 			if [[  $output_index != *"$2"* ]]
@@ -799,7 +777,7 @@ pkg_install(){
 				output -s "$pm" "“$i” is already installed"
 			else
 				output -t "$pm/installing: $i"
-				[[ " ${pkgs_in_repo[@]} " = *" $i"* ]] && pma -i "$i" || output -s "$pm" "“$i” not found in repository or not avaliable for “$PRETTY_NAME”"
+				[[ " ${pkgs_in_repo[@]} " = *" $i"* ]] && pma -iy "$i" || output -s "$pm" "“$i” not found in repository or not avaliable for “$PRETTY_NAME”"
 			fi
 		done
 
@@ -812,7 +790,7 @@ pkg_install(){
 			if [[ " ${pkgs_in[@]} " = *" $i"* ]]
 			then
 				output -t "$pm/removing: $i"
-				pma -r $i
+				pma -ry $i
 			else
 				output -t "$pm/removing: $i"
 				output -s "$pm" "“$i” is not installed"
@@ -959,7 +937,7 @@ setup(){
 	source config
 	output 0
 #Detect custom bin path
-	[[ $2 = *"srcd="* ]] && cmd_srcd=$($prt $2|sed "s/srcd=//g") || [[ $3 = *"srcd="* ]] && cmd_srcd=$($prt $3|sed "s/srcd=//g")
+	[[ $2 = "cmd_srcd="* ]] && declare $2 || [[ $3 = "cmd_srcd="* ]] && declare $3
 #Creating directories
 	output -hT "$name_upper installation"
 	sfm -d $pdir $bnd_dir $cfg $hlc $hsr
