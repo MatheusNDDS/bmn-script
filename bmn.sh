@@ -516,6 +516,8 @@ bmr_a=($@)
 
 	## Helper
 	[[ $1 = "-h" ]] && $prt "$(output -T "$name_upper Register")\n\n$(output -t "Commands")\n  -rg : Register a line. Use “-rgt” instead to instert a timestamp.\n  -srg : Register a single line that can only be updated. Use “-srgt” instead to instert a timestamp.\n  -rm : Remove lines by @key.\n  -gl : Get lines by @key. Use “-glf” instead to format the line for visibility.\n  -gd : Get the line data by @key. Works fine only with single data lines.\n  -ed : Substitutes a the data line and keep the @key.\n  -sub : Substitutes one line to another.\n  -ail : Insert items in a line.\n  -ril : Remove items in a line.\n  -o : Format the line using the output function. Works fine only with single data lines.\n\n$(output -t "Data Types")\n -d : Data.\n -a : Alert.\n -s : Sucess.\n -e : Error.\n\n$(output -t "Using other database")\n You can thange the database declaring the “bmr_db=yourdbfile” in your script or temporaly in the last agrument."
+	
+	## Handy shortcuts
 	case $1 in
 		'-rg'|'-rgt'|'-srg'|'-srgt'|'-gl'|'-glf'|'-gd'|'-rm'|'-o') #automatically adds a “-d” data type to a line in some insertions for convenience.
 			if [[  $output_index != *"$2"* ]]
@@ -576,7 +578,7 @@ bmr_a=($@)
 			[[ $blog_verbose = 1 ]] && output -s "bmr" "Line “$(echo "${bmr_a[*]:1}")” registered"
 		fi
 	;;
-	"-srg"|"-srgt") # safe register, if there is data replace it with the newest one.
+	"-srg"|"-srgt") # safe register, if the line exists, replace it with the newest one.
 		if [[ $output_index != *"${bmr_a[1]}"* || ${bmr_a[2]}  != "${bkc}"* || ${bmr_a[@]:3} = *"${bkc}"* ]]
 		then
 			output -a syntax "bmr ${bmr_a[0]} “-d” “${bkc}key” “text arguments (cannot contain ${bkc})”"
@@ -757,12 +759,13 @@ pkg_install(){
 	[[ -z $1 ]] && pkg_parser parse packages || pkg_parser parse $1/packages
 	if [[ $pkg_flag != "null" ]]
 	then
+		
 		output -p $pm "Validate packages for installation"
 		pkg_parser check pma-in
-
+		
 		output -p $pm "Installing Packages"
 		pkg_parser list_pkgs
-
+		
 		if [[ $pm_update = 1 ]]
 		then
 			output -p $pm "Updating Packages"
@@ -798,6 +801,7 @@ pkg_install(){
 		done
 		pkg_parser clean
 	fi
+	
 	## Flatpaks
 	[[ -z $1 ]] && pkg_parser parse flatpaks || pkg_parser parse $1/flatpaks
 	if [[ $pkg_flag != "null" ]]
@@ -943,11 +947,11 @@ setup(){
 	sfm -d $pdir $bnd_dir $cfg $hlc $hsr
 	sfm -f $cfg_file $init_file $bmr_db
 	$cp $script "$pdir/source"
-	$prt "#!/bin/sh\nbash $pdir/source" '$*' > $cmd_srcd/$name
+	$prt "#!/bin/sh\nexec bash $pdir/source" '$*' > $cmd_srcd/$name
 	$elf $cmd_srcd/$name "$pdir/source"
 #Init file buid
 	$prt "source $pdir/source" > $init_file
-	$prt 'export PS1="\\n“\w”\\n$(output -d $name)"\nalias q="exit 0"\nalias x="clear"\nalias c="$editor $cfg_file"\nalias i="$editor $init_file"\nalias r="$editor $pdir/release"\nalias l="$editor $bmr_db"\nalias h="$prt +\\n c: edit config\\n i: edit init\\n r: edit release\\n l: edit log\\n x: clear prompt\\n h: help\\n q: exit+"' | tr '+' "'" >> $init_file
+	$prt 'export PS1="\\n“\w”\\n$(output -d $name)"\nalias q="exit 0"\nalias x="clear"\nalias s="$editor $pdir/source"\nalias c="$editor $cfg_file"\nalias i="$editor $init_file"\nalias r="$editor $pdir/release"\nalias l="$editor $bmr_db"\nalias h="$prt +\\n b: Edit $name_upper source\\n c: edit config\\n i: edit init\\n r: edit release\\n l: edit log\\n x: clear prompt\\n h: help\\n q: exit+"' | tr '+' "'" >> $init_file
 #Package manager autodetect
 	if [[ -z $pm ]]
 	then
@@ -1153,11 +1157,11 @@ btest(){
 }
 live_shell(){
 	btest -env -root -master || return 1
-	export current_dir=$(pwd)
-	cd $pdir
-	$ir bash --init-file $init_file
+	#export current_dir=$(pwd)
+	#cd $pdir
+	bash --init-file $init_file
 	bmr -rgt @bsh_login
-	cd $current_dir
+	#cd $current_dir
 }
 null(){
 	return $?
