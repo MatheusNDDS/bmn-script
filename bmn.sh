@@ -69,6 +69,8 @@ bmn_data(){
 	sfm_verbose=0 #Enable verbose log for SFM
 	bkc=@
 	date_f=('§' '%d-%m-%Y,%H:%M')
+	pki_verbose=0
+	[[ $1 = *'V' ]] && pki_verbose=1 && args[0]="$($prt ${args[0]}|tr -d 'V')"
 
 	#Work Directories
 	pdir="/etc/$name"
@@ -104,7 +106,8 @@ bmn_data(){
 bmn_init(){
 	btest -master || return 1
 	$mkd $lc_dir $bnd_dir && $cho -R root:root $lc_dir &> $dnull
-	if [[ $1 = '-i' || $1 = '--install' ]]
+
+	if [[ ${args[0]} = '-i' || ${args[0]} = '--install' ]]
 	then
 		btest -env -root || return 1
 		for i in ${args[@]:1}
@@ -125,7 +128,7 @@ bmn_init(){
 				output -d i "Maybe the relese file has outdated, try “$name -rU”."
 			fi
 		done
-	elif [[ $1 = '-li' || $1 = '--lc-install' && ! -z "${args[@]:1}" ]]
+	elif [[ ${args[0]} = '-li' || ${args[0]} = '--lc-install' && ! -z "${args[@]:1}" ]]
 	then
 		btest -env -root || return 1
 		bnd_ignore=()
@@ -162,7 +165,7 @@ bmn_init(){
 				lc_inst=0
 			fi
 		done
-	elif [[ $1 = '-di' || $1 = '--dir-install' && ! -z "${args[@]:1}" ]]
+	elif [[ ${args[0]} = '-di' || ${args[0]} = '--dir-install' && ! -z "${args[@]:1}" ]]
 	then
 		btest -env -root || return 1
 		bnd_ignore=()
@@ -192,80 +195,80 @@ bmn_init(){
 				lc_inst=0
 			fi
 		done
-	elif [[ $1 = "-iu" ]]
+	elif [[ ${args[0]} = "-iu" ]]
 	then
 		pm_update=1
 		bmn_init -i ${args[@]:1}
-	elif [[ $1 = "-liu" ]]
+	elif [[ ${args[0]} = "-liu" ]]
 	then
 		pm_update=1
 		bmn_init -li ${args[@]:1}
-	elif [[ $1 = "-diu" ]]
+	elif [[ ${args[0]} = "-diu" ]]
 	then
 		pm_update=1
 		bmn_init -di ${args[@]:1}
-	elif [[ $1 = '-e' || $1 = '--enable-extras' ]]
+	elif [[ ${args[0]} = '-e' || ${args[0]} = '--enable-extras' ]]
 	then
 		enable_extras $*
-	elif [[ $1 = '-bdl' || $1 = '--bnd-dowload' ]]
+	elif [[ ${args[0]} = '-bdl' || ${args[0]} = '--bnd-dowload' ]]
 	then
 		for dbnd in ${args[@]:1}
 		do
 			download $dbnd 1
 		done
-	elif [[ $1 = '-bp' || $1 = '--bnd-pack' ]]
+	elif [[ ${args[0]} = '-bp' || ${args[0]} = '--bnd-pack' ]]
 	then
 		for i in ${args[@]:1}
 		do
 			bnd_pack $i
 		done
-	elif [[ $1 = '-s' || $1 = '--setup' ]]
+	elif [[ ${args[0]} = '-s' || ${args[0]} = '--setup' ]]
 	then
 		setup $*
-	elif [[ $1 = '-ss' || $1 = '--setup' ]]
+	elif [[ ${args[0]} = '-ss' || ${args[0]} = '--setup' ]]
 	then
 		bmn_update $script
-	elif [[ $1 = '-U' || $1 = "--$name-update" ]]
+	elif [[ ${args[0]} = '-U' || ${args[0]} = "--$name-update" ]]
 	then
 		bmn_update $2
-	elif [[ $1 = '-rU' || $1 = '--repo-update' ]]
+	elif [[ ${args[0]} = '-rU' || ${args[0]} = '--repo-update' ]]
 	then
-		qwerry_bnd $1
-	elif [[ $1 = '-l' || $1 = '--list-bnds' ]]
+		qwerry_bnd ${args[0]}
+	elif [[ ${args[0]} = '-l' || ${args[0]} = '--list-bnds' ]]
 	then
 		qwerry_bnd ${args[@]:1}
-	elif [[ $1 = '-p' || $1 = '--properties' ]]
+	elif [[ ${args[0]} = '-p' || ${args[0]} = '--properties' ]]
 	then
 		output 0
 		output 1
-	elif [[ ! -z $2 && $1 = '-bd' || $1 = '--bnd-data' ]]
+	elif [[ ! -z $2 && ${args[0]} = '-bd' || ${args[0]} = '--bnd-data' ]]
 	then
 		#output -hT "$2"
 		bnd_parser $2
 		output 3
-	elif [[ ! -z $2 && $1 = '-rl' ]]
+	elif [[ ! -z $2 && ${args[0]} = '-rl' ]]
 	then
 		[[ "${args[1]}"  = "db="* ]] && bmr_db=$($prt ${args[1]} | sed "s/db=//" ) && unset args[1]
 		bmr -glf ${args[@]:1}
-	elif [[ ! -z $2 && $1 = '-rd' ]]
+	elif [[ ! -z $2 && ${args[0]} = '-rd' ]]
 	then
 		[[ "${args[1]}"  = "db="* ]] && bmr_db=$($prt ${args[1]} | sed "s/db=//" ) && unset args[1]
 		bmr -gd ${args[@]:1}
-	elif [[ ! -z $2 && $1 = '-rg' ]]
+	elif [[ ! -z $2 && ${args[0]} = '-rg' ]]
 	then
 		btest -env -root || return 1
 		[[ "${args[1]}"  = "db="* ]] && bmr_db=$($prt ${args[1]} | sed "s/db=//" ) && unset args[1]
 		bmr ${args[@]:1}
-	elif [[ $1 = '-h' || $1 = '--help' ]]
+	elif [[ ${args[0]} = '-h' || ${args[0]} = '--help' ]]
 	then
 		output 0
 		output 2
-	elif [[ $1 = '-ph' ]]
+	elif [[ ${args[0]} = '-ph' ]]
 	then
 		output 0
 		output 1
 		output 2
-	elif [[ $1 = '-c' || $1 = '--clean' ]]
+	elif [[ ${args[0]} = '-c' || ${args[0]} = '--clean' ]]
 	then
 		btest -env -root || return 1
 		bmn_invbnds="$(ls $bnd_dir/)"
@@ -277,7 +280,7 @@ bmn_init(){
 		else
 			output -s $name "No invalid b bundles found"
 		fi
-	elif [[ $1 = '-api' ]]
+	elif [[ ${args[0]} = '-api' ]]
 	then
 		btest -env -api || return 1
 		if [[ $2 = 'bmr' ]]
@@ -288,7 +291,7 @@ bmn_init(){
 		else
 			$2 ${args[@]:2}
 		fi
-	elif [[ $1 = '-sh' || "$1" = '--live-shell' ]]
+	elif [[ ${args[0]} = '-sh' || "${args[0]}" = '--live-shell' ]]
 	then
 		live_shell
 	fi
@@ -738,7 +741,6 @@ pkg_parser(){
 		'check')
 			case $2 in
 				'fp')
-					output -t 'Checking installed flatpaks'
 					pkgs_in=$(flatpak list)
 				;;
 				'pma')
@@ -762,14 +764,12 @@ pkg_install(){
 		
 		output -p $pm "Validate packages for installation"
 		pkg_parser check pma-in
-		
-		output -p $pm "Installing Packages"
 		pkg_parser list_pkgs
 		
 		if [[ $pm_update = 1 ]]
 		then
 			output -p $pm "Updating Packages"
-			pma -u
+			[[ $pki_verbose = 1 ]] && pma -u || pma -u &> $dnull
 		fi
 
 		for i in ${to_install[*]}
@@ -780,7 +780,12 @@ pkg_install(){
 				output -s "$pm" "“$i” is already installed"
 			else
 				output -t "$pm/installing: $i"
-				[[ " ${pkgs_in_repo[@]} " = *" $i"* ]] && pma -iy "$i" || output -s "$pm" "“$i” not found in repository or not avaliable for “$PRETTY_NAME”"
+				if [[ " ${pkgs_in_repo[@]} " = *" $i"* ]]
+				then
+					[[ $pki_verbose = 1 ]] && pma -iy "$i" || pma -iy "$i" &> $dnull
+				else
+					output -s "$pm" "“$i” not found in repository or not avaliable for “$PRETTY_NAME”"
+				fi
 			fi
 		done
 
@@ -793,7 +798,7 @@ pkg_install(){
 			if [[ " ${pkgs_in[@]} " = *" $i"* ]]
 			then
 				output -t "$pm/removing: $i"
-				pma -ry $i
+				[[ $pki_verbose = 1 ]] && pma -ry "$i" || pma -ry "$i" 2> $dnull
 			else
 				output -t "$pm/removing: $i"
 				output -s "$pm" "“$i” is not installed"
@@ -806,8 +811,9 @@ pkg_install(){
 	[[ -z $1 ]] && pkg_parser parse flatpaks || pkg_parser parse $1/flatpaks
 	if [[ $pkg_flag != "null" ]]
 	then
-		$pnl && output -p Flatpak "Installing Flatpaks"
+		output -hT "Installing “$bnd_name” Flatpaks"
 		pkg_parser list_pkgs
+
 		if [[ $pm_update = 1 ]]
 		then
 			output -t 'Uptating Flathub'
@@ -822,7 +828,7 @@ pkg_install(){
 				output -s "flatpak" "“$i” is already installed"
 			else
 				output -t "flatpak/installing: $i"
-				$ir flatpak $fp_mode install $fp_remote $i -y
+				[[ $pki_verbose = 1 ]] && $ir flatpak $fp_mode install $fp_remote $i -y || $ir flatpak $fp_mode install $fp_remote $i -y 0> $dnull
 			fi
 		done
 
@@ -833,7 +839,8 @@ pkg_install(){
 			if [[ "$pkgs_in" = *"$i"* ]]
 			then
 				output -t "flatpak/removing: $i"
-				$ir flatpak uninstall $fp_mode $i -y
+
+				[[ $pki_verbose = 1 ]] && $ir flatpak uninstall $fp_mode $i -y || $ir flatpak uninstall $fp_mode $i -y 2> $dnull
 			else
 				output -t "flatpak/removing: $i"
 				output -s "flatpak" "“$i” is not installed"
@@ -893,9 +900,9 @@ cook(){
 
 	## Auto writing file systems
 	[[ -e rootfs ]] && output -p $name "Writing “$bndid” root file system" && $cp rootfs/* rootfs/.* / 2> $dnull
-	[[ -e rootfs ]] && output -l "rootfs_dirs" "$(ls rootfs/)"
+	[[ -e rootfs ]] && output -l "rootfs_dirs" "$rootfs_dots $(ls -A rootfs/)"
 	[[ -e homefs ]] && output -p $name "Writing “$bndid” home file system" && $cp homefs/* homefs/.* $h/ 2> $dnull
-	[[ -e homefs ]] && output -l "homefs_dirs" "$(ls homefs/)"
+	[[ -e homefs ]] && output -l "homefs_dirs" "$homefs_dots $(ls -A homefs/)"
 
 	## Packages installation
 	[[ -f packages || -f flatpaks ]] && output -hT "Installing “$bnd_name” packages"
