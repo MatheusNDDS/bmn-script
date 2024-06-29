@@ -798,7 +798,7 @@ pkg_install(){
 			if [[ " ${pkgs_in[@]} " = *" $i"* ]]
 			then
 				output -t "$pm/removing: $i"
-				[[ $pki_verbose = 1 ]] && pma -ry "$i" || pma -ry "$i" 2> $dnull
+				[[ $pki_verbose = 1 ]] && pma -ry "$i" || pma -ry "$i" &> $dnull
 			else
 				output -t "$pm/removing: $i"
 				output -s "$pm" "“$i” is not installed"
