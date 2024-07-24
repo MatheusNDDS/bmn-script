@@ -27,7 +27,7 @@ bmn_data(){
 	pkgi="pkg_install"
 	header="output -bH"
 	src="sfm -rc"
-	
+
 	#Redirect points
 	d0="/dev/0"
 	dnull="/dev/null"
@@ -71,6 +71,8 @@ bmn_data(){
 	date_f=('§' '%d-%m-%Y,%H:%M')
 	pki_verbose=0
 	[[ $1 = *'V' ]] && pki_verbose=1 && args[0]="$($prt ${args[0]}|tr -d 'V')"
+
+	allert="bmr -a @$1"
 
 	#Work Directories
 	pdir="/etc/$name"
@@ -306,17 +308,17 @@ out_a=($*)
 	[[ $1 = 0 ]] && t[0]="\033[01;36m-=/Automation Bundles Manager/=-\033[00m \n~ MatheusNDDS : https://github.com/MatheusNDDS\n"
 	[[ $1 = 1 ]] && t[1]="\033[01;33m[Properties]\033[00m\n User: $u\n Home: $h\n PkgM: $pm\n Repo: $repo"
 	[[ $1 = 2 ]] && t[2]="\033[01;33m[Commands]\033[00m\n$(output -t "Bundles managment")\n --install,-i : Install bundles from repository, use “-iu” to update $pm packages during installation.\n --lc-install,-li : Install bundles from $file_format file path, use “-liu” to update $pm packages during installation.\n --dir-install,-di : Install bundles from unpacked dir path, use “-diu” to update $pm packages during installation.\n --dowload,-bdl : Download bundles from repository.\n --list-bnds,-l : List or search for bundles in repo file.\n --repo-update,-rU : Update repository release file, use this regularly.\n --clean,-c : Clean invalid bundles residues.\n\n$(output -t "Script tools")\n --$name-update,-U : Update $name script from Repo source or local script.\n --bnd-pack, -bp : Pack a bundle from a directory.\n --live-shell,-sh : Run live shell for testing $name functions.\n --properties,-p : Prints the user information that $name uses.\n\n$(output -t "BMN Register commands")\n Use “db=yourdbfile” in second argument to change database file.\n -rl : Read a Line.\n -rd : Read a line data only.\n -rg : Register and alter a line or use other BMR functions.\n\n\033[01;33m[Api Functions]\033[00m\n Some useful functions commands used in $name_upper that cam be acessible for every shell script language.\n Syntax: $name -api “function”.\n\n\033[01m  output :\033[00m The function used to format text in $name_upper and Recipe Srcipts. Use “output -h” for help.\n \033[01m pma :\033[00m The Package Manager Abstractor, a simple and extensible program for abstract package management across some Linux distros. Use “pma -h” for help.\n \033[01m bmr :\033[00m The $name_upper Register, provide a simple text based database, also cam be used in Recipe Scripts to send alerts and errors signals to $name main process. Use “bmr -h” for help.\n\n --help,-h : Print help text."
-	[[ $1 = 3 ]] && t[3]="bndp_a=(${bndp_a[*]})\nbndf=$bndf\nbnd_raw_name=$bnd_raw_name\nbnd_pre_name=(${bnd_pre_name[*]})\nbnd_name=$bnd_name\nflags=(${bnd_flags[*]})"
+	[[ $1 = 3 ]] && t[3]="bndp_a=(${bndp_a[*]})\nbndf=$bndf\nbnd_raw_name=$bnd_raw_name\nbnd_pre_name=(${bnd_pre_name[*]})\nbnd_name=$bnd_name\nbnd_pre_flags=(${bnd_pre_flags[*]})\nflags=(${bnd_flags[*]})"
 	[[ $1 = '-h' ]] && t['-h']="$(output -T "$name_upper Output Formatter")\n\n$(output -t "Titles")\n -hT : High Normal.\n -ahT : High Alert.\n -shT : High Sucess.\n -ehT : High Error.\n -T : Low Title.\n\n$(output -t "Dialogs")\n -d : Normal.\n -l : List.\n -p : Process.\n -t : Task.\n -a : Alert.\n -s : Sucess.\n -e : Error."
 	[[ $1 = '-p' ]] && t['-p']="\033[01;35m [$2]: -=- $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") -=-\033[00m" #Process
-	[[ $1 = '-l' ]] && t['-l']="\033[01m $2[ $($prt $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")|tr ' ' ', ') ]\033[00m " #List itens
-	[[ $1 = '-hT' ]] &&  t['-hT']="\n\033[01;36m******** [ ${out_a[*]:1} ] ********\033[00m\n" #High Title
-	[[ $1 = '-ahT' ]] &&  t['-ahT']="\n\033[01;33m******** // ${out_a[*]:1} // ********\033[00m\n" #Alert High Title
-	[[ $1 = '-shT' ]] &&  t['-shT']="\n\033[01;32m******** ( ${out_a[*]:1} ) ********\033[00m\n" #Sucess High Title
-	[[ $1 = '-ehT' ]] &&  t['-ehT']="\n\033[01;31m*#*#*#*# { $( echo "${out_a[*]:1}" | tr [:lower:] [:upper:]) } #*#*#*#*\033[00m\n" #Error High Title
+	[[ $1 = '-l' ]] && t['-l']="\033[01m $2: [ $($prt $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")|tr ' ' ', ') ]\033[00m " #List itens
+	[[ $1 = '-hT' ]] &&  t['-hT']="\v\033[01;36m******** [ ${out_a[*]:1} ] ********\033[00m\v" #High Title
+	[[ $1 = '-ahT' ]] &&  t['-ahT']="\v\033[01;33m******** // ${out_a[*]:1} // ********\033[00m\v" #Alert High Title
+	[[ $1 = '-shT' ]] &&  t['-shT']="\v\033[01;32m******** ( ${out_a[*]:1} ) ********\033[00m\v" #Sucess High Title
+	[[ $1 = '-ehT' ]] &&  t['-ehT']="\v\033[01;31m*#*#*#*# { $( echo "${out_a[*]:1}" | tr [:lower:] [:upper:]) } #*#*#*#*\033[00m\v" #Error High Title
 	[[ $1 = '-bH' ]] &&  t['-bH']="\033[01;36m ### $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") ###\n ~ $2 ~\033[00m\n" #Bundle Header
 	[[ $1 = '-T' ]] &&  t['-T']="\n\033[01;36m ## ${out_a[*]:1} ##\033[00m\n" #Title
-	[[ $1 = '-t' ]] &&  t['-t']="\033[01m -- ${out_a[*]:1}\033[00m" #Subtitle
+	[[ $1 = '-t' ]] &&  t['-t']="\v\033[01m -- ${out_a[*]:1}\033[00m" #Subtitle
 	[[ $1 = '-d' || $1 = '-qi' ]] &&  t['-d']="\033[01m [$2]: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Dialog, bmr Data
 	[[ $1 = '-e' || $1 = '-qi' ]] &&  t['-e']="\033[01;31m {$2}: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Error Dialog
 	[[ $1 = '-s' || $1 = '-qi' ]] &&  t['-s']="\033[01;32m ($2): $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Sucess Dialog
@@ -348,7 +350,7 @@ pma_a=($*)
 	pm_s[apt]="list"
 	pm_u[apt]="update"
 	pm_g[apt]="upgrade"
-##apt##
+##nix##
 	pm_i['nix-env']="-iA"
 	pm_r['nix-env']="-e"
 	pm_l['nix-env']="--qwery --installed"
@@ -857,15 +859,26 @@ bndp_a=($($prt $1|sed "s/:/ /"))
 	'-pbf') #brint bnd flags
 		if [[ ! -z $bnd_flags ]]
 		then
-			$prt ":${bnd_flags[@]}" | tr ' ' ','
+			$prt ":${bnd_pre_flags[@]}"
 		fi
 	;;
 	*) #set flags
+		unset bnd_f bnd_pre_flags bnd_flags bnd_raw_name bnd_pre_name bnd_name
 		bndf=${bndp_a[0]}
 		bnd_raw_name=$1
 		bnd_pre_name=($($prt $bndf|tr '/' ' '))
-		bnd_name=$($prt ${bnd_pre_name[-1]}|sed "s/.$file_format//")
-		bnd_flags=($($prt ${bndp_a[1]}|tr ',' ' '))
+		bnd_name=$($prt ${bnd_pre_name[-1]} | sed "s/.$file_format//")
+		bnd_pre_flags=($($prt ${bndp_a[1]} | sed s/'\],'/'\] '/g | sed s/',\['/' \['/g))
+
+		for flag in ${bnd_pre_flags[@]}
+		do
+			if [[ $flag = '['*']' ]]
+			then
+				bnd_flags+=($($prt $flag | tr '[]' ' '))
+			else
+				bnd_flags+=($($prt $flag | tr ',' ' '))
+			fi
+		done
 	;;
 	esac
 }
