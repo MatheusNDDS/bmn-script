@@ -28,6 +28,10 @@ bmn_data(){
 	header="output -bH"
 	src="sfm -rc"
 
+	#Bundle Utilities
+	alert="bmr -a @$1"
+	error="bmr -e @$1"
+
 	#Redirect points
 	d0="/dev/0"
 	dnull="/dev/null"
@@ -319,9 +323,9 @@ out_a=($*)
 	[[ $1 = '-T' ]] &&  t['-T']="\n\033[01;36m ## ${out_a[*]:1} ##\033[00m\n" #Title
 	[[ $1 = '-t' ]] &&  t['-t']="\v\033[01m -- ${out_a[*]:1}\033[00m" #Subtitle
 	[[ $1 = '-d' || $1 = '-qi' ]] &&  t['-d']="\033[01m [$2]: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Dialog, bmr Data
-	[[ $1 = '-e' || $1 = '-qi' ]] &&  t['-e']="\033[01;31m {$2}: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Error Dialog
+	[[ $1 = '-e' || $1 = '-qi' ]] &&  t['-e']="\033[01;31m >> {$2}: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") <<\033[00m" #Error Dialog
 	[[ $1 = '-s' || $1 = '-qi' ]] &&  t['-s']="\033[01;32m ($2): $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Sucess Dialog
-	[[ $1 = '-a' || $1 = '-qi' ]] &&  t['-a']="\033[01;33m /$2/: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Alert Dialog
+	[[ $1 = '-a' || $1 = '-qi' ]] &&  t['-a']="\033[01;33m >> /$2/: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") <<\033[00m" #Alert Dialog
 
 	if [[ "$1" != "-qi" ]]
 	then
