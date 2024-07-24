@@ -72,8 +72,6 @@ bmn_data(){
 	pki_verbose=0
 	[[ $1 = *'V' ]] && pki_verbose=1 && args[0]="$($prt ${args[0]}|tr -d 'V')"
 
-	allert="bmr -a @$1"
-
 	#Work Directories
 	pdir="/etc/$name"
 	cfg_file="$pdir/cfg"
@@ -86,11 +84,12 @@ bmn_data(){
 	flathub="flathub https://flathub.org/repo/flathub.flatpakrepo"
 	fp_mode="--system"
 	fp_remote="flathub"
-	
+
 	#External Data Import ##
 	$src $cfg_file
 	$src /etc/os-release
 	release=($($cat $pdir/release))
+	[[ -d $pdir/repo && $lc_repo = 0 ]] && lc_repo=$pdir/repo
 	
 	#Configure pm,u,h variables
 	detect_user_props
@@ -719,6 +718,7 @@ pkg_parser(){
 	case $1 in
 		'parse')
 			[[ ! -e $2 ]] && return 1
+			unset to_install to_remove pkg_flag
 			for i in $(cat $2)
 			do
 				case $i in
