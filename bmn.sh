@@ -93,6 +93,11 @@ bmn_data(){
 	$src $cfg_file
 	$src /etc/os-release
 	release=($($cat $pdir/release))
+	repo=$(bconfig -read repo)
+	lc_repo=$(bconfig -read lc_repo)
+	pm=$(bconfig -read pm)
+	u=$(bconfig -read user_name)
+	h=$(bconfig -read user_home)
 	[[ -d $pdir/repo && $lc_repo = 0 ]] && lc_repo=$pdir/repo
 	
 	#Configure pm,u,h variables
@@ -592,6 +597,7 @@ bmr_a=($@)
 			output -a syntax "bmr ${bmr_a[0]} “-d” “${bkc}key” “text arguments (cannot contain ${bkc})”"
 			output -d dataTypes ${output_index[@]}
 		else
+			old_key=${bmr_a[2]}
 			if [ ${bmr_a[0]} = '-srgt' ]
 			then
 				bmr_a[2]="${bmr_a[2]}$blog_date_str"
@@ -600,8 +606,9 @@ bmr_a=($@)
 			then
 				echo "${bmr_a[*]:1}" | sed "s/\n//g" >> $bmr_db
 			else
-				sed -i "/${bmr_a[1]} ${bmr_a[2]}/d" $bmr_db
+				sed -i "/${bmr_a[1]} $old_key/d" $bmr_db
 				echo "${bmr_a[*]:1}" | sed "s/\n//g" >> $bmr_db
+				unset old_key
 			fi
 			[[ $blog_verbose = 1 ]] && output -s "bmr" "Safe line “$(echo "${bmr_a[*]:1}")” registered"
 		fi
@@ -960,22 +967,23 @@ bnd_pack(){
 
 ## Script Management
 setup(){
+	args=($*)
 	btest -root -installer || return 1
 	unset pm u h repo lc_repo
 	source config
 	output 0
 #Detect custom bin path
-	[[ $2 = "cmd_srcd="* ]] && declare $2 || [[ $3 = "cmd_srcd="* ]] && declare $3
+	[[ $2 = "cmd_srcd="* ]] && declare $2 && unset ${args[1]}
 #Creating directories
 	output -hT "$name_upper installation"
 	sfm -d $pdir $bnd_dir $cfg $hlc $hsr
-	sfm -f $cfg_file $init_file $bmr_db
+	sfm -f $init_file $bmr_db
 	$cp $script "$pdir/source"
 	$prt "#!/bin/sh\nexec bash $pdir/source" '$*' > $cmd_srcd/$name
 	$elf $cmd_srcd/$name "$pdir/source"
 #Init file buid
-	$prt "source $pdir/source" > $init_file
-	$prt 'export PS1="\\n“\w”\\n$(output -d $name)"\nalias q="exit 0"\nalias x="clear"\nalias s="$editor $pdir/source"\nalias c="$editor $cfg_file"\nalias i="$editor $init_file"\nalias r="$editor $pdir/release"\nalias l="$editor $bmr_db"\nalias h="$prt +\\n b: Edit $name_upper source\\n c: edit config\\n i: edit init\\n r: edit release\\n l: edit log\\n x: clear prompt\\n h: help\\n q: exit+"' | tr '+' "'" >> $init_file
+	$prt "source $cmd_srcd/$name" > $init_file
+	$prt 'export PS1="\\n“\w”\\n$(output -d $name)"\nalias q="exit 0"\nalias x="clear"\nalias s="$editor $pdir/source"\nalias i="$editor $init_file"\nalias r="$editor $pdir/release"\nalias l="$editor $bmr_db"\nalias h="$prt +\\n b: Edit $name_upper source\\n c: edit config\\n i: edit init\\n r: edit release\\n l: edit log\\n x: clear prompt\\n h: help\\n q: exit+"' | tr '+' "'" >> $init_file
 #Package manager autodetect
 	if [[ -z $pm ]]
 	then
@@ -994,19 +1002,18 @@ setup(){
 	output -a ATTENTION "If you run this program outside your home directory the directory defined in this setup will be used."
 #Installing dependencies
 	output -p $name "Installing Dependencies"
-	pma -u
+	pma -uy
 	for i in ${deps[@]}
 	do
 		output -t "$pm/install: $i"
-		pma -i $i
+		pma -iy $i
 	done
-#Saving environment variables
-	if [[ -z "$2" && $2 != *"srcd="* || -z "$3" && $3 != *"srcd="* ]]
+#Saving bmn configurations
+	if [[ -z "${args[1]}" ]]
 	then
 		if [ -e config ]
 		then
-			$prt "pm=$pm h=$h u=$u \nrepo=$repo \nlc_repo=$lc_repo" > $cfg_file
-			$src $cfg_file
+			bconfig -setup
 #Downloading repository releas
 			qwerry_bnd -rU
 			output -hT "$name_upper instelled with portable repo file"
@@ -1016,20 +1023,40 @@ setup(){
 			exit 1
 		fi
 	else
-		$prt "pm=$pm h=$h u=$u \nrepo=$2 \nlc_repo=0" > $cfg_file
-		$src $cfg_file
+# 		$src $cfg_file
 #Downloading repository release
+		repo=${args[1]}
+		bconfig -setup
 		qwerry_bnd -rU
 		output -hT "$name_upper instaled"
 	fi
 	bmr -rgt @setup "$name target “$cmd_srcd”. pm=$pm, h=$h, u=$u, repo=$repo"
+}
+bconfig(){
+	btest -root || return 1
+	bcfg_a=($*)
+	case $1 in
+	-read)
+		bmr -gd @bmn_$2
+	;;
+	-set)
+		bmr -gd @bmn_$2 ${bcfg_a[*]:1}
+	;;
+	-setup)
+		bmr -srg @bmn_pm $pm
+		bmr -srg @bmn_user_home $h
+		bmr -srg @bmn_user_name $u
+		bmr -srg @bmn_repo $repo
+		bmr -srg @bmn_lc_repo $lc_repo
+	;;
+	esac
 }
 bmn_update(){
 	btest -env -root -master || return 1
 	output -hT "Updating $name_upper Script"
 	bin_srcd=($(cat $init_file))
 	cmd_bin=${bin_srcd[1]}
-	if [[ $1 = "" ]]
+	if [[ -z $1 ]]
 	then
 		current_dir=$(pwd)
 		output -p $name 'Downloading Script'
@@ -1044,7 +1071,7 @@ bmn_update(){
 		output -d 'local' $script_src
 		$cp $script_src $pdir/
 	fi
-	bmr -rgt @update "from “$script_src”."
+	bmr -srgt @update "from “$script_src”."
 	output -p $name 'Installing Script'
 	$mv "$pdir/$name.sh" $cmd_bin
 	$elf $cmd_bin
@@ -1168,7 +1195,7 @@ btest(){
 				ef=1 && [[ $0 = "bmn.sh" ]] && ef=0
 			;;
 			'-env')
-				[[ ! -d $pdir && ! -d $bnd_dir && ! -f $init_file && ! -f $bmr_db && ! -f $cfg_file ]] && err_out=${bterr[$err_type]} && ef=1
+				[[ ! -d $pdir && ! -d $bnd_dir && ! -f $init_file ]] && err_out=${bterr[$err_type]} && ef=1
 			;;
 			'api')
 				[[ ${args[1]} != 'pma' || ${args[1]} != 'output' || ${args[1]} != 'bmr' ]] && ef=1
@@ -1181,11 +1208,8 @@ btest(){
 }
 live_shell(){
 	btest -env -root -master || return 1
-	#export current_dir=$(pwd)
-	#cd $pdir
 	bash --init-file $init_file
-	bmr -rgt @bsh_login
-	#cd $current_dir
+	bmr -srgt @bsh_login
 }
 null(){
 	return $?
