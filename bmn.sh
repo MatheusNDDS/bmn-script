@@ -1,8 +1,83 @@
 #!/usr/bin/env bash
 ### Core functions ###
 bmn_data(){
-## Evironment Variables : Can be used in recipe scripts ##
-	#General commands 
+#------------------------------------------------------
+## Cook Script Commands ##
+#Generate commands without conflict with “-*” pattern
+	declare -Ag cs
+	#Linux standard replacments
+	cs['chm']="chmod"
+	cs['cho']="chown"
+	cs['cp']="cp -r"
+	cs['rm']="sfm -r"
+	cs['rmd']="sfm -rd"
+	cs['mv']="mv"
+	cs['mk']="sfm -f"
+	cs['mkd']="sfm -d"
+	cs['elf']="chmod 755"
+	cs['cat']="sfm -c"
+	cs['prt']="echo -e"
+	cs['pwd']="pwd"
+	cs['src']="sfm -rc"
+	#BMN Tools
+	cs['out']="output"
+	cs['init']="bmn_init"
+	cs['pkgi']="pkg_install"
+	cs['bmi']="bmn -i"
+	#BMN Register
+	cs['rg']="bmr -rg"
+	cs['srg']="bmr -srg"
+	cs['srgt']="bmr -srgt"
+	cs['drm']="bmr -rm"
+	cs['ed']="bmr -ed"
+	cs['sub']="bmr -sub"
+	cs['ail']="bmr -ail"
+	cs['ril']="bmr -ril"
+	cs['do']=" bmr -o"
+	cs['gl']="bmr -gl"
+	cs['glf']="bmr -glf"
+	cs['gd']="bmr -gd"
+	#Shortcuts
+	cs['dl']="wget"
+	cs['pnl']="echo -e \n"
+	cs['gitc']="git clone"
+	cs['add_ppa']="add-apt-repository"
+	cs['flatpak_remote']="flatpak remote-add --if-not-exists"
+	cs['fp_overide']="flatpak override"
+	#Bundles utilities
+	cs['header']="output -bH"
+	cs['alert']="bmr -a @\$1"
+	cs['error']="bmr -e @\$1"
+	#Permission manager
+	cs['own']="$set_owner" #set dirs owner to current user
+	cs['fown']="$set_owner_forced" #force $set_owner in entire $HOME (slow)
+
+	## Directories ##
+	#Common
+	bin="/usr/bin"
+	rsr="/usr/share" #root share
+	rlc="/usr/local" #root local
+	hsr="$h/.local/share" #home share
+	hlc="$h/.local" #home local
+	cfg="$h/.config"
+	rapp="$rsr/applications"
+	happ="$hsr/applications"
+	etc="/etc"
+	dev="/dev"
+	mdi="/media"
+	mnt="/mnt"
+	tmp="/temp"
+	sus="/etc/sudoers"
+	xss="$rsr/xsessions"
+	wss="$rsr/wayland-sessions"
+	xdga="/etc/xdg/autostart"
+	skel="$etc/skel"
+	#Redirect points
+	d0="/dev/0"
+	dnull="/dev/null"
+	tmpf="/tmp/$$" #generate a unique temporary file
+
+## Commands (Legacy) ##
 	r="sudo"
 	ir=""
 	chm="$ir chmod"
@@ -31,31 +106,7 @@ bmn_data(){
 	#Bundle Utilities
 	alert="bmr -a @$1"
 	error="bmr -e @$1"
-
-	#Redirect points
-	d0="/dev/0"
-	dnull="/dev/null"
-	tmpf="/tmp/$$" #generate a unique temporary file
-	
-	#Directorys collection
-	bin="/usr/bin"
-	rsr="/usr/share" #root share
-	rlc="/usr/local" #root local
-	hsr="$h/.local/share" #home share
-	hlc="$h/.local" #home local
-	cfg="$h/.config"
-	rapp="$rsr/applications"
-	happ="$hsr/applications"
-	etc="/etc"
-	dev="/dev"
-	mdi="/media"
-	mnt="/mnt"
-	tmp="/temp"
-	sus="/etc/sudoers"
-	xss="$rsr/xsessions"
-	wss="$rsr/wayland-sessions"
-	xdga="/etc/xdg/autostart"
-	skel="$etc/skel"
+#--------------------------------------------------------
 
 ## Script Variables : Change this variables broke bundle execution ##
 	#References
@@ -110,8 +161,10 @@ bmn_data(){
 	hlc="$h/.local"
 	cfg="$h/.config"
 	happ="$hsr/applications/"
-	set_owner="$cho -R $u:$u"  #set dirs owner to current user
-	set_owner_forced="$set_owner $(echo $h/.* $h/* | sed s/$(echo $lc_dir | sed s/'\/'/'\\\/'/g)//) &> $dnull" #force $set_owner in entire $HOME (slow)
+	set_owner="$cho -R $u:$u"
+	set_owner_forced="$set_owner $(echo $h/.* $h/* | sed s/$(echo $lc_dir | sed s/'\/'/'\\\/'/g)//) &> $dnull"
+	cs['own']="$set_owner"
+	cs['fown']="$set_owner_forced"
 }
 bmn_init(){
 	btest -master || return 1
@@ -234,7 +287,16 @@ bmn_init(){
 		done
 	elif [[ ${args[0]} = '-s' || ${args[0]} = '--setup' ]]
 	then
-		setup $*
+		setup ${args[@]:1}
+	elif [[ ${args[0]} = '-rc' || ${args[0]} = '--read-config' ]]
+	then
+		bconfig -read ${args[@]:1}
+	elif [[ ${args[0]} = '-lc' || ${args[0]} = '--list-config' ]]
+	then
+		bconfig -list ${args[@]:1}
+	elif [[ ${args[0]} = '-sc' || ${args[0]} = '--set-config' ]]
+	then
+		bconfig -set ${args[@]:1}
 	elif [[ ${args[0]} = '-ss' || ${args[0]} = '--setup' ]]
 	then
 		bmn_update $script
@@ -292,14 +354,13 @@ bmn_init(){
 		fi
 	elif [[ ${args[0]} = '-api' ]]
 	then
-		btest -env -api || return 1
-		if [[ $2 = 'bmr' ]]
+		btest -env -api=${args[1]} || return 1
+		if [[ ${args[1]} = 'bmr' ]]
 		then
-			btest -root || return 1
 			[[ "${args[2]}"  = "db="* ]] && bmr_db=$($prt ${args[2]} | sed "s/db=//" ) && unset args[2]
 			bmr ${args[@]:2}
 		else
-			$2 ${args[@]:2}
+			${args[1]} ${args[@]:2}
 		fi
 	elif [[ ${args[0]} = '-sh' || "${args[0]}" = '--live-shell' ]]
 	then
@@ -326,7 +387,7 @@ out_a=($*)
 	[[ $1 = '-ehT' ]] &&  t['-ehT']="\v\033[01;31m*#*#*#*# { $( echo "${out_a[*]:1}" | tr [:lower:] [:upper:]) } #*#*#*#*\033[00m\v" #Error High Title
 	[[ $1 = '-bH' ]] &&  t['-bH']="\033[01;36m ### $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") ###\n ~ $2 ~\033[00m\n" #Bundle Header
 	[[ $1 = '-T' ]] &&  t['-T']="\n\033[01;36m ## ${out_a[*]:1} ##\033[00m\n" #Title
-	[[ $1 = '-t' ]] &&  t['-t']="\v\033[01m -- ${out_a[*]:1}\033[00m" #Subtitle
+	[[ $1 = '-t' ]] &&  t['-t']="\033[01m -- ${out_a[*]:1}\033[00m" #Subtitle
 	[[ $1 = '-d' || $1 = '-qi' ]] &&  t['-d']="\033[01m [$2]: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Dialog, bmr Data
 	[[ $1 = '-e' || $1 = '-qi' ]] &&  t['-e']="\033[01;31m >> {$2}: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") <<\033[00m" #Error Dialog
 	[[ $1 = '-s' || $1 = '-qi' ]] &&  t['-s']="\033[01;32m ($2): $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Sucess Dialog
@@ -400,11 +461,9 @@ pma_a=($*)
 	pm_s[apx]="search"
 	pm_u[apx]=@
 	pm_g[apx]=@
-
 	#Command yes implementation
 	[[ $1 = *'y' ]] && pm_yes='-y' && pma_a[0]="$($prt ${pma_a[0]}|tr -d 'y')"
 	[[ ${pma_a[-1]} = '-y' ]] && pm_yes='-y' && unset pma_a[-1]
-
 	case "${pma_a[0]}" in
 	'-h')
 		$prt "$(output -T "$name_upper Package Manager Abstractor")\n$(output -d "suported" ${!pm_l[@]})\n\n$(output -t "Commands")\n  -i : Install package.\n  -r : Remove package.\n  -l : List instaled.\n  -s : Search in repository.\n\n$(output -t "“yes” command support")\n  Standard: “pma -i pkgs... \033[01;36m-y\033[00m”.\n  In-argument: “pma -i\033[01;36my\033[00m pkgs...”"
@@ -532,16 +591,19 @@ bmr_a=($@)
 	
 	## Handy shortcuts
 	case $1 in
-		'-rg'|'-rgt'|'-srg'|'-srgt'|'-gl'|'-glf'|'-gd'|'-rm'|'-o') #automatically adds a “-d” data type to a line in some insertions for convenience.
+		-rg|-rgt|-srg|-srgt|-gl|-glf|-gd|-rm|-o) #automatically adds a “-d” data type to a line in some insertions for convenience.
 			if [[  $output_index != *"$2"* ]]
 			then
 				bmr_a=($1 '-d' ${bmr_a[@]:1})
 				line=($(grep -- "${bmr_a[1]} ${bmr_a[2]}" $bmr_db))
 			fi
 		;;
-		'@'*) #adds a alert data type when the arguments are no insertion instructions and a @key are passed, useful for generate bundles alerts quickly.
+		@*) #adds a alert data type when the arguments are no insertion instructions and a @key are passed, useful for generate bundles alerts quickly.
 			bmr_a=('-a' ${bmr_a[@]:0})
 			line=($(grep -- "${bmr_a[1]} ${bmr_a[2]}" $bmr_db))
+		;;
+		-rg*|-srg*|-rm)
+		btest -root || return 1
 		;;
 	esac
 	
@@ -982,7 +1044,7 @@ setup(){
 	$prt "#!/bin/sh\nexec bash $pdir/source" '$*' > $cmd_srcd/$name
 	$elf $cmd_srcd/$name "$pdir/source"
 #Init file buid
-	$prt "source $cmd_srcd/$name" > $init_file
+	$prt "source $pdir/source" > $init_file
 	$prt 'export PS1="\\n“\w”\\n$(output -d $name)"\nalias q="exit 0"\nalias x="clear"\nalias s="$editor $pdir/source"\nalias i="$editor $init_file"\nalias r="$editor $pdir/release"\nalias l="$editor $bmr_db"\nalias h="$prt +\\n b: Edit $name_upper source\\n c: edit config\\n i: edit init\\n r: edit release\\n l: edit log\\n x: clear prompt\\n h: help\\n q: exit+"' | tr '+' "'" >> $init_file
 #Package manager autodetect
 	if [[ -z $pm ]]
@@ -1033,16 +1095,22 @@ setup(){
 	bmr -rgt @setup "$name target “$cmd_srcd”. pm=$pm, h=$h, u=$u, repo=$repo"
 }
 bconfig(){
-	btest -root || return 1
 	bcfg_a=($*)
 	case $1 in
 	-read)
+		btest -env -cfg=$2 || return 1
 		bmr -gd @bmn_$2
 	;;
+	-list)
+		btest -env || return 1
+		bmr -glf @bmn_$2 | sed s/'bmn_'/''/g
+	;;
 	-set)
-		bmr -gd @bmn_$2 ${bcfg_a[*]:1}
+		btest -env -root -cfg=$2 || return 1
+		bmr -srg @bmn_$2 ${bcfg_a[*]:2}
 	;;
 	-setup)
+		btest -env -root || return 1
 		bmr -srg @bmn_pm $pm
 		bmr -srg @bmn_user_home $h
 		bmr -srg @bmn_user_name $u
@@ -1173,36 +1241,47 @@ btest(){
 	bterr['-net']="-ehT No internet connection"
 	bterr['-env']="-ahT BMN environment not correctly configured"
 	bterr['-api']="-ahT Invalid “${args[1]}” api call"
+	bterr['-cfg']="-ahT Invalid configuration key. Run “$name -lc” to view the keys"
 	ef=0
-	
+
 	## Tests
 	for err_type in $*
 	do
-		case $err_type in 
-			'-root')
-				[[ $UID != 0 ]] &&  err_out=${bterr[$err_type]} && ef=1
-			;;
-			'-net')
-				wget -q --spider www.google.com
-				[[ $? != 0 ]] && err_out=${bterr[$err_type]} && ef=1
-			;;
-			'-master')
-				ef=1 && init_data=($([ -f $init_file ] && cat $init_file))
-				[[ ! -z "$init_data" && $0 = "${init_data[1]}" || $0 = "/etc/bmn/source" && "${init_data[1]}" = '/etc/bmn/source' || $0 = "bmn.sh" ]] && ef=0
-				unset init_data
-			;;
-			'-installer')
-				ef=1 && [[ $0 = "bmn.sh" ]] && ef=0
-			;;
-			'-env')
-				[[ ! -d $pdir && ! -d $bnd_dir && ! -f $init_file ]] && err_out=${bterr[$err_type]} && ef=1
-			;;
-			'api')
-				[[ ${args[1]} != 'pma' || ${args[1]} != 'output' || ${args[1]} != 'bmr' ]] && ef=1
-			;;
-		esac
-		[[ ! -z "${bterr[$err_type]}" && $ef = 1 ]] && output ${bterr[$err_type]}
-		[[ $ef = 1 ]] && return $ef
+		err_a=$($prt $err_type | tr '=' ' ')
+		err_test="${err_a[0]}"
+		err_flags="${err_a[1]}"
+		if [[ " ${tested[*]} " != *"$err_test"* ]]
+		then
+			tested+=($err_test)
+			case $err_test in
+				-root)
+					[[ $UID != 0 ]] && ef=1
+				;;
+				-net)
+					wget -q --spider www.google.com
+					[[ $? != 0 ]] && ef=1
+				;;
+				-master)
+					ef=1 && init_data=($([ -f $init_file ] && cat $init_file))
+					[[ ! -z "$init_data" && $0 = "${init_data[1]}" || $0 = "/etc/bmn/source" && "${init_data[1]}" = '/etc/bmn/source' || $0 = "bmn.sh" ]] && ef=0
+					unset init_data
+				;;
+				-installer)
+					ef=1 && [[ $0 = "bmn.sh" ]] && ef=0
+				;;
+				-env)
+					[[ ! -d $pdir && ! -d $bnd_dir && ! -f $init_file ]] && ef=1
+				;;
+				-api)
+					[[ $err_flags != 'pma' || $err_flags != 'output' || $err_flags != 'bmr' ]] && ef=1
+				;;
+				-cfg)
+					[[ $err_flags != 'pm' && $err_flags != 'user_name' && $err_flags != 'user_home' && $err_flags != 'repo'&& $err_flags != 'lc_repo' ]] && ef=1
+				;;
+			esac
+			[[ ! -z "${bterr[$err_test]}" && $ef = 1 ]] && output ${bterr[$err_test]}
+			[[ $ef = 1 ]] && return $ef
+		fi
 	done
 	return $ef
 }
@@ -1216,4 +1295,6 @@ null(){
 }
 
 ### Program Start ###
-bmn_data $* && bmn_init $*
+bmn_data $*
+for csi in ${!cs[*]} ; do alias -- "-$csi=${cs[$csi]}" ; done && shopt -s expand_aliases
+bmn_init $*
