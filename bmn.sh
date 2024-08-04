@@ -376,7 +376,41 @@ out_a=($*)
 	declare -A t
 	[[ $1 = 0 ]] && t[0]="\033[01;36m-=/Automation Bundles Manager/=-\033[00m \n~ MatheusNDDS : https://github.com/MatheusNDDS\n"
 	[[ $1 = 1 ]] && t[1]="\033[01;33m[Properties]\033[00m\n User: $u\n Home: $h\n PkgM: $pm\n Repo: $repo"
-	[[ $1 = 2 ]] && t[2]="\033[01;33m[Commands]\033[00m\n$(output -t "Bundles managment")\n --install,-i : Install bundles from repository, use “-iu” to update $pm packages during installation.\n --lc-install,-li : Install bundles from $file_format file path, use “-liu” to update $pm packages during installation.\n --dir-install,-di : Install bundles from unpacked dir path, use “-diu” to update $pm packages during installation.\n --dowload,-bdl : Download bundles from repository.\n --list-bnds,-l : List or search for bundles in repo file.\n --repo-update,-rU : Update repository release file, use this regularly.\n --clean,-c : Clean invalid bundles residues.\n\n$(output -t "Script tools")\n --$name-update,-U : Update $name script from Repo source or local script.\n --bnd-pack, -bp : Pack a bundle from a directory.\n --live-shell,-sh : Run live shell for testing $name functions.\n --properties,-p : Prints the user information that $name uses.\n\n$(output -t "BMN Register commands")\n Use “db=yourdbfile” in second argument to change database file.\n -rl : Read a Line.\n -rd : Read a line data only.\n -rg : Register and alter a line or use other BMR functions.\n\n\033[01;33m[Api Functions]\033[00m\n Some useful functions commands used in $name_upper that cam be acessible for every shell script language.\n Syntax: $name -api “function”.\n\n\033[01m  output :\033[00m The function used to format text in $name_upper and Recipe Srcipts. Use “output -h” for help.\n \033[01m pma :\033[00m The Package Manager Abstractor, a simple and extensible program for abstract package management across some Linux distros. Use “pma -h” for help.\n \033[01m bmr :\033[00m The $name_upper Register, provide a simple text based database, also cam be used in Recipe Scripts to send alerts and errors signals to $name main process. Use “bmr -h” for help.\n\n --help,-h : Print help text."
+	[[ $1 = 2 ]] && t[2]="\033[01;33m[Commands]\033[00m
+$(output -t "Bundles managment")
+  --install -i : Install bundles from repository, use “-iu” to update $pm packages during installation.
+  --lc-install -li : Install bundles from $file_format file path, use “-liu” to update $pm packages during installation.
+  --dir-install -di : Install bundles from unpacked dir path, use “-diu” to update $pm packages during installation.
+  --dowload -bdl : Download bundles from repository.
+  --list-bnds -l : List or search for bundles in repo file.
+  --repo-update -rU : Update repository release file, use this regularly.
+  --clean -c : Clean invalid bundles residues.
+
+$(output -t "Script tools")
+  --$name-update -U : Update $name script from Repo source or local script.
+  --list-config -lc : List all avaliable configurations.
+  --read-config -rc : Read configuration data.
+  --set-config -sc : Change a configuration value.
+  --bnd-pack, -bp : Pack a bundle from a directory.
+  --live-shell -sh : Run live shell for testing $name functions.
+  --properties -p : Prints the user information that $name uses.
+
+$(output -t "BMN Register commands")
+ Use “db=yourdbfile” in second argument to change database file.
+  -rl : Read a Line.
+  -rd : Read a line data only.
+  -rg : Register and alter a line or use other BMR functions.
+
+\033[01;33m[Api Functions]\033[00m
+ Some useful functions commands used in $name_upper that cam be acessible for every shell script language.
+ Syntax: $name -api “function”.
+
+\033[01m  output :\033[00m The function used to format text in $name_upper and Recipe Srcipts. Use “output -h” for help.
+\033[01m  pma :\033[00m The Package Manager Abstractor, a simple and extensible program for abstract package management across some Linux distros.  Use “pma -h” for help.
+\033[01m  bmr :\033[00m The $name_upper Register, provide a simple text based database. Use “bmr -h” for help.
+
+ --help -h : Print help text."
+
 	[[ $1 = 3 ]] && t[3]="bndp_a=(${bndp_a[*]})\nbndf=$bndf\nbnd_raw_name=$bnd_raw_name\nbnd_pre_name=(${bnd_pre_name[*]})\nbnd_name=$bnd_name\nbnd_pre_flags=(${bnd_pre_flags[*]})\nflags=(${bnd_flags[*]})"
 	[[ $1 = '-h' ]] && t['-h']="$(output -T "$name_upper Output Formatter")\n\n$(output -t "Titles")\n -hT : High Normal.\n -ahT : High Alert.\n -shT : High Sucess.\n -ehT : High Error.\n -T : Low Title.\n\n$(output -t "Dialogs")\n -d : Normal.\n -l : List.\n -p : Process.\n -t : Task.\n -a : Alert.\n -s : Sucess.\n -e : Error."
 	[[ $1 = '-p' ]] && t['-p']="\033[01;35m [$2]: -=- $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") -=-\033[00m" #Process
@@ -584,10 +618,31 @@ bmr_a=($@)
 	btest -master && blog_verbose=0 || blog_verbose=1
 
 	## change database file
-	[[ ${bmr_a[-1]} = 'bmr_db='* ]] && declare ${bmr_a[-1]} && unset bmr_a[-1]
+	[[ ${bmr_a[1]} = 'db='* ]] && declare ${bmr_a[1]} && bmr_db=$db && unset bmr_a[1] db
 
 	## Helper
-	[[ $1 = "-h" ]] && $prt "$(output -T "$name_upper Register")\n\n$(output -t "Commands")\n  -rg : Register a line. Use “-rgt” instead to instert a timestamp.\n  -srg : Register a single line that can only be updated. Use “-srgt” instead to instert a timestamp.\n  -rm : Remove lines by @key.\n  -gl : Get lines by @key. Use “-glf” instead to format the line for visibility.\n  -gd : Get the line data by @key. Works fine only with single data lines.\n  -ed : Substitutes a the data line and keep the @key.\n  -sub : Substitutes one line to another.\n  -ail : Insert items in a line.\n  -ril : Remove items in a line.\n  -o : Format the line using the output function. Works fine only with single data lines.\n\n$(output -t "Data Types")\n -d : Data.\n -a : Alert.\n -s : Sucess.\n -e : Error.\n\n$(output -t "Using other database")\n You can thange the database declaring the “bmr_db=yourdbfile” in your script or temporaly in the last agrument."
+	[[ $1 = "-h" ]] && $prt "$(output -T "$name_upper Register")
+
+$(output -t "Commands")
+  -rg : Register a line. Use “-rgt” instead to instert a timestamp.
+  -srg : Register a single line that can only be updated. Use “-srgt” instead to instert a timestamp.
+  -rm : Remove lines by @key.
+  -gl : Get lines by @key. Use “-glf” instead to format the line for visibility.
+  -gd : Get the line data by @key. Works fine only with single data lines.
+  -ed : Substitutes a the data line and keep the @key.
+  -sub : Substitutes one line to another.
+  -ail : Insert items in a line.
+  -ril : Remove items in a line.
+  -o : Format the line using the output function. Works fine only with single data lines.
+
+$(output -t "Data Types")
+  -d : Data.
+  -a : Alert.
+  -s : Sucess.
+  -e : Error.
+
+$(output -t "Using other database")
+  You can thange the database declaring the “db=yourdbfile” variable in the first argument."
 	
 	## Handy shortcuts
 	case $1 in
