@@ -172,7 +172,7 @@ bmn_init(){
 
 	if [[ ${args[0]} = '-i' || ${args[0]} = '--install' ]]
 	then
-		btest -env -root || return 1
+		btest -env -data -root || return 1
 		for i in ${args[@]:1}
 		do
 			bnd_parser $i
@@ -193,7 +193,7 @@ bmn_init(){
 		done
 	elif [[ ${args[0]} = '-li' || ${args[0]} = '--lc-install' && ! -z "${args[@]:1}" ]]
 	then
-		btest -env -root || return 1
+		btest -env -data -root || return 1
 		bnd_ignore=()
 		output -hT "Importing bundles"
 		for i in ${args[@]:1}
@@ -230,7 +230,7 @@ bmn_init(){
 		done
 	elif [[ ${args[0]} = '-di' || ${args[0]} = '--dir-install' && ! -z "${args[@]:1}" ]]
 	then
-		btest -env -root || return 1
+		btest -env -data -root || return 1
 		bnd_ignore=()
 		output -hT "Importing dir bundles"
 		for i in ${args[@]:1}
@@ -354,7 +354,7 @@ bmn_init(){
 		fi
 	elif [[ ${args[0]} = '-api' ]]
 	then
-		btest -env -api=${args[1]} || return 1
+		btest -env -data -api=${args[1]} || return 1
 		if [[ ${args[1]} = 'bmr' ]]
 		then
 			[[ "${args[2]}"  = "db="* ]] && bmr_db=$($prt ${args[2]} | sed "s/db=//" ) && unset args[2]
@@ -1295,6 +1295,7 @@ btest(){
 	bterr['-root']="-ahT “$name $cmd” needs root privileges"
 	bterr['-net']="-ehT No internet connection"
 	bterr['-env']="-ahT BMN environment not correctly configured"
+	bterr['-data']="-ahT BMR: Some configuration data are missing"
 	bterr['-api']="-ahT Invalid “${args[1]}” api call"
 	bterr['-cfg']="-ahT Invalid configuration key. Run “$name -lc” to view the keys"
 	ef=0
@@ -1325,7 +1326,10 @@ btest(){
 					ef=1 && [[ $0 = "bmn.sh" ]] && ef=0
 				;;
 				-env)
-					[[ ! -d $pdir && ! -d $bnd_dir && ! -f $init_file ]] && ef=1
+					[[ ! -d $pdir && ! -d $bnd_dir && ! -f $init_file && ! -f $bmr_db ]] && ef=1
+				;;
+				-data)
+					[[ -z $pm || -z $h || -z $u || -z $repo || -z $lc_repo ]] && ef=1
 				;;
 				-api)
 					[[ $err_flags != 'pma' || $err_flags != 'output' || $err_flags != 'bmr' ]] && ef=1
