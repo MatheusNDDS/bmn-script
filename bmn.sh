@@ -6,6 +6,7 @@ bmn_data(){
 #Generate commands without conflict with “-*” pattern
 	declare -Ag cs
 	#Linux standard replacments
+	cs['r']="sudo"
 	cs['chm']="chmod"
 	cs['cho']="chown"
 	cs['cp']="cp -r"
@@ -333,8 +334,9 @@ bmn_init(){
 		bmr ${args[@]:1}
 	elif [[ ${args[0]} = '-h' || ${args[0]} = '--help' ]]
 	then
-		output 0
-		output 2
+        btest -master || return 1
+        output 0
+        output 2
 	elif [[ ${args[0]} = '-ph' ]]
 	then
 		output 0
@@ -1318,9 +1320,7 @@ btest(){
 					[[ $? != 0 ]] && ef=1
 				;;
 				-master)
-					ef=1 && init_data=($([ -f $init_file ] && cat $init_file))
-					[[ ! -z "$init_data" && $0 = "${init_data[1]}" || $0 = "/etc/bmn/source" && "${init_data[1]}" = '/etc/bmn/source' || $0 = "bmn.sh" ]] && ef=0
-					unset init_data
+					ef=1 && [[ $0 = "/etc/bmn/source" || $0 = "bmn.sh" ]] && ef=0
 				;;
 				-installer)
 					ef=1 && [[ $0 = "bmn.sh" ]] && ef=0
@@ -1339,7 +1339,7 @@ btest(){
 				;;
 			esac
 			[[ ! -z "${bterr[$err_test]}" && $ef = 1 ]] && output ${bterr[$err_test]}
-			[[ $ef = 1 ]] && return $ef
+			[[ $ef = 1 ]] && unset tested && return $ef
 		fi
 	done
 	return $ef
@@ -1356,4 +1356,4 @@ null(){
 ### Program Start ###
 bmn_data $*
 for csi in ${!cs[*]} ; do alias -- "-$csi=${cs[$csi]}" ; done && shopt -s expand_aliases
-bmn_init $*
+btest -master && bmn_init $*
