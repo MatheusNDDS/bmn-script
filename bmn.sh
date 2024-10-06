@@ -52,6 +52,11 @@ bmn_data(){
 	#Permission manager
 	cs['own']="$set_owner" #set dirs owner to current user
 	cs['fown']="$set_owner_forced" #force $set_owner in entire $HOME (slow)
+	#pma
+	cs['pmi']="pma -iy"
+	cs['pmr']="pma -ry"
+	cs['pml']="pma -l"
+	cs['pmu']="pma -uy"
 
 	## Directories ##
 	#Common
@@ -151,10 +156,10 @@ bmn_data(){
 	u=$(bconfig -read user_name)
 	h=$(bconfig -read user_home)
 	[[ -d $pdir/repo && $lc_repo = 0 ]] && lc_repo=$pdir/repo
-	
+
 	#Configure pm,u,h variables
 	detect_user_props
-	
+
 	#Directories and commands that use data from detect_user_props()
 	lc_dir="$h/.$name"
 	bnd_dir="$h/.$name/bundles"
@@ -447,7 +452,7 @@ pma_a=($*)
 	declare -A pm_u
 	declare -A pm_g
 	pkgs="${pma_a[*]:1}"
-	
+
 ##apt##
 	pm_i[apt]="install"
 	pm_r[apt]="remove"
@@ -539,6 +544,9 @@ pma_a=($*)
 		$r $pm ${pm_u[$pm_target]} $pm_yes
 		[[ -z ${pm_g[$pm_target]} || ${pm_g[$pm_target]} != 0 ]] && $r $pm ${pm_g[$pm_target]} $pm_yes
 	;;
+	*)
+		$pm ${pma_a[@]:0}
+	;;
 	esac
 }
 sfm(){
@@ -549,7 +557,7 @@ sfm_a=($*)
 	rootfs_dirs=(/*)
 	rootfs_dirs2=($(for bldir in ${rootfs_dirs[@]};do $prt "$bldir/ ";done))
 	rootfs_dirs3=($($prt ${rootfs_dirs[@]} | tr '/' ' '))
-	
+
 	for dof in ${sfm_a[@]:1}
 	do
 		sdof=$([ -f $dof ] && realpath $dof || $prt $dof)
@@ -563,14 +571,14 @@ sfm_a=($*)
 						[[ $sfm_verbose = 1 ]] && output -t "Directory “$dof” maked"
 					fi
 				;;
-				'-f') 
+				'-f')
 					if [[ ! -e "$dof" ]]
 					then
 						$ir touch "$dof"
 						[[ $sfm_verbose = 1 ]] && output -t "File “$dof” maked"
 					fi
 				;;
-				'-r') 
+				'-r')
 					if [[ -e "$dof" ]]
 					then
 						$ir rm -rf "$dof"
@@ -583,7 +591,7 @@ sfm_a=($*)
 					[[ $sfm_verbose = 1 && $dof_exists = 1 ]] && output -t "“$dof” removed"
 					[[ $sfm_verbose = 1 && -z $dof_exists ]] && output  -a 'SFM' "“$dof” does not exist"
 				;;
-				'-rd') 
+				'-rd')
 					if [[ -d "$dof" ]]
 					then
 						$ir rmdir --ignore-fail-on-non-empty "$dof"
@@ -615,7 +623,7 @@ bmr_a=($@)
 	line=($(grep -- "${bmr_a[1]} ${bmr_a[2]}" $bmr_db))
 	output_index="$(output -qi)"
 	blog_date_str="${date_f[0]}$(date +${date_f[1]})"
-	
+
 	## Switches the bmr verbosity for untrusted executions.
 	btest -master && blog_verbose=0 || blog_verbose=1
 
@@ -645,7 +653,7 @@ $(output -t "Data Types")
 
 $(output -t "Using other database")
   You can thange the database declaring the “db=yourdbfile” variable in the first argument."
-	
+
 	## Handy shortcuts
 	case $1 in
 		-rg|-rgt|-srg|-srgt|-gl|-glf|-gd|-rm|-o) #automatically adds a “-d” data type to a line in some insertions for convenience.
@@ -663,7 +671,7 @@ $(output -t "Using other database")
 		btest -root || return 1
 		;;
 	esac
-	
+
 	## Insertion Instructions
 	case ${bmr_a[0]} in
 	"-a"|"-e"|"-d") #quick alert and error register for bundles
@@ -732,7 +740,7 @@ $(output -t "Using other database")
 			[[ $blog_verbose = 1 ]] && output -s "bmr" "Safe line “$(echo "${bmr_a[*]:1}")” registered"
 		fi
 	;;
-	"-ail"|"-ril") #add and remove items in a line 
+	"-ail"|"-ril") #add and remove items in a line
 		if [[ $output_index != *"${bmr_a[1]}"* || $3 != *"@"* || ${bmr_a[@]:3} = *"${bkc}"* ]]
 		then
 			output -a syntax "bmr ${bmr_a[0]} “-d” “${bkc}keyQwerry” “text arguments (cannot contain ${bkc})”"
@@ -893,11 +901,11 @@ pkg_install(){
 	[[ -z $1 ]] && pkg_parser parse packages || pkg_parser parse $1/packages
 	if [[ $pkg_flag != "null" ]]
 	then
-		
+
 		output -p $pm "Validate packages for installation"
 		pkg_parser check pma-in
 		pkg_parser list_pkgs
-		
+
 		if [[ $pm_update = 1 ]]
 		then
 			output -p $pm "Updating Packages"
@@ -938,7 +946,7 @@ pkg_install(){
 		done
 		pkg_parser clean
 	fi
-	
+
 	## Flatpaks
 	[[ -z $1 ]] && pkg_parser parse flatpaks || pkg_parser parse $1/flatpaks
 	if [[ $pkg_flag != "null" ]]
@@ -1163,7 +1171,7 @@ bconfig(){
 		bmr -glf @bmn_$2 | sed s/'bmn_'/''/g
 	;;
 	-set)
-		btest -env -root -cfg=$2 || return 1
+		btest -cfg=$2 -env -root || return 1
 		bmr -srg @bmn_$2 ${bcfg_a[*]:2}
 	;;
 	-setup)
@@ -1299,18 +1307,18 @@ btest(){
 	bterr['-env']="-ahT BMN environment not correctly configured"
 	bterr['-data']="-ahT BMR: Some configuration data are missing"
 	bterr['-api']="-ahT Invalid “${args[1]}” api call"
-	bterr['-cfg']="-ahT Invalid configuration key. Run “$name -lc” to view the keys"
+	bterr['-cfg']="-ahT Invalid configuration key. Run “$name -lc” to view the avaliable keys"
 	ef=0
 
 	## Tests
 	for err_type in $*
 	do
-		err_a=$($prt $err_type | tr '=' ' ')
+		err_a=($($prt $err_type | tr '=' ' '))
 		err_test="${err_a[0]}"
 		err_flags="${err_a[1]}"
-		if [[ " ${tested[*]} " != *"$err_test"* ]]
+		if [[ " ${tested[*]} " != *"$err_type"* ]]
 		then
-			tested+=($err_test)
+			tested+=($err_type)
 			case $err_test in
 				-root)
 					[[ $UID != 0 ]] && ef=1
@@ -1327,6 +1335,7 @@ btest(){
 				;;
 				-env)
 					[[ ! -d $pdir && ! -d $bnd_dir && ! -f $init_file && ! -f $bmr_db ]] && ef=1
+					[[ -z $pm && -z $repo && -z $lc_repo && -z $h && -z $u ]] && ef=1
 				;;
 				-data)
 					[[ -z $pm || -z $h || -z $u || -z $repo || -z $lc_repo ]] && ef=1
