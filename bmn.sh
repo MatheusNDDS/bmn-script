@@ -83,7 +83,7 @@ bmn_data(){
 	dnull="/dev/null"
 	tmpf="/tmp/$$" #generate a unique temporary file
 
-## Commands (Legacy) ##
+## Command variables (Legacy) ##
 	r="sudo"
 	ir=""
 	chm="$ir chmod"
@@ -863,20 +863,37 @@ pkg_parser(){
 				'#install'|'#remove')
 					pkg_flag=$i
 				;;
+				'@main'|'@flatpak')
+					pkgm_flag=$i
+					pkgm_reg+=($i)
+				;;
 				*)
-					[[ $pkg_flag = "#install" ]] && to_install+=($i)
-					[[ $pkg_flag = "#remove" ]] && to_remove+=($i)
+					#main
+					[[ $pkg_flag = "#install" && $pkgm_flag = '@main' ]] && to_install_main+=($i)
+					[[ $pkg_flag = "#remove" && $pkgm_flag = '@main' ]] && to_remove_main+=($i)
+					#flatpak
+					[[ $pkg_flag = "#install" && $pkgm_flag = '@flatpak' ]] && to_install_fp+=($i)
+					[[ $pkg_flag = "#remove" && $pkgm_flag = '@flatpak' ]] && to_remove_fp+=($i)
 				;;
 				esac
 			done
 		;;
 		'list_pkgs')
-			[[ -n "${to_install[*]}" ]] && output -l "to install" "${to_install[*]}"
-			[[ -n "${to_remove[*]}" ]] && output -l "to remove" "${to_remove[*]}"
+			case $2 in
+				main)
+					[[ -n "${to_install_main[*]}" ]] && output -l "to install" "${to_install_main[*]}"
+					[[ -n "${to_remove_main[*]}" ]] && output -l "to remove" "${to_remove_main[*]}"
+				;;
+				fp)
+					[[ -n "${to_install_fp[*]}" ]] && output -l "to install" "${to_install_fp[*]}"
+					[[ -n "${to_remove_fp[*]}" ]] && output -l "to remove" "${to_remove_fp[*]}"
+				;;
+			esac
 		;;
 		'clean')
-			unset to_install to_remove
 			pkg_flag="null"
+			[[ $2 = 'main' ]] && unset to_install_main to_remove_main
+			[[ $2 = 'fp' ]] && unset to_install_fp to_remove_fp
 		;;
 		'check')
 			case $2 in
@@ -885,12 +902,12 @@ pkg_parser(){
 				;;
 				'pma')
 					output -t 'Checking installed packages'
-					pkgs_in=($(pma -l "${to_install[*]}"))
+					pkgs_in=($(pma -l "${to_install_main[*]}"))
 				;;
 				'pma-in')
 					pkg_parser check pma
 					output -t 'Checking packages in repository'
-					pkgs_in_repo=($(pma -s "${to_install[*]}"))
+					pkgs_in_repo=($(pma -s "${to_install_main[*]}"))
 				;;
 			esac
 		;;
@@ -899,12 +916,12 @@ pkg_parser(){
 pkg_install(){
 	## Distro Pkgs
 	[[ -z $1 ]] && pkg_parser parse packages || pkg_parser parse $1/packages
-	if [[ $pkg_flag != "null" ]]
+	if [[ ${pkgm_reg[*]} = *"@main"* ]]
 	then
 
 		output -p $pm "Validate packages for installation"
 		pkg_parser check pma-in
-		pkg_parser list_pkgs
+		pkg_parser list_pkgs main
 
 		if [[ $pm_update = 1 ]]
 		then
@@ -912,7 +929,7 @@ pkg_install(){
 			[[ $pki_verbose = 1 ]] && pma -u || pma -u &> $dnull
 		fi
 
-		for i in ${to_install[*]}
+		for i in ${to_install_main[*]}
 		do
 			if [[ " ${pkgs_in[@]} " = *" $i"* ]]
 			then
@@ -929,11 +946,11 @@ pkg_install(){
 			fi
 		done
 
-		[[ -z $to_remove ]] && return 1
+		[[ -z $to_remove_main ]] && return 1
 		$pnl && output -p $pm "Validate installed packages for remove"
 		pkg_parser check pma
 
-		for i in ${to_remove[*]}
+		for i in ${to_remove_main[*]}
 		do
 			if [[ " ${pkgs_in[@]} " = *" $i"* ]]
 			then
@@ -944,15 +961,14 @@ pkg_install(){
 				output -s "$pm" "“$i” is not installed"
 			fi
 		done
-		pkg_parser clean
+		pkg_parser clean main
 	fi
 
 	## Flatpaks
-	[[ -z $1 ]] && pkg_parser parse flatpaks || pkg_parser parse $1/flatpaks
-	if [[ $pkg_flag != "null" ]]
+	if [[ ${pkgm_reg[*]} = *"@flatpak"* ]]
 	then
 		output -hT "Installing “$bnd_name” Flatpaks"
-		pkg_parser list_pkgs
+		pkg_parser list_pkgs fp
 
 		if [[ $pm_update = 1 ]]
 		then
@@ -960,7 +976,7 @@ pkg_install(){
 			$ir flatpak update -y
 		fi
 		pkg_parser check fp
-		for i in ${to_install[*]}
+		for i in ${to_install_fp[*]}
 		do
 			if [[ "$pkgs_in" = *"$i"* ]]
 			then
@@ -972,9 +988,9 @@ pkg_install(){
 			fi
 		done
 
-		[[ -z $to_remove ]] && return 1
+		[[ -z $to_remove_fp ]] && return 1
 		pkg_parser check fp
-		for i in ${to_remove[*]}
+		for i in ${to_remove_fp[*]}
 		do
 			if [[ "$pkgs_in" = *"$i"* ]]
 			then
@@ -986,8 +1002,10 @@ pkg_install(){
 				output -s "flatpak" "“$i” is not installed"
 			fi
 		done
-		pkg_parser clean
+		pkg_parser clean fp
 	fi
+
+	unset pkgm_reg
 }
 
 ## Bundle Process
@@ -1341,7 +1359,7 @@ btest(){
 					[[ -z $pm || -z $h || -z $u || -z $repo || -z $lc_repo ]] && ef=1
 				;;
 				-api)
-					[[ $err_flags != 'pma' || $err_flags != 'output' || $err_flags != 'bmr' ]] && ef=1
+					[[ $err_flags != 'pma' && $err_flags != 'output' && $err_flags != 'bmr' ]] && ef=1
 				;;
 				-cfg)
 					[[ $err_flags != 'pm' && $err_flags != 'user_name' && $err_flags != 'user_home' && $err_flags != 'repo'&& $err_flags != 'lc_repo' ]] && ef=1
