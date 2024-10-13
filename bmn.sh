@@ -798,7 +798,7 @@ $(output -t "Using other database")
 			fi
 		fi
 	;;
-	"-rm") #removes a especific type and key line
+	"-rm") remove:s a especific type and key line
 		if  [[ $output_index != *"${bmr_a[1]}"* || ${bmr_a[2]}  != "${bkc}"* ]]
 		then
 			output -a syntax "bmr ${bmr_a[0]} “-d” “${bkc}key”"
@@ -860,20 +860,20 @@ pkg_parser(){
 			for i in $(cat $2)
 			do
 				case $i in
-				'#install'|'#remove')
+				install:|remove:)
 					pkg_flag=$i
 				;;
-				'@main'|'@flatpak')
+				'#main'|'#flatpak')
 					pkgm_flag=$i
 					pkgm_reg+=($i)
 				;;
 				*)
 					#main
-					[[ $pkg_flag = "#install" && $pkgm_flag = '@main' ]] && to_install_main+=($i)
-					[[ $pkg_flag = "#remove" && $pkgm_flag = '@main' ]] && to_remove_main+=($i)
+					[[ $pkg_flag = "install:" && $pkgm_flag = '#main' ]] && to_install_main+=($i)
+					[[ $pkg_flag = "remove:" && $pkgm_flag = '#main' ]] && to_remove_main+=($i)
 					#flatpak
-					[[ $pkg_flag = "#install" && $pkgm_flag = '@flatpak' ]] && to_install_fp+=($i)
-					[[ $pkg_flag = "#remove" && $pkgm_flag = '@flatpak' ]] && to_remove_fp+=($i)
+					[[ $pkg_flag = "install:" && $pkgm_flag = '#flatpak' ]] && to_install_fp+=($i)
+					[[ $pkg_flag = "remove:" && $pkgm_flag = '#flatpak' ]] && to_remove_fp+=($i)
 				;;
 				esac
 			done
@@ -916,7 +916,7 @@ pkg_parser(){
 pkg_install(){
 	## Distro Pkgs
 	[[ -z $1 ]] && pkg_parser parse packages || pkg_parser parse $1/packages
-	if [[ ${pkgm_reg[*]} = *"@main"* ]]
+	if [[ ${pkgm_reg[*]} = *"#main"* ]]
 	then
 
 		output -p $pm "Validate packages for installation"
@@ -965,7 +965,7 @@ pkg_install(){
 	fi
 
 	## Flatpaks
-	if [[ ${pkgm_reg[*]} = *"@flatpak"* ]]
+	if [[ ${pkgm_reg[*]} = *"#flatpak"* ]]
 	then
 		output -hT "Installing “$bnd_name” Flatpaks"
 		pkg_parser list_pkgs fp
