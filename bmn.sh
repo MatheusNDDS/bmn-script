@@ -915,7 +915,7 @@ pkg_parser(){
 }
 pkg_install(){
 	## Distro Pkgs
-	[[ -z $1 ]] && pkg_parser parse packages || pkg_parser parse $1/packages
+	[[ -z $1 ]] && pkg_parser parse packages || pkg_parser parse $1
 	if [[ ${pkgm_reg[*]} = *"#main"* ]]
 	then
 
@@ -1068,10 +1068,10 @@ cook(){
 	cd $bndid/
 
 	## Auto writing file systems
-	[[ -e rootfs ]] && output -p $name "Writing “$bndid” root file system" && $cp rootfs/* rootfs/.* / 2> $dnull
-	[[ -e rootfs ]] && output -l "rootfs_dirs" "$rootfs_dots $(ls -A rootfs/)"
-	[[ -e homefs ]] && output -p $name "Writing “$bndid” home file system" && $cp homefs/* homefs/.* $h/ 2> $dnull
-	[[ -e homefs ]] && output -l "homefs_dirs" "$homefs_dots $(ls -A homefs/)"
+	[[ -e @rootfs ]] && output -p $name "Writing “$bndid” root file system" && $cp @rootfs/* @rootfs/.* / 2> $dnull
+	[[ -e @rootfs ]] && output -l "rootfs_dirs" "$rootfs_dots $(ls -A @rootfs/)"
+	[[ -e @homefs ]] && output -p $name "Writing “$bndid” home file system" && $cp @homefs/* @homefs/.* $h/ 2> $dnull
+	[[ -e @homefs ]] && output -l "homefs_dirs" "$homefs_dots $(ls -A @homefs/)"
 
 	## Packages installation
 	[[ -f packages || -f flatpaks ]] && output -hT "Installing “$bnd_name” packages"
