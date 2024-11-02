@@ -175,7 +175,7 @@ bmn_data(){
 bmn_init(){
 	btest -master || return 1
 	$mkd $lc_dir $bnd_dir && $cho -R root:root $lc_dir &> $dnull
-
+## Download a bundle file and install
 	if [[ ${args[0]} = '-i' || ${args[0]} = '--install' ]]
 	then
 		btest -env -data -root || return 1
@@ -197,6 +197,8 @@ bmn_init(){
 				output -d i "Maybe the relese file has outdated, try “$name -rU”."
 			fi
 		done
+
+## Install a local bundle file
 	elif [[ ${args[0]} = '-li' || ${args[0]} = '--lc-install' && ! -z "${args[@]:1}" ]]
 	then
 		btest -env -data -root || return 1
@@ -234,6 +236,8 @@ bmn_init(){
 				lc_inst=0
 			fi
 		done
+
+## Install a local bundle directory
 	elif [[ ${args[0]} = '-di' || ${args[0]} = '--dir-install' && ! -z "${args[@]:1}" ]]
 	then
 		btest -env -data -root || return 1
@@ -264,6 +268,8 @@ bmn_init(){
 				lc_inst=0
 			fi
 		done
+
+## Package manager update trigger variants
 	elif [[ ${args[0]} = "-iu" ]]
 	then
 		pm_update=1
@@ -276,6 +282,8 @@ bmn_init(){
 	then
 		pm_update=1
 		bmn_init -di ${args[@]:1}
+
+## Other program options
 	elif [[ ${args[0]} = '-e' || ${args[0]} = '--enable-extras' ]]
 	then
 		enable_extras $*
@@ -1128,7 +1136,7 @@ setup(){
 	$elf $cmd_srcd/$name "$pdir/source"
 #Init file buid
 	$prt "source $pdir/source" > $init_file
-	$prt 'export PS1="\\n“\w”\\n$(output -d $name)"\nalias q="exit 0"\nalias x="clear"\nalias s="$editor $pdir/source"\nalias i="$editor $init_file"\nalias r="$editor $pdir/release"\nalias l="$editor $bmr_db"\nalias h="$prt +\\n b: Edit $name_upper source\\n c: edit config\\n i: edit init\\n r: edit release\\n l: edit log\\n x: clear prompt\\n h: help\\n q: exit+"' | tr '+' "'" >> $init_file
+	$prt 'export PS1="\\n“\w”\\n$(output -d $name)"\nalias b="$editor $pdir/source"\nalias q="exit 0"\nalias c="clear"\nalias s="$editor $pdir/source"\nalias i="$editor $init_file"\nalias r="$editor $pdir/release"\nalias d="$editor $bmr_db"\nalias h="$prt +\\n b: Edit $name_upper source\\n i: Edit init\\n r: Edit release\\n d: Edit bmr global database\\n c: Clear prompt\\n h: Help\\n q: Exit+" -out -t "type “h” to list commands"' | tr '+' "'" >> $init_file
 #Package manager autodetect
 	if [[ -z $pm ]]
 	then
