@@ -550,7 +550,7 @@ pma_a=($*)
 	'-u')
 		[[ -z "${pm_u[$pm]}" ]] && return 1 || [[ "${pm_u[$pm]}" = "@" ]] && pm_target='apt' || pm_target=$pm
 		$r $pm ${pm_u[$pm_target]} $pm_yes
-		[[ -z ${pm_g[$pm_target]} || ${pm_g[$pm_target]} != 0 ]] && $r $pm ${pm_g[$pm_target]} $pm_yes
+		[[ -z ${pm_g[$pm_target]} || ${pm_g[$pm_target]} != 0 ]] && $r $pm ${pm_g[$pm_target]}
 	;;
 	*)
 		$pm ${pma_a[@]:0}
@@ -1360,8 +1360,8 @@ btest(){
 					ef=1 && [[ $0 = "bmn.sh" ]] && ef=0
 				;;
 				-env)
-					[[ ! -d $pdir && ! -d $bnd_dir && ! -f $init_file && ! -f $bmr_db ]] && ef=1
-					[[ -z $pm && -z $repo && -z $lc_repo && -z $h && -z $u ]] && ef=1
+					#[[ ! -d $pdir && ! -d $bnd_dir && ! -f $init_file && ! -f $bmr_db ]] && ef=1
+					#[[ -z $pm && -z $repo && -z $lc_repo && -z $h && -z $u ]] && ef=1
 				;;
 				-data)
 					[[ -z $pm || -z $h || -z $u || -z $repo || -z $lc_repo ]] && ef=1
