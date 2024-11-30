@@ -174,7 +174,8 @@ bmn_data(){
 }
 bmn_init(){
 	btest -master || return 1
-	$mkd $lc_dir $bnd_dir && $cho -R root:root $lc_dir &> $dnull
+	[[ -z $1 ]] && exec bmn -h #print help text when are no arguments
+	$mkd $lc_dir $bnd_dir && $cho -R root:root $lc_dir &> $dnull #auto generate bmn directories
 ## Download a bundle file and install
 	if [[ ${args[0]} = '-i' || ${args[0]} = '--install' ]]
 	then
