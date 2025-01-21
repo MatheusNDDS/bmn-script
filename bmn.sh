@@ -551,7 +551,7 @@ pma_a=($*)
 	'-u')
 		[[ -z "${pm_u[$pm]}" ]] && return 1 || [[ "${pm_u[$pm]}" = "@" ]] && pm_target='apt' || pm_target=$pm
 		$r $pm ${pm_u[$pm_target]} $pm_yes
-		[[ -z ${pm_g[$pm_target]} || ${pm_g[$pm_target]} != 0 ]] && $r $pm ${pm_g[$pm_target]}
+		[[ -z ${pm_g[$pm_target]} || ${pm_g[$pm_target]} != 0 ]] && $r $pm ${pm_g[$pm_target]} $pm_yes
 	;;
 	*)
 		$pm ${pma_a[@]:0}
@@ -676,8 +676,8 @@ $(output -t "Using other database")
 			bmr_a=('-a' ${bmr_a[@]:0})
 			line=($(grep -- "${bmr_a[1]} ${bmr_a[2]}" $bmr_db))
 		;;
-		-rg*|-srg*|-rm)
-		btest -root || return 1
+		-rg*|-srg*|-rm) #check root in inserctions that write in bmn database
+			btest -root || return 1
 		;;
 	esac
 
@@ -807,7 +807,7 @@ $(output -t "Using other database")
 			fi
 		fi
 	;;
-	"-rm") remove:s a especific type and key line
+	"-rm") #remove a type and key line
 		if  [[ $output_index != *"${bmr_a[1]}"* || ${bmr_a[2]}  != "${bkc}"* ]]
 		then
 			output -a syntax "bmr ${bmr_a[0]} “-d” “${bkc}key”"
@@ -1096,7 +1096,8 @@ cook(){
 
 	## Verify alerts in BMR Database
 	recipe_log=($(bmr -gal "@$bndid "))
-	bmr -rma "@$bndid "
+	bmr -rm -a "@$bndid "
+	bmr -rm -e "@$bndid "
 	if [[ " ${recipe_log[@]} " = *" -a "* ]]
 	then
 		output -ahT "“$bndid$(bnd_parser -pbf)” Returned Alerts"
