@@ -627,6 +627,8 @@ sfm_a=($*)
 }
 bmr(){
 bmr_a=($@)
+	[[ ! -f $bmr_db ]] && return 1 #return when the db file doesn't exists
+	
 	## Data
 	log_hist=($(cat $bmr_db))
 	line=($(grep -- "${bmr_a[1]} ${bmr_a[2]}" $bmr_db))
@@ -940,37 +942,28 @@ pkg_install(){
 
 		for i in ${to_install_main[*]}
 		do
-			if [[ " ${pkgs_in[@]} " = *" $i"* ]]
-			then
-				output -t "$pm/installing: $i"
-				output -s "$pm" "“$i” is already installed"
-			else
-				output -t "$pm/installing: $i"
-				if [[ " ${pkgs_in_repo[@]} " = *" $i"* ]]
+			output -t "$pm/installing: $i"
+			[[ $pki_verbose = 1 ]] && pma -iy "$i" || pma -iy "$i" &> $dnull
+		done
+
+		if [[ ! -z $to_remove_main ]]
+		then
+			$pnl && output -p $pm "Validate installed packages for remove"
+			pkg_parser check pma
+
+			for i in ${to_remove_main[*]}
+			do
+				if [[ " ${pkgs_in[@]} " = *" $i"* ]]
 				then
-					[[ $pki_verbose = 1 ]] && pma -iy "$i" || pma -iy "$i" &> $dnull
+					output -t "$pm/removing: $i"
+					[[ $pki_verbose = 1 ]] && pma -ry "$i" || pma -ry "$i" &> $dnull
 				else
-					output -s "$pm" "“$i” not found in repository or not avaliable for “$PRETTY_NAME”"
+					output -t "$pm/removing: $i"
+					output -s "$pm" "“$i” is not installed"
 				fi
-			fi
-		done
-
-		[[ -z $to_remove_main ]] && return 1
-		$pnl && output -p $pm "Validate installed packages for remove"
-		pkg_parser check pma
-
-		for i in ${to_remove_main[*]}
-		do
-			if [[ " ${pkgs_in[@]} " = *" $i"* ]]
-			then
-				output -t "$pm/removing: $i"
-				[[ $pki_verbose = 1 ]] && pma -ry "$i" || pma -ry "$i" &> $dnull
-			else
-				output -t "$pm/removing: $i"
-				output -s "$pm" "“$i” is not installed"
-			fi
-		done
-		pkg_parser clean main
+			done
+			pkg_parser clean main
+		fi
 	fi
 
 	## Flatpaks
@@ -997,21 +990,23 @@ pkg_install(){
 			fi
 		done
 
-		[[ -z $to_remove_fp ]] && return 1
-		pkg_parser check fp
-		for i in ${to_remove_fp[*]}
-		do
-			if [[ "$pkgs_in" = *"$i"* ]]
-			then
-				output -t "flatpak/removing: $i"
+		if [[ -z $to_remove_fp ]]
+		then
+			pkg_parser check fp
+			for i in ${to_remove_fp[*]}
+			do
+				if [[ "$pkgs_in" = *"$i"* ]]
+				then
+					output -t "flatpak/removing: $i"
 
-				[[ $pki_verbose = 1 ]] && $ir flatpak uninstall $fp_mode $i -y || $ir flatpak uninstall $fp_mode $i -y 2> $dnull
-			else
-				output -t "flatpak/removing: $i"
-				output -s "flatpak" "“$i” is not installed"
-			fi
-		done
-		pkg_parser clean fp
+					[[ $pki_verbose = 1 ]] && $ir flatpak uninstall $fp_mode $i -y || $ir flatpak uninstall $fp_mode $i -y 2> $dnull
+				else
+					output -t "flatpak/removing: $i"
+					output -s "flatpak" "“$i” is not installed"
+				fi
+			done
+			pkg_parser clean fp
+		fi
 	fi
 
 	unset pkgm_reg
@@ -1074,13 +1069,44 @@ unpack(){
 cook(){
 	btest -env -master || return 1
 	bndid=$1
+	users=('/root' '/etc/skel' $(for udr in $(ls /home) ; do $prt "/home/$udr" ; done))
 	cd $bndid/
 
-	## Auto writing file systems
+	## Simple Auto writing file systems
 	[[ -e @rootfs ]] && output -p $name "Writing “$bndid” root file system" && $cp @rootfs/* @rootfs/.* / 2> $dnull
 	[[ -e @rootfs ]] && output -l "rootfs_dirs" "$rootfs_dots $(ls -A @rootfs/)"
-	[[ -e @homefs ]] && output -p $name "Writing “$bndid” home file system" && $cp @homefs/* @homefs/.* $h/ 2> $dnull
-	[[ -e @homefs ]] && output -l "homefs_dirs" "$homefs_dots $(ls -A @homefs/)"
+	## Current user home file system auto writing
+	if [[ -e @homefs ]]
+	then
+		output -p $name "Writing “$bndid” home file system" 
+		output -l "homefs_dirs" "$homefs_dots $(ls -A @homefs/)"
+		$cp @homefs/* @homefs/.* $h/ 2> $dnull
+		homefs_dirs=($(ls -a @homefs/))
+		for i in ${homefs_dirs[@]:2}
+		do
+			$set_owner $h/$i
+		done
+	fi
+	## All user homes file system auto writing
+	if [[ -e @usersfs ]]
+	then
+		output -p $name "Writing “$bndid” users file system"
+		output -l "usersfs_dirs" "$(ls -A @usersfs/)"
+		for user in ${users[@]}
+		do
+			$cp @usersfs/* @usersfs/.* $user 2> $dnull
+			if [[ $user = "/home/"* ]] ##&& $cho md:md -R $(echo $h/.* $h/* | sed s/$(echo $lc_dir | sed s/'\/'/'\\\/'/g)//)
+			then
+				userfs_dirs=($(ls -a @usersfs/))
+				for i in ${userfs_dirs[@]:2}
+				do
+					userarr=($($prt $user | tr '/' ' ' ))
+					$cho ${userarr[1]}:${userarr[1]} -R /home/${userarr[1]}/$i
+				done
+			fi
+		done
+		output -t "“$user” writed"
+	fi
 
 	## Packages installation
 	[[ -f packages || -f flatpaks ]] && output -hT "Installing “$bnd_name” packages"
@@ -1138,7 +1164,7 @@ setup(){
 	$elf $cmd_srcd/$name "$pdir/source"
 #Init file buid
 	$prt "source $pdir/source" > $init_file
-	$prt 'export PS1="\\n“\w”\\n$(output -d $name)"\nalias b="$editor $pdir/source"\nalias q="exit 0"\nalias c="clear"\nalias s="$editor $pdir/source"\nalias i="$editor $init_file"\nalias r="$editor $pdir/release"\nalias d="$editor $bmr_db"\nalias h="$prt +\\n b: Edit $name_upper source\\n i: Edit init\\n r: Edit release\\n d: Edit bmr global database\\n c: Clear prompt\\n h: Help\\n q: Exit+" -out -t "type “h” to list commands"' | tr '+' "'" >> $init_file
+	$prt 'export PS1="\\n“\w”\\n$(output -d $name)"\nalias b="$editor $pdir/source"\nalias q="exit 0"\nalias c="clear"\nalias s="$editor $pdir/source"\nalias i="$editor $init_file"\nalias r="$editor $pdir/release"\nalias d="$editor $bmr_db"\nalias h="$prt +\\n b: Edit $name_upper source\\n i: Edit init\\n r: Edit release\\n d: Edit bmr global database\\n c: Clear prompt\\n h: Help\\n q: Exit+"\n -out -t "type “h” to list commands"' | tr '+' "'" >> $init_file
 #Package manager autodetect
 	if [[ -z $pm ]]
 	then
