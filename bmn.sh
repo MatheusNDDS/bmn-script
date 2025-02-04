@@ -57,6 +57,8 @@ bmn_data(){
 	cs['pmr']="pma -ry"
 	cs['pml']="pma -l"
 	cs['pmu']="pma -uy"
+	#Aliases generator
+	for csi in ${!cs[*]} ; do alias -- "-$csi=${cs[$csi]}" ; done && shopt -s expand_aliases
 
 	## Directories ##
 	#Common
@@ -454,12 +456,7 @@ pma(){
 pma_a=($*)
 
 ### Database ###
-	declare -A pm_i
-	declare -A pm_r
-	declare -A pm_l
-	declare -A pm_s
-	declare -A pm_u
-	declare -A pm_g
+	declare -A pm_i pm_r pm_l pm_s pm_u pm_g
 	pkgs="${pma_a[*]:1}"
 
 ##apt##
@@ -511,9 +508,12 @@ pma_a=($*)
 	pm_s[apx]="search"
 	pm_u[apx]=@
 	pm_g[apx]=@
+	
 	#Command yes implementation
 	[[ $1 = *'y' ]] && pm_yes='-y' && pma_a[0]="$($prt ${pma_a[0]}|tr -d 'y')"
 	[[ ${pma_a[-1]} = '-y' ]] && pm_yes='-y' && unset pma_a[-1]
+	
+	#command builder
 	case "${pma_a[0]}" in
 	'-h')
 		$prt "$(output -T "$name_upper Package Manager Abstractor")\n$(output -d "suported" ${!pm_l[@]})\n\n$(output -t "Commands")\n  -i : Install package.\n  -r : Remove package.\n  -l : List instaled.\n  -s : Search in repository.\n\n$(output -t "“yes” command support")\n  Standard: “pma -i pkgs... \033[01;36m-y\033[00m”.\n  In-argument: “pma -i\033[01;36my\033[00m pkgs...”"
@@ -570,7 +570,7 @@ sfm_a=($*)
 	for dof in ${sfm_a[@]:1}
 	do
 		sdof=$([ -f $dof ] && realpath $dof || $prt $dof)
-		if [[ " ${sysdbl[@]} " != *"$sdof"* || $1 = '-r' && " ${sysdbl[@]} " != *"$sdof"* && "${sfm_a[@]:1}" != "${rootfs_dirs[@]}" && "${sfm_a[@]:1}" != "${rootfs_dirs2[@]}" && "${sfm_a[@]:1}" != "${rootfs_dirs3[@]}" || $1 = "-c" || $1 = "-rc" ]]
+		if [[ " ${sysdbl[@]} " != *"$sdof"* || $1 = '-r'  && "${sfm_a[@]:1}" != "${rootfs_dirs[@]}" && "${sfm_a[@]:1}" != "${rootfs_dirs2[@]}" && "${sfm_a[@]:1}" != "${rootfs_dirs3[@]}" || $1 = "-c" || $1 = "-rc" ]]
 		then
 			case ${sfm_a[0]} in
 				'-d')
@@ -775,8 +775,7 @@ $(output -t "Using other database")
 						sbl="$(echo "$sbl" | sed "s/$item//")"
 					done
 					bmr -sub ${bmr_a[1]} ${bmr_a[2]} ${bmr_a[1]} ${bmr_a[2]} $sbl
-					blog_verbose=$bmr_last_bv
-					[[ $blog_verbose = 1 ]] && output -s "bmr" "Removed “$bmr_irm” in line “$bmr_last_line”"
+					[[ $bmr_last_bv = 1 ]] && output -s "bmr" "Removed “$bmr_irm” in line “$bmr_last_line”"
 				fi
 			fi
 		fi
@@ -1078,7 +1077,7 @@ cook(){
 	## Current user home file system auto writing
 	if [[ -e @homefs ]]
 	then
-		output -p $name "Writing “$bndid” home file system" 
+		output -p $name "Writing “$bndid” home file system"
 		output -l "homefs_dirs" "$homefs_dots $(ls -A @homefs/)"
 		$cp @homefs/* @homefs/.* $h/ 2> $dnull
 		homefs_dirs=($(ls -a @homefs/))
@@ -1418,5 +1417,4 @@ null(){
 
 ### Program Start ###
 bmn_data $*
-for csi in ${!cs[*]} ; do alias -- "-$csi=${cs[$csi]}" ; done && shopt -s expand_aliases
 btest -master && bmn_init $*
