@@ -463,7 +463,7 @@ pma_a=($*)
 	pm_i[apt]="install"
 	pm_r[apt]="remove"
 	pm_l[apt]="list --installed"
-	pm_s[apt]="list"
+	pm_s[apt]="search"
 	pm_u[apt]="update"
 	pm_g[apt]="upgrade"
 ##nix##
@@ -484,28 +484,28 @@ pma_a=($*)
 	pm_i[apk]="add"
 	pm_r[apk]="del"
 	pm_l[apk]="info"
-	pm_s[apk]="search"
+	pm_s[apk]=@
 	pm_u[apk]=@
 	pm_g[apk]=@
 ##slackpkg##
 	pm_i[slackpkg]=@
 	pm_r[slackpkg]=@
 	pm_l[slackpkg]="2> $dnull ; ls /var/log/packages"
-	pm_s[slackpkg]="search"
+	pm_s[slackpkg]=@
 	pm_u[slackpkg]="upgrade"
 	pm_g[slackpkg]=0
 ##dnf##
 	pm_i[dnf]=@
 	pm_r[dnf]=@
 	pm_l[dnf]=@
-	pm_s[dnf]="search"
+	pm_s[dnf]=@
 	pm_u[dnf]=@
 	pm_g[dnf]=0
 ##apx##
 	pm_i[apx]=@
 	pm_r[apx]=@
 	pm_l[apx]=@
-	pm_s[apx]="search"
+	pm_s[apx]=@
 	pm_u[apx]=@
 	pm_g[apx]=@
 	
