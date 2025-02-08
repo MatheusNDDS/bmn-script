@@ -49,6 +49,7 @@ bmn_data(){
 	cs['header']="output -bH"
 	cs['alert']="bmr -a @\$1"
 	cs['error']="bmr -e @\$1"
+	cs['mode']="bmr -gd @\${1}_mode"
 	#Permission manager
 	cs['own']="$set_owner" #set dirs owner to current user
 	cs['fown']="$set_owner_forced" #force $set_owner in entire $HOME (slow)
@@ -58,6 +59,7 @@ bmn_data(){
 	cs['pml']="pma -l"
 	cs['pms']="pma -s"
 	cs['pmu']="pma -uy"
+	#BMN TUI Tolkit
 	cs['btk']="dialog \${btk_props[@]}"
 
 	## Directories ##
@@ -125,15 +127,17 @@ bmn_data(){
 	pkg_flag="null"
 	args=($*)
 	cmd="$1"
-	rex="$r bash recipe dialog"
+	rex="$r bash recipe"
 	editor="nano"
-	deps="wget $ir $editor shc"
+	deps="wget $ir $editor shc dialog"
 	script_src="https://github.com/MatheusNDDS/${name}-script/raw/main/${name}.sh"
 	sfm_verbose=0 #Enable verbose log for SFM
 	bkc=@
 	date_f=('§' '%d-%m-%Y,%H:%M')
 	pki_verbose=0
 	[[ $1 = *'V' ]] && pki_verbose=1 && args[0]="$($prt ${args[0]}|tr -d 'V')"
+	[[ $1 = *'r' ]] && bnd_rm_mode=1 && args[0]="$($prt ${args[0]}|tr 'r' 'i')"
+
 	btk_props=(
 		--stdout --cursor-off-label --beep --keep-tite --no-collapse
 		--ok-label "✓"
@@ -1118,21 +1122,22 @@ cook(){
 	fi
 
 	## Packages installation
-	[[ -f packages || -f flatpaks ]] && output -hT "Installing “$bnd_name” packages"
-	pkg_install
+	[[ -f packages || -f flatpaks ]] && output -hT "Installing “$bnd_name” packages" && pkg_install
 
 	## Recipe file process
 	if [[ -e recipe ]]
 	then
 		output -hT "Executing “$bndid$(bnd_parser -pbf)” Recipe"
 		$elf recipe
-		$rex $bndid ${bnd_flags[@]}
+		[[ $bnd_rm_mode = 1 ]] && bmr -srg @${bndid}_mode 1
+		$rex "$bndid" ${bnd_flags[@]}
 	fi
 
 	## Verify alerts in BMR Database
 	recipe_log=($(bmr -gal "@$bndid "))
 	bmr -rm -a "@$bndid "
 	bmr -rm -e "@$bndid "
+	bmr -rm -d "@${bndid}_mode "
 	if [[ " ${recipe_log[@]} " = *" -a "* ]]
 	then
 		output -ahT "“$bndid$(bnd_parser -pbf)” Returned Alerts"
