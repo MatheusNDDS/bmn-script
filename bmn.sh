@@ -56,9 +56,9 @@ bmn_data(){
 	cs['pmi']="pma -iy"
 	cs['pmr']="pma -ry"
 	cs['pml']="pma -l"
+	cs['pms']="pma -s"
 	cs['pmu']="pma -uy"
-	#Aliases generator
-	for csi in ${!cs[*]} ; do alias -- "-$csi=${cs[$csi]}" ; done && shopt -s expand_aliases
+	cs['btk']="dialog \${btk_props[@]}"
 
 	## Directories ##
 	#Common
@@ -125,7 +125,7 @@ bmn_data(){
 	pkg_flag="null"
 	args=($*)
 	cmd="$1"
-	rex="$r bash recipe"
+	rex="$r bash recipe dialog"
 	editor="nano"
 	deps="wget $ir $editor shc"
 	script_src="https://github.com/MatheusNDDS/${name}-script/raw/main/${name}.sh"
@@ -134,6 +134,16 @@ bmn_data(){
 	date_f=('§' '%d-%m-%Y,%H:%M')
 	pki_verbose=0
 	[[ $1 = *'V' ]] && pki_verbose=1 && args[0]="$($prt ${args[0]}|tr -d 'V')"
+	btk_props=(
+		--stdout --cursor-off-label --beep --keep-tite --no-collapse
+		--ok-label "✓"
+		--yes-label "✓"
+		--cancel-label "←"
+		--no-label "x"
+		--exit-label "x"
+		--help-label "?"
+		--extra-label "+"
+	)
 
 	#Work Directories
 	pdir="/etc/$name"
@@ -177,7 +187,7 @@ bmn_data(){
 bmn_init(){
 	btest -master || return 1
 	[[ -z $1 ]] && exec bmn -h #print help text when are no arguments
-	$mkd $lc_dir $bnd_dir && $cho -R root:root $lc_dir &> $dnull #auto generate bmn directories
+	sfm -d $lc_dir $bnd_dir && $cho -R root:root $lc_dir &> $dnull #auto generate bmn directories
 ## Download a bundle file and install
 	if [[ ${args[0]} = '-i' || ${args[0]} = '--install' ]]
 	then
@@ -188,12 +198,12 @@ bmn_init(){
 			if [[ " ${release[@]} " = *" $bndf "* ]] #checks if the bundle exists in the repository release.
 			then
 				output -hT "Configuring “$bnd_name$(bnd_parser -pbf)”"
-				$rm $bnd_dir/$bnd_name
+				sfm -r $bnd_dir/$bnd_name
 				cd $bnd_dir/
 				download $bnd_name 0 || return 1
 				unpack $bnd_name  || return 1
 				cook $bnd_name ${bnd_flags[@]}
-				$rm $bnd_dir/$bnd_name
+				sfm -r $bnd_dir/$bnd_name
 				lc_inst=0
 			else
 				output -a $name "“$bnd_name” bundle not found in repository"
@@ -231,11 +241,11 @@ bmn_init(){
 			then
 				bnd_parser $i
 				output -hT "Configuring “$bnd_name$(bnd_parser -pbf)”"
-				$rm $bnd_dir/$bnd_name
+				sfm -r $bnd_dir/$bnd_name
 				cd $bnd_dir/
 				unpack $bnd_name || return 1
 				cook $bnd_name ${bnd_flags[@]}
-				$rm $bnd_dir/$bnd_name
+				sfm -r $bnd_dir/$bnd_name
 				lc_inst=0
 			fi
 		done
@@ -267,7 +277,7 @@ bmn_init(){
 				output -hT "Configuring “$bnd_name$(bnd_parser -pbf)”"
 				cd $bnd_dir/
 				cook $bnd_name ${bnd_flags[@]}
-				$rm $bnd_dir/$bnd_name
+				sfm -r $bnd_dir/$bnd_name
 				lc_inst=0
 			fi
 		done
@@ -366,7 +376,7 @@ bmn_init(){
 		then
 			output -p $name "Cleaning invalid bundles residues"
 			output -l "bnds" $bmn_invbnds
-			$rm $bnd_dir/*
+			sfm -r $bnd_dir/*
 		else
 			output -s $name "No invalid b bundles found"
 		fi
@@ -1043,7 +1053,7 @@ bndp_a=($($prt $1|sed "s/:/ /"))
 }
 download(){
 	btest -env -master || return 1
-	$rm $1.$file_format
+	sfm -r $1.$file_format
 	if [[ $lc_repo = 0 ]] || [ $2 = 1 ]
 	then
 		output -p $name "Downloading “$1”"
@@ -1059,10 +1069,10 @@ download(){
 unpack(){
 	btest -env -master || return 1
 	output -p $name "Unpacking “$1”"
-	$rm $1/
-	$mkd $1/
+	sfm -r $1/
+	sfm -d $1/
 	tar -xf $1.$file_format -C $1/
-	$rm $1.$file_format
+	sfm -r $1.$file_format
 	output -l "files" "$(ls $bnd_dir/$1/)"
 }
 cook(){
@@ -1270,7 +1280,7 @@ qwerry_bnd(){
 		current_dir=$(pwd)
 		output -hT "Updating Repository"
 		cd $pdir
-		$rm $pdir/release
+		sfm -r $pdir/release
 		if [[ $lc_repo = 0 ]]
 		then
 			output -p $name "Downloading Release"
@@ -1417,4 +1427,5 @@ null(){
 
 ### Program Start ###
 bmn_data $*
+for csi in ${!cs[*]} ; do alias -- "-$csi=${cs[$csi]}" ; done && shopt -s expand_aliases
 btest -master && bmn_init $*
