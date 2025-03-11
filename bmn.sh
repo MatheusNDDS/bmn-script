@@ -76,7 +76,7 @@ bmn_data(){
 	dev="/dev"
 	mdi="/media"
 	mnt="/mnt"
-	tmp="/temp"
+	tmp="/tmp"
 	sus="/etc/sudoers"
 	xss="$rsr/xsessions"
 	wss="$rsr/wayland-sessions"
