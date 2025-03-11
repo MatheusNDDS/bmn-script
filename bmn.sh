@@ -1178,7 +1178,7 @@ setup(){
 	$elf $cmd_srcd/$name "$pdir/source"
 #Init file buid
 	$prt "source $pdir/source" > $init_file
-	$prt 'export PS1="\\n“\w”\\n$(output -d $name)"\nalias b="$editor $pdir/source"\nalias q="exit 0"\nalias c="clear"\nalias s="$editor $pdir/source"\nalias i="$editor $init_file"\nalias r="$editor $pdir/release"\nalias d="$editor $bmr_db"\nalias h="$prt +\\n b: Edit $name_upper source\\n i: Edit init\\n r: Edit release\\n d: Edit bmr global database\\n c: Clear prompt\\n h: Help\\n q: Exit+"\n -out -t "type “h” to list commands"' | tr '+' "'" >> $init_file
+	$prt 'export PS1="\\n“\w”\\n$(output -d $name)"\nalias b="$editor $pdir/source"\nalias q="exit 0"\nalias c="clear"\nalias s="$editor $pdir/source"\nalias i="$editor $init_file"\nalias r="$editor $pdir/release"\nalias d="$editor $bmr_db"\nalias h="$prt +\\n b: Edit $name_upper source\\n i: Edit init\\n r: Edit release\\n d: Edit bmr global database\\n c: Clear prompt\\n h: Help\\n q: Exit+"' | tr '+' "'" >> $init_file
 #Package manager autodetect
 	if [[ -z $pm ]]
 	then
