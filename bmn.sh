@@ -1117,8 +1117,8 @@ cook(){
 					$cho ${userarr[1]}:${userarr[1]} -R /home/${userarr[1]}/$i
 				done
 			fi
+			output -t "“$user” writed"
 		done
-		output -t "“$user” writed"
 	fi
 
 	## Packages installation
