@@ -1083,20 +1083,22 @@ cook(){
 	btest -env -master || return 1
 	bndid=$1
 	users=('/root' '/etc/skel' $(for udr in $(ls /home) ; do $prt "/home/$udr" ; done))
+	homefs_dirs=($(ls -a @homefs/ ))
+	usersfs_dirs=($(ls -a @usersfs/ ))
+	bnd_rootfs_dirs=($(ls -a @rootfs/ ))
 	cd $bndid/
 
 	## Simple Auto writing file systems
-	[[ -e @rootfs ]] && output -p $name "Writing “$bndid” root file system" && $cp @rootfs/* @rootfs/.* / 2> $dnull
-	[[ -e @rootfs ]] && output -l "rootfs_dirs" "$rootfs_dots $(ls -A @rootfs/)"
+	[[ -e @rootfs ]] && output -p $name "Writing “$bndid” root file system" && $cp ${bnd_rootfs_dirs[@]:2} /
+	[[ -e @rootfs ]] && output -l "rootfs_dirs" "$(ls -A @rootfs/)"
 	## Current user home file system auto writing
 	if [[ -e @homefs ]]
 	then
 		output -p $name "Writing “$bndid” home file system"
-		output -l "homefs_dirs" "$homefs_dots $(ls -A @homefs/)"
-		$cp @homefs/* @homefs/.* $h/ 2> $dnull
-		homefs_dirs=($(ls -a @homefs/))
+		output -l "homefs_dirs" " ${homefs_dirs[@]:2} "
 		for i in ${homefs_dirs[@]:2}
 		do
+			$cp @homefs/$i $h
 			$set_owner $h/$i
 		done
 	fi
@@ -1104,16 +1106,15 @@ cook(){
 	if [[ -e @usersfs ]]
 	then
 		output -p $name "Writing “$bndid” users file system"
-		output -l "usersfs_dirs" "$(ls -A @usersfs/)"
+		output -l "usersfs_dirs" "${usersfs_dirs[@]:2}"
 		for user in ${users[@]}
 		do
-			$cp @usersfs/* @usersfs/.* $user 2> $dnull
 			if [[ $user = "/home/"* ]] ##&& $cho md:md -R $(echo $h/.* $h/* | sed s/$(echo $lc_dir | sed s/'\/'/'\\\/'/g)//)
 			then
-				userfs_dirs=($(ls -a @usersfs/))
-				for i in ${userfs_dirs[@]:2}
+				for i in ${usersfs_dirs[@]:2}
 				do
 					userarr=($($prt $user | tr '/' ' ' ))
+					$cp @usersfs/$i /home/${userarr[1]}/
 					$cho ${userarr[1]}:${userarr[1]} -R /home/${userarr[1]}/$i
 				done
 			fi
@@ -1236,6 +1237,7 @@ bconfig(){
 	;;
 	-list)
 		btest -env || return 1
+		output -T "BMN Settings"
 		bmr -glf @bmn_$2 | sed s/'bmn_'/''/g
 	;;
 	-set)
