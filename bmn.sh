@@ -1082,15 +1082,27 @@ unpack(){
 cook(){
 	btest -env -master || return 1
 	bndid=$1
-	users=('/root' '/etc/skel' $(for udr in $(ls /home) ; do $prt "/home/$udr" ; done))
-	homefs_dirs=($(ls -a @homefs/ ))
-	usersfs_dirs=($(ls -a @usersfs/ ))
-	bnd_rootfs_dirs=($(ls -a @rootfs/ ))
 	cd $bndid/
+	users=('/root' '/etc/skel' $(for udr in $(ls /home) ; do $prt "/home/$udr" ; done))
+	[[ -e @homefs ]] && homefs_dirs=($(ls -a @homefs/ ))
+	[[ -e @usersfs ]] && usersfs_dirs=($(ls -a @usersfs/ ))
+	[[ -e @rootfs ]] && bnd_rootfs_dirs=($(ls -a @rootfs/ ))
+	
 
 	## Simple Auto writing file systems
-	[[ -e @rootfs ]] && output -p $name "Writing “$bndid” root file system" && $cp ${bnd_rootfs_dirs[@]:2} /
+	[[ -e @rootfs ]] && output -p $name "Writing “$bndid” root file system"
 	[[ -e @rootfs ]] && output -l "rootfs_dirs" "$(ls -A @rootfs/)"
+	
+	## Root file system auto writing
+	if [[ -e @rootfs ]]
+	then
+		output -p $name "Writing root file system"
+		output -l "rootfs_dirs" " ${bnd_rootfs_dirs[@]:2} "
+		for i in ${bnd_rootfs_dirs[@]:2}
+		do
+			$cp @rootfs/$i /
+		done
+	fi
 	## Current user home file system auto writing
 	if [[ -e @homefs ]]
 	then
@@ -1114,7 +1126,7 @@ cook(){
 				for i in ${usersfs_dirs[@]:2}
 				do
 					userarr=($($prt $user | tr '/' ' ' ))
-					$cp @usersfs/$i /home/${userarr[1]}/
+					$cp "@usersfs/"$i /home/${userarr[1]}/
 					$cho ${userarr[1]}:${userarr[1]} -R /home/${userarr[1]}/$i
 				done
 			fi
