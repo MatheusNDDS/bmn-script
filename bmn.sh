@@ -1129,6 +1129,11 @@ cook(){
 					$cp "@usersfs/"$i /home/${userarr[1]}/
 					$cho ${userarr[1]}:${userarr[1]} -R /home/${userarr[1]}/$i
 				done
+			else
+				for i in ${usersfs_dirs[@]:2}
+				do
+					$cp "@usersfs/"$i $user/
+				done
 			fi
 			output -t "“$user” writed"
 		done
