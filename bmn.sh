@@ -3,7 +3,7 @@
 bmn_data(){
 #------------------------------------------------------
 ## Cook Script Commands ##
-#Generate commands without conflict with “-*” pattern
+#Generate commands without conflict with the linux shell using a “-*” pattern
 	declare -Ag cs
 	#Linux standard replacments
 	cs['r']="sudo"
@@ -45,7 +45,7 @@ bmn_data(){
 	cs['add_ppa']="add-apt-repository"
 	cs['flatpak_remote']="flatpak remote-add --if-not-exists"
 	cs['fp_overide']="flatpak override"
-	#Bundles utilities
+	#Bundles text utilities
 	cs['header']="output -bH"
 	cs['alert']="bmr -a @\$1"
 	cs['error']="bmr -e @\$1"
@@ -53,7 +53,7 @@ bmn_data(){
 	#Permission manager
 	cs['own']="$set_owner" #set dirs owner to current user
 	cs['fown']="$set_owner_forced" #force $set_owner in entire $HOME (slow)
-	#pma
+	#Package Manager Abstraction
 	cs['pmi']="pma -iy"
 	cs['pmr']="pma -ry"
 	cs['pml']="pma -l"
@@ -122,7 +122,7 @@ bmn_data(){
 	#References
 	name="bmn"
 	name_upper="$($prt $name|tr [:lower:] [:upper:])"
-	script="$(pwd)/${name}.sh"
+	script=./${name}.sh
 	file_format="tar"
 	pkg_flag="null"
 	args=($*)
@@ -190,7 +190,7 @@ bmn_data(){
 }
 bmn_init(){
 	btest -master || return 1
-	[[ -z $1 ]] && exec bmn -h #print help text when are no arguments
+	[[ -z $1 ]] && exec bmn -h
 	sfm -d $lc_dir $bnd_dir && $cho -R root:root $lc_dir &> $dnull #auto generate bmn directories
 ## Download a bundle file and install
 	if [[ ${args[0]} = '-i' || ${args[0]} = '--install' ]]
@@ -1167,7 +1167,7 @@ cook(){
 	fi
 }
 bnd_pack(){
-	current_dir=$(pwd)
+	current_dir=./
 	if [[ -d $1 ]]
 	then
 		cd $1
@@ -1278,7 +1278,7 @@ bmn_update(){
 	cmd_bin=${bin_srcd[1]}
 	if [[ -z $1 ]]
 	then
-		current_dir=$(pwd)
+		current_dir=./
 		output -p $name 'Downloading Script'
 		btest -net || return 1
 		output -d 'Source' $script_src
@@ -1301,7 +1301,7 @@ qwerry_bnd(){
 	if [[ $1 = '-rU' ]] #Condition for update release file
 	then
 		btest -env -root || return 1
-		current_dir=$(pwd)
+		current_dir=./
 		output -hT "Updating Repository"
 		cd $pdir
 		sfm -r $pdir/release
