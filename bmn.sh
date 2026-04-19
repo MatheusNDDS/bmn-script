@@ -450,7 +450,7 @@ $(output -t "BMN Register commands")
 	[[ $1 = '-hT' ]] &&  t['-hT']="\v\033[01;36m******** [ ${out_a[*]:1} ] ********\033[00m\v" #High Title
 	[[ $1 = '-ahT' ]] &&  t['-ahT']="\v\033[01;33m******** // ${out_a[*]:1} // ********\033[00m\v" #Alert High Title
 	[[ $1 = '-shT' ]] &&  t['-shT']="\v\033[01;32m******** ( ${out_a[*]:1} ) ********\033[00m\v" #Sucess High Title
-	[[ $1 = '-ehT' ]] &&  t['-ehT']="\v\033[01;31m*#*#*#*# { $( echo "${out_a[*]:1}" | tr [:lower:] [:upper:]) } #*#*#*#*\033[00m\v" #Error High Title
+	[[ $1 = '-ehT' ]] &&  t['-ehT']="\v\033[01;31m*#*#*#*# { $( echo "${out_a[*]:1}") } #*#*#*#*\033[00m\v" #Error High Title
 	[[ $1 = '-bH' ]] &&  t['-bH']="\033[01;36m ### $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") ###\n ~ $2 ~\033[00m\n" #Bundle Header
 	[[ $1 = '-T' ]] &&  t['-T']="\n\033[01;36m ## ${out_a[*]:1} ##\033[00m\n" #Title
 	[[ $1 = '-t' ]] &&  t['-t']="\033[01m -- ${out_a[*]:1}\033[00m" #Subtitle
@@ -1063,10 +1063,12 @@ download(){
 		output -p $name "Downloading “$1”"
 		btest -net || return 1
 		$dl $repo/$1.$file_format
+		btest -file="$bnd_dir/$1.$file_format" || return 1
 	else
 		output -p $name "Importing “$1”"
 		output -d "dir" $lc_repo
 		$cp $lc_repo/$1.$file_format $bnd_dir/
+		btest -file="$bnd_dir/$1.$file_format" || return 1
 	fi
 	output -l "files" "$(ls . | grep $1.$file_format)"
 }
@@ -1387,7 +1389,7 @@ detect_user_props(){
 	fi
 }
 btest(){
-	## Error Texts BataBase
+	## Static error texts
 	declare -A bterr
 	bterr['-root']="-ahT “$name $cmd” needs root privileges"
 	bterr['-net']="-ehT No internet connection"
@@ -1430,10 +1432,16 @@ btest(){
 				-api)
 					[[ $err_flags != 'pma' && $err_flags != 'output' && $err_flags != 'bmr' ]] && ef=1
 				;;
+				-file)
+					[[ ! -f $err_flags ]] && ef=1
+				;;
 				-cfg)
 					[[ $err_flags != 'pm' && $err_flags != 'user_name' && $err_flags != 'user_home' && $err_flags != 'repo'&& $err_flags != 'lc_repo' ]] && ef=1
 				;;
 			esac
+			## Dynamic error texts
+			bterr['-file']="-ehT File “$err_flags” cannot be found"
+			## Return and error output
 			[[ ! -z "${bterr[$err_test]}" && $ef = 1 ]] && output ${bterr[$err_test]}
 			[[ $ef = 1 ]] && unset tested && return $ef
 		fi
