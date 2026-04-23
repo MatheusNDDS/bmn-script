@@ -195,6 +195,7 @@ bmn_init(){
 ## Download a bundle file and install
 	if [[ ${args[0]} = '-i' || ${args[0]} = '--install' ]]
 	then
+		query_bnd -srU
 		btest -env -data -root || return 1
 		for i in ${args[@]:1}
 		do
@@ -336,10 +337,10 @@ bmn_init(){
 		bmn_update $2
 	elif [[ ${args[0]} = '-rU' || ${args[0]} = '--repo-update' ]]
 	then
-		qwerry_bnd ${args[0]}
+		qwery_bnd ${args[0]}
 	elif [[ ${args[0]} = '-l' || ${args[0]} = '--list-bnds' ]]
 	then
-		qwerry_bnd ${args[@]:1}
+		qwery_bnd ${args[@]:1}
 	elif [[ ${args[0]} = '-p' || ${args[0]} = '--properties' ]]
 	then
 		output 0
@@ -1230,7 +1231,7 @@ setup(){
 		then
 			bconfig -setup
 #Downloading repository releas
-			qwerry_bnd -rU
+			qwery_bnd -rU
 			output -hT "$name_upper instelled with portable repo file"
 			output -d 'repository' "$repo"
 		else
@@ -1242,7 +1243,7 @@ setup(){
 #Downloading repository release
 		repo=${args[1]}
 		bconfig -setup
-		qwerry_bnd -rU
+		qwery_bnd -rU
 		output -hT "$name_upper instaled"
 	fi
 	bmr -rgt @setup "$name target “$cmd_srcd”. pm=$pm, h=$h, u=$u, repo=$repo"
@@ -1299,7 +1300,7 @@ bmn_update(){
 	$elf $cmd_bin
 	output -hT "$name_upper Script Updated"
 }
-qwerry_bnd(){
+qwery_bnd(){
 	if [[ $1 = '-rU' ]] #Condition for update release file
 	then
 		btest -env -root || return 1
@@ -1312,6 +1313,27 @@ qwerry_bnd(){
 			output -p $name "Downloading Release"
 			btest -net || return 1
 			$dl $repo/release
+		else
+			output -p $name "Importing Release"
+			output -d "dir" $lc_repo
+			$cp $lc_repo/release .
+		fi
+		bmr -rm @release
+		bmr -rgt @release $($cat $pdir/release)
+		output -hT "Repository Updated"
+		cd $current_dir
+if [[ $1 = '-srU' ]] #Condition for update release file
+	then
+		btest -env -root || return 1
+		current_dir=./
+		output -hT "Updating Repository"
+		cd $pdir
+		sfm -r $pdir/release
+		if [[ $lc_repo = 0 ]]
+		then
+			output -p $name "Downloading Release"
+			btest -net || return 1
+			$dl -q $repo/release
 		else
 			output -p $name "Importing Release"
 			output -d "dir" $lc_repo
