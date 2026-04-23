@@ -337,10 +337,10 @@ bmn_init(){
 		bmn_update $2
 	elif [[ ${args[0]} = '-rU' || ${args[0]} = '--repo-update' ]]
 	then
-		qwery_bnd ${args[0]}
+		query_bnd ${args[0]}
 	elif [[ ${args[0]} = '-l' || ${args[0]} = '--list-bnds' ]]
 	then
-		qwery_bnd ${args[@]:1}
+		query_bnd ${args[@]:1}
 	elif [[ ${args[0]} = '-p' || ${args[0]} = '--properties' ]]
 	then
 		output 0
@@ -1231,7 +1231,7 @@ setup(){
 		then
 			bconfig -setup
 #Downloading repository releas
-			qwery_bnd -rU
+			query_bnd -rU
 			output -hT "$name_upper instelled with portable repo file"
 			output -d 'repository' "$repo"
 		else
@@ -1243,7 +1243,7 @@ setup(){
 #Downloading repository release
 		repo=${args[1]}
 		bconfig -setup
-		qwery_bnd -rU
+		query_bnd -rU
 		output -hT "$name_upper instaled"
 	fi
 	bmr -rgt @setup "$name target “$cmd_srcd”. pm=$pm, h=$h, u=$u, repo=$repo"
@@ -1300,8 +1300,8 @@ bmn_update(){
 	$elf $cmd_bin
 	output -hT "$name_upper Script Updated"
 }
-qwery_bnd(){
-	if [[ $1 = '-rU' ]] #Condition for update release file
+query_bnd(){
+if [[ $1 = '-rU' ]] #Condition for update release file
 	then
 		btest -env -root || return 1
 		current_dir=./
@@ -1322,6 +1322,7 @@ qwery_bnd(){
 		bmr -rgt @release $($cat $pdir/release)
 		output -hT "Repository Updated"
 		cd $current_dir
+fi
 if [[ $1 = '-srU' ]] #Condition for update release file
 	then
 		btest -env -root || return 1
