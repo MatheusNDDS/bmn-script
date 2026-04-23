@@ -202,7 +202,7 @@ bmn_init(){
 			bnd_parser $i
 			if [[ " ${release[@]} " = *" $bndf "* ]] #checks if the bundle exists in the repository release.
 			then
-				output -hT "Configuring “$bnd_name$(bnd_parser -pbf)”"
+				output -bhT "Configuring “$bnd_name$(bnd_parser -pbf)”"
 				sfm -r $bnd_dir/$bnd_name
 				cd $bnd_dir/
 				download $bnd_name 0 || return 1
@@ -245,7 +245,7 @@ bmn_init(){
 			if [[ ${bnd_ignore[*]} != *"$i"* ]]
 			then
 				bnd_parser $i
-				output -hT "Configuring “$bnd_name$(bnd_parser -pbf)”"
+				output -bhT "Configuring “$bnd_name$(bnd_parser -pbf)”"
 				sfm -r $bnd_dir/$bnd_name
 				cd $bnd_dir/
 				unpack $bnd_name || return 1
@@ -279,7 +279,7 @@ bmn_init(){
 			if [[ ${bnd_ignore[*]} != *"$i"* ]]
 			then
 				bnd_parser $i
-				output -hT "Configuring “$bnd_name$(bnd_parser -pbf)”"
+				output -bhT "Configuring “$bnd_name$(bnd_parser -pbf)”"
 				cd $bnd_dir/
 				cook $bnd_name ${bnd_flags[@]}
 				sfm -r $bnd_dir/$bnd_name
@@ -449,6 +449,7 @@ $(output -t "BMN Register commands")
 	[[ $1 = '-p' ]] && t['-p']="\033[01;35m [$2]: -=- $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") -=-\033[00m" #Process
 	[[ $1 = '-l' ]] && t['-l']="\033[01m $2: [ $($prt $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")|tr ' ' ', ') ]\033[00m " #List itens
 	[[ $1 = '-hT' ]] &&  t['-hT']="\v\033[01;36m******** [ ${out_a[*]:1} ] ********\033[00m\v" #High Title
+	[[ $1 = '-bhT' ]] &&  t['-hT']="\v\033[01;36m- - - - - - - - [ ${out_a[*]:1} ] - - - - - - - -\033[00m\v" #High Title
 	[[ $1 = '-ahT' ]] &&  t['-ahT']="\v\033[01;33m******** // ${out_a[*]:1} // ********\033[00m\v" #Alert High Title
 	[[ $1 = '-shT' ]] &&  t['-shT']="\v\033[01;32m******** ( ${out_a[*]:1} ) ********\033[00m\v" #Sucess High Title
 	[[ $1 = '-ehT' ]] &&  t['-ehT']="\v\033[01;31m*#*#*#*# { $( echo "${out_a[*]:1}") } #*#*#*#*\033[00m\v" #Error High Title
@@ -1320,7 +1321,7 @@ if [[ $1 = '-rU' ]] #Condition for update release file
 		fi
 		bmr -rm @release
 		bmr -rgt @release $($cat $pdir/release)
-		output -p $name "Repository Updated"
+		output -hT s "Repository Updated"
 		cd $current_dir
 fi
 if [[ $1 = '-srU' ]] #Condition for update release file
