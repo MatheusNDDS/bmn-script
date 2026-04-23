@@ -195,14 +195,14 @@ bmn_init(){
 ## Download a bundle file and install
 	if [[ ${args[0]} = '-i' || ${args[0]} = '--install' ]]
 	then
-		query_bnd -srU
 		btest -env -data -root || return 1
+		query_bnd -srU
 		for i in ${args[@]:1}
 		do
 			bnd_parser $i
 			if [[ " ${release[@]} " = *" $bndf "* ]] #checks if the bundle exists in the repository release.
 			then
-				output -bhT "Configuring “$bnd_name$(bnd_parser -pbf)”"
+				output -hT "Configuring “$bnd_name$(bnd_parser -pbf)”"
 				sfm -r $bnd_dir/$bnd_name
 				cd $bnd_dir/
 				download $bnd_name 0 || return 1
@@ -245,7 +245,7 @@ bmn_init(){
 			if [[ ${bnd_ignore[*]} != *"$i"* ]]
 			then
 				bnd_parser $i
-				output -bhT "Configuring “$bnd_name$(bnd_parser -pbf)”"
+				output -hT "Configuring “$bnd_name$(bnd_parser -pbf)”"
 				sfm -r $bnd_dir/$bnd_name
 				cd $bnd_dir/
 				unpack $bnd_name || return 1
@@ -279,7 +279,7 @@ bmn_init(){
 			if [[ ${bnd_ignore[*]} != *"$i"* ]]
 			then
 				bnd_parser $i
-				output -bhT "Configuring “$bnd_name$(bnd_parser -pbf)”"
+				output -hT "Configuring “$bnd_name$(bnd_parser -pbf)”"
 				cd $bnd_dir/
 				cook $bnd_name ${bnd_flags[@]}
 				sfm -r $bnd_dir/$bnd_name
@@ -449,7 +449,7 @@ $(output -t "BMN Register commands")
 	[[ $1 = '-p' ]] && t['-p']="\033[01;35m [$2]: -=- $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") -=-\033[00m" #Process
 	[[ $1 = '-l' ]] && t['-l']="\033[01m $2: [ $($prt $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")|tr ' ' ', ') ]\033[00m " #List itens
 	[[ $1 = '-hT' ]] &&  t['-hT']="\v\033[01;36m******** [ ${out_a[*]:1} ] ********\033[00m\v" #High Title
-	[[ $1 = '-bhT' ]] &&  t['-hT']="\v\033[01;36m- - - - - - - - [ ${out_a[*]:1} ] - - - - - - - -\033[00m\v" #High Title
+	[[ $1 = '-bhT' ]] &&  t['-bhT']="\v\033[01;36m-=-=-=-=-=-=-=-=- [ ${out_a[*]:1} ] -=-=-=-=-=-=-=-=-\033[00m\v" #High Title for bundles recipe
 	[[ $1 = '-ahT' ]] &&  t['-ahT']="\v\033[01;33m******** // ${out_a[*]:1} // ********\033[00m\v" #Alert High Title
 	[[ $1 = '-shT' ]] &&  t['-shT']="\v\033[01;32m******** ( ${out_a[*]:1} ) ********\033[00m\v" #Sucess High Title
 	[[ $1 = '-ehT' ]] &&  t['-ehT']="\v\033[01;31m*#*#*#*# { $( echo "${out_a[*]:1}") } #*#*#*#*\033[00m\v" #Error High Title
@@ -457,9 +457,9 @@ $(output -t "BMN Register commands")
 	[[ $1 = '-T' ]] &&  t['-T']="\n\033[01;36m ## ${out_a[*]:1} ##\033[00m\n" #Title
 	[[ $1 = '-t' ]] &&  t['-t']="\033[01m -- ${out_a[*]:1}\033[00m" #Subtitle
 	[[ $1 = '-d' || $1 = '-qi' ]] &&  t['-d']="\033[01m [$2]: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Dialog, bmr Data
-	[[ $1 = '-e' || $1 = '-qi' ]] &&  t['-e']="\033[01;31m >> {$2}: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") <<\033[00m" #Error Dialog
+	[[ $1 = '-e' || $1 = '-qi' ]] &&  t['-e']="\033[01;31m {$2}: >>$([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") <<\033[00m" #Error Dialog
 	[[ $1 = '-s' || $1 = '-qi' ]] &&  t['-s']="\033[01;32m ($2): $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Sucess Dialog
-	[[ $1 = '-a' || $1 = '-qi' ]] &&  t['-a']="\033[01;33m >> /$2/: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") <<\033[00m" #Alert Dialog
+	[[ $1 = '-a' || $1 = '-qi' ]] &&  t['-a']="\033[01;33m /$2/: >>$([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") <<\033[00m" #Alert Dialog
 
 	if [[ "$1" != "-qi" ]]
 	then
@@ -1149,7 +1149,7 @@ cook(){
 	## Recipe file process
 	if [[ -e recipe ]]
 	then
-		output -hT "Executing “$bndid$(bnd_parser -pbf)” Recipe"
+		output -bhT "Executing “$bndid$(bnd_parser -pbf)” Recipe"
 		$elf recipe
 		[[ $bnd_rm_mode = 1 ]] && bmr -srg @${bndid}_mode 1
 		$rex "$bndid" ${bnd_flags[@]}
@@ -1343,7 +1343,7 @@ if [[ $1 = '-srU' ]] #Condition for update release file
 		fi
 		bmr -rm @release
 		bmr -rgt @release $($cat $pdir/release)
-		output -hT "Repository Updated"
+		output -p $name "Repository Updated"
 		cd $current_dir
 	else #Until search bundles in current release file
 		## Import and verify release file
