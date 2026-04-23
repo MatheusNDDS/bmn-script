@@ -1186,6 +1186,7 @@ bnd_pack(){
 setup(){
 	args=($*)
 	btest -root -installer || return 1
+	cdir=$(pwd)
 	unset pm u h repo lc_repo
 	source config
 	output 0
@@ -1231,7 +1232,7 @@ setup(){
 		if [ -e config ]
 		then
 			bconfig -setup
-#Downloading repository releas
+#Downloading repository release
 			query_bnd -rU
 			output -hT "$name_upper instelled with portable repo file"
 			output -d 'repository' "$repo"
@@ -1248,6 +1249,10 @@ setup(){
 		output -hT "$name_upper instaled"
 	fi
 	bmr -rgt @setup "$name target “$cmd_srcd”. pm=$pm, h=$h, u=$u, repo=$repo"
+
+#Installing Package Manager 
+	cd "$cdir"
+	bmn -diV pma
 }
 bconfig(){
 	bcfg_a=($*)

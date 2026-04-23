@@ -1,0 +1,5 @@
+#!/bin/env bash
+source  /etc/bmn/init
+-header "MatheusNDDS" "PMA (Package Manager Abstractor)"
+-out -p $1 "Making binary executable"
+-elf /usr/bin/pma
