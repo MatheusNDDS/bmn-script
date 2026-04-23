@@ -1320,7 +1320,7 @@ if [[ $1 = '-rU' ]] #Condition for update release file
 		fi
 		bmr -rm @release
 		bmr -rgt @release $($cat $pdir/release)
-		output -hT "Repository Updated"
+		output -p $name "Repository Updated"
 		cd $current_dir
 fi
 if [[ $1 = '-srU' ]] #Condition for update release file
