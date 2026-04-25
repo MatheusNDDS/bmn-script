@@ -1099,21 +1099,18 @@ cook(){
 	then
 		output -p $name "Writing “$bndid” root file system"
 		output -l "rootfs_dirs" " ${bnd_rootfs_dirs[@]:2} "
-		for i in ${bnd_rootfs_dirs[@]:2}
-		do
-			$cp @rootfs/$i /
-		done
+		$set_owner @homefs/* @homefs/* .
+		$cp \@rootfs/* / &> $dnull
+		$cp \@rootfs/.* / &> $dnull
 	fi
 	## Current user home file system auto writing
 	if [[ -e @homefs ]]
 	then
 		output -p $name "Writing “$bndid” home file system"
 		output -l "homefs_dirs" " ${homefs_dirs[@]:2} "
-		for i in ${homefs_dirs[@]:2}
-		do
-			$cp @homefs/$i $h
-			$set_owner $h/$i
-		done
+		$set_owner @homefs/* @homefs/* .
+		cp -pR \@homefs/* $h/ &> $dnull
+		cp -pR \@homefs/.* $h/ &> $dnull
 	fi
 	## All user homes file system auto writing
 	if [[ -e @usersfs ]]
