@@ -1098,8 +1098,7 @@ cook(){
 	if [[ -e @rootfs ]]
 	then
 		output -p $name "Writing “$bndid” root file system"
-		output -l "rootfs_dirs" " ${bnd_rootfs_dirs[@]:2} "
-		$set_owner @homefs/* @homefs/* .
+		ls -a \@rootfs
 		$cp \@rootfs/* / &> $dnull
 		$cp \@rootfs/.* / &> $dnull
 	fi
@@ -1107,8 +1106,9 @@ cook(){
 	if [[ -e @homefs ]]
 	then
 		output -p $name "Writing “$bndid” home file system"
-		output -l "homefs_dirs" " ${homefs_dirs[@]:2} "
-		$set_owner @homefs/* @homefs/* .
+		#output -l "homefs_dirs" " ${homefs_dirs[@]:2} "
+		ls -a \@homefs
+		$set_owner @homefs/* @homefs/*. &> $dnull
 		cp -pR \@homefs/* $h/ &> $dnull
 		cp -pR \@homefs/.* $h/ &> $dnull
 	fi
@@ -1116,7 +1116,7 @@ cook(){
 	if [[ -e @usersfs ]]
 	then
 		output -p $name "Writing “$bndid” users file system"
-		output -l "usersfs_dirs" "${usersfs_dirs[@]:2}"
+		ls -a \@usersfs
 		for user in ${users[@]}
 		do
 			if [[ $user = "/home/"* ]] ##&& $cho md:md -R $(echo $h/.* $h/* | sed s/$(echo $lc_dir | sed s/'\/'/'\\\/'/g)//)
