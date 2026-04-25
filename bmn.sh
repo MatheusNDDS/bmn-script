@@ -1094,15 +1094,10 @@ cook(){
 	[[ -e @usersfs ]] && usersfs_dirs=($(ls -a @usersfs/ ))
 	[[ -e @rootfs ]] && bnd_rootfs_dirs=($(ls -a @rootfs/ ))
 	
-
-	## Simple Auto writing file systems
-	[[ -e @rootfs ]] && output -p $name "Writing “$bndid” root file system"
-	[[ -e @rootfs ]] && output -l "rootfs_dirs" "$(ls -A @rootfs/)"
-	
 	## Root file system auto writing
 	if [[ -e @rootfs ]]
 	then
-		output -p $name "Writing root file system"
+		output -p $name "Writing “$bndid” root file system"
 		output -l "rootfs_dirs" " ${bnd_rootfs_dirs[@]:2} "
 		for i in ${bnd_rootfs_dirs[@]:2}
 		do
