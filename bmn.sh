@@ -447,15 +447,17 @@ $(output -t "BMN Register commands")
 	[[ $1 = 3 ]] && t[3]="bndp_a=(${bndp_a[*]})\nbndf=$bndf\nbnd_raw_name=$bnd_raw_name\nbnd_pre_name=(${bnd_pre_name[*]})\nbnd_name=$bnd_name\nbnd_pre_flags=(${bnd_pre_flags[*]})\nflags=(${bnd_flags[*]})"
 	[[ $1 = '-h' ]] && t['-h']="$(output -T "$name_upper Output Formatter")\n\n$(output -t "Titles")\n -hT : High Normal.\n -ahT : High Alert.\n -shT : High Sucess.\n -ehT : High Error.\n -T : Low Title.\n\n$(output -t "Dialogs")\n -d : Normal.\n -l : List.\n -p : Process.\n -t : Task.\n -a : Alert.\n -s : Sucess.\n -e : Error."
 	[[ $1 = '-p' ]] && t['-p']="\033[01;35m [$2]: -=- $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") -=-\033[00m" #Process
-	[[ $1 = '-l' ]] && t['-l']="\033[01m $2: [ $($prt $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")|tr ' ' ', ') ]\033[00m " #List itens
-	[[ $1 = '-hT' ]] &&  t['-hT']="\v\033[01;36m******** [ ${out_a[*]:1} ] ********\033[00m\v" #High Title
-	[[ $1 = '-bhT' ]] &&  t['-bhT']="\v\033[01;36m-=-=-=-=-=-=-=-=- [ ${out_a[*]:1} ] -=-=-=-=-=-=-=-=-\033[00m\v" #High Title for bundles recipe
-	[[ $1 = '-ahT' ]] &&  t['-ahT']="\v\033[01;33m******** // ${out_a[*]:1} // ********\033[00m\v" #Alert High Title
-	[[ $1 = '-shT' ]] &&  t['-shT']="\v\033[01;32m******** ( ${out_a[*]:1} ) ********\033[00m\v" #Sucess High Title
-	[[ $1 = '-ehT' ]] &&  t['-ehT']="\v\033[01;31m*#*#*#*# { $( echo "${out_a[*]:1}") } #*#*#*#*\033[00m\v" #Error High Title
+	[[ $1 = '-l' ]] && t['-l']="\033[01m $2: [ $($prt $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")|tr ' ' ', ') ]\033[00m " #items list
+	[[ $1 = '-hT' ]] &&  t['-hT']="\n\033[01;36m******** [ ${out_a[*]:1} ] ********\033[00m\n" #High Title
+	[[ $1 = '-bhT' ]] &&  t['-bhT']="\n\033[01;36m-=-=-=-=-=-=-=-=- [ ${out_a[*]:1} ] -=-=-=-=-=-=-=-=-\033[00m" #High Title for bundles recipe
+	[[ $1 = '-ahT' ]] &&  t['-ahT']="\033[01;33m******** // ${out_a[*]:1} // ********\033[00m" #Alert High Title
+	[[ $1 = '-shT' ]] &&  t['-shT']="\033[01;32m******** ( ${out_a[*]:1} ) ********\033[00m" #Sucess High Title
+	[[ $1 = '-ehT' ]] &&  t['-ehT']="\033[01;31m *#*#*#*# { $( echo "${out_a[*]:1}") } #*#*#*#*\033[00m" #Error High Title
 	[[ $1 = '-bH' ]] &&  t['-bH']="\033[01;36m ### $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") ###\n ~ $2 ~\033[00m\n" #Bundle Header
 	[[ $1 = '-T' ]] &&  t['-T']="\n\033[01;36m ## ${out_a[*]:1} ##\033[00m\n" #Title
-	[[ $1 = '-t' ]] &&  t['-t']="\033[01m -- ${out_a[*]:1}\033[00m" #Subtitle
+	[[ $1 = '-t' ]] &&  t['-t']="\033[01m -- ${out_a[*]:1}\033[00m" #subtitle
+	[[ $1 = '-at' ]] &&  t['-at']="\033[01;33m** ${out_a[*]:1}\033[00m" #Alert subtitle
+	[[ $1 = '-et' ]] &&  t['-et']="\033[01;31m** ${out_a[*]:1}\033[00m" #Error subtitle
 	[[ $1 = '-d' || $1 = '-qi' ]] &&  t['-d']="\033[01m [$2]: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Dialog, bmr Data
 	[[ $1 = '-e' || $1 = '-qi' ]] &&  t['-e']="\033[01;31m {$2}: >>$([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") <<\033[00m" #Error Dialog
 	[[ $1 = '-s' || $1 = '-qi' ]] &&  t['-s']="\033[01;32m ($2): $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Sucess Dialog
@@ -1160,15 +1162,10 @@ cook(){
 	bmr -rm -a "@$bndid "
 	bmr -rm -e "@$bndid "
 	bmr -rm -d "@${bndid}_mode "
-	if [[ " ${recipe_log[@]} " = *" -a "* ]]
-	then
-		output -ahT "“$bndid$(bnd_parser -pbf)” Returned Alerts"
-	elif [[ " ${recipe_log[@]} " = *" -e "* ]]
-	then
-		output -ehT "“$bndid$(bnd_parser -pbf)” Returned Erros"
-	else
-		output -hT "“$bndid$(bnd_parser -pbf)” Finished"
-	fi
+	$pnl
+	[[ " ${recipe_log[@]} " = *" -a "* ]] && output -at "“$bndid$(bnd_parser -pbf)” Returned Alerts"
+	[[ " ${recipe_log[@]} " = *" -e "* ]] && output -et "“$bndid$(bnd_parser -pbf)” Returned Errors"
+	output -bhT "“$bndid$(bnd_parser -pbf)” Finished"
 }
 bnd_pack(){
 	current_dir=./
