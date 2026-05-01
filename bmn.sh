@@ -414,7 +414,7 @@ $(output -t "Bundles managment")
   --install -i : Install bundles from repository, use “-iu” to update $pm packages during installation.
   --lc-install -li : Install bundles from $file_format file path, use “-liu” to update $pm packages during installation.
   --dir-install -di : Install bundles from unpacked dir path, use “-diu” to update $pm packages during installation.
-  --dowload -bdl : Download bundles from repository.
+  --bundle-download -bdl : Download bundles from repository.
   --list-bnds -l : List or search for bundles in repo file.
   --repo-update -rU : Update repository release file, use this regularly.
   --clean -c : Clean invalid bundles residues.
