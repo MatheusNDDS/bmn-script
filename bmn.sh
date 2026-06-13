@@ -1108,7 +1108,7 @@ cook(){
 		output -p $name "Writing “$bndid” home file system"
 		#output -l "homefs_dirs" " ${homefs_dirs[@]:2} "
 		ls -a \@homefs
-		$set_owner @homefs/* @homefs/*. &> $dnull
+		$set_owner @homefs/* @homefs/.* &> $dnull
 		cp -pR \@homefs/* $h/ &> $dnull
 		cp -pR \@homefs/.* $h/ &> $dnull
 	fi
@@ -1477,5 +1477,5 @@ null(){
 
 ### Program Start ###
 bmn_data $*
-for csi in ${!cs[*]} ; do alias -- "-$csi=${cs[$csi]}" ; done && shopt -s expand_aliases
+for csi in ${!cs[*]} ; do alias -- "-$csi=${cs[$csi]}" ; done && shopt -s expand_aliases ### Cook Script build
 btest -master && bmn_init $*
