@@ -3,9 +3,9 @@
 bmn_data(){
 #------------------------------------------------------
 ## Cook Script Commands ##
-#Generate commands without conflict with the linux shell using a “-*” pattern
+#Generate commands without conflict with another shells using a “-*” pattern
 	declare -Ag cs
-	#Linux standard replacments
+	#Linux standard replacements
 	cs['r']="sudo"
 	cs['chm']="chmod"
 	cs['cho']="chown"
@@ -1026,7 +1026,7 @@ pkg_install(){
 bnd_parser(){
 bndp_a=($($prt $1|sed "s/:/ /"))
 	case $1 in
-	'-pbf') #brint bnd flags
+	'-pbf') #print bnd flags
 		if [[ ! -z $bnd_flags ]]
 		then
 			$prt ":${bnd_pre_flags[@]}"
