@@ -13,3 +13,6 @@ It is something like a package manager (but weirder) focused in shell script aut
 # Usage instructions
 Syntax: ``sudo bmn ”command” “arguments” ``  
 For help: ``bmn --help``
+
+# Disclaimer
+This is a hobby project that may contain bugs and unfinished content.

@@ -505,13 +505,6 @@ pma_a=($*)
 	pm_s[apk]=@
 	pm_u[apk]=@
 	pm_g[apk]=@
-##slackpkg##
-	pm_i[slackpkg]=@
-	pm_r[slackpkg]=@
-	pm_l[slackpkg]="2> $dnull ; ls /var/log/packages"
-	pm_s[slackpkg]=@
-	pm_u[slackpkg]="upgrade"
-	pm_g[slackpkg]=0
 ##dnf##
 	pm_i[dnf]=@
 	pm_r[dnf]=@
@@ -1239,9 +1232,11 @@ setup(){
 	fi
 	bmr -rgt @setup "$name target “$cmd_srcd”. pm=$pm, h=$h, u=$u, repo=$repo"
 
-#Installing Package Manager 
-	cd "$cdir"
-	bmn -diV pma
+cd "$cdir"
+#Installing Package Manager Abstractor
+	bmn -diV tools/pma
+#Installing BMN Register
+	bmn -diV tools/bmr
 }
 bconfig(){
 	bcfg_a=($*)

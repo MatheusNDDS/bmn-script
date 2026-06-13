@@ -1,0 +1,4 @@
+// Some useful tools behind BMN api //
+
+-- PMA: Cross distro package manager, for help use “pma -h”.
+-- BMR: A simple text based database, for help use “bmr -h”.

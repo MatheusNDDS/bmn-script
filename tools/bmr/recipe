@@ -1,0 +1,5 @@
+#!/bin/env bash
+source  /etc/bmn/init
+-header "MatheusNDDS" "BMR (Bmn register or database)"
+-out -p $1 "Making binary executable"
+-elf /usr/bin/bmr
