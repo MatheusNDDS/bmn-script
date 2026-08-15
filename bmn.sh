@@ -135,8 +135,10 @@ bmn_data(){
 	bkc=@
 	date_f=('§' '%d-%m-%Y,%H:%M')
 	pki_verbose=0
+	patch_mode=0
 	[[ $1 = *'V' ]] && pki_verbose=1 && args[0]="$($prt ${args[0]}|tr -d 'V')"
 	[[ $1 = *'r' ]] && bnd_rm_mode=1 && args[0]="$($prt ${args[0]}|tr 'r' 'i')"
+	[[ $1 = *'p' ]] && patch_mode=1 && args[0]="$($prt ${args[0]}|tr -d 'p')"
 
 	btk_props=(
 		--stdout --cursor-off-label --beep --keep-tite --no-collapse
@@ -874,6 +876,7 @@ $(output -t "Using other database")
 
 ## Package Install
 pkg_parser(){
+	[[ $patch_mode = 1 ]] && return 0
 	case $1 in
 		'parse')
 			[[ ! -e $2 ]] && return 1
@@ -935,6 +938,7 @@ pkg_parser(){
 	esac
 }
 pkg_install(){
+	[[ $patch_mode = 1 ]] && return 0
 	## Distro Pkgs
 	[[ -z $1 ]] && pkg_parser parse packages || pkg_parser parse $1
 	if [[ ${pkgm_reg[*]} = *"#main"* ]]
@@ -1131,7 +1135,7 @@ cook(){
 	fi
 
 	## Packages installation
-	[[ -f packages || -f flatpaks ]] && output -hT "Installing “$bnd_name” packages" && pkg_install
+	[[ -f packages || -f flatpaks ]] && [[ ! -z $patch_mode ]] && output -hT "Installing “$bnd_name” packages" && pkg_install
 
 	## Recipe file process
 	if [[ -e recipe ]]
