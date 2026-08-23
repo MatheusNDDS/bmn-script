@@ -1105,9 +1105,9 @@ cook(){
 		output -p $name "Writing “$bndid” home file system"
 		#output -l "homefs_dirs" " ${homefs_dirs[@]:2} "
 		ls -a \@homefs
-		$set_owner @homefs/* @homefs/.* &>
-		cp -pR \@homefs/* $h/ &>
-		cp -pR \@homefs/.* $h/ &>
+		$set_owner @homefs/* @homefs/.*
+		cp -pR \@homefs/* $h/
+		cp -pR \@homefs/.* $h/
 	fi
 	## All user homes file system auto writing
 	if [[ -e @usersfs ]]
