@@ -136,9 +136,13 @@ bmn_data(){
 	date_f=('§' '%d-%m-%Y,%H:%M')
 	pki_verbose=0
 	patch_mode=0
-	[[ $1 = *'V' ]] && pki_verbose=1 && args[0]="$($prt ${args[0]}|tr -d 'V')"
-	[[ $1 = *'r' ]] && bnd_rm_mode=1 && args[0]="$($prt ${args[0]}|tr 'r' 'i')"
-	[[ $1 = *'p' ]] && patch_mode=1 && args[0]="$($prt ${args[0]}|tr -d 'p')"
+	# [[ $1 = *'V' ]] && pki_verbose=1 && args[0]="$($prt ${args[0]}|tr -d 'V')"
+	# [[ $1 = *'r' ]] && bnd_rm_mode=1 && args[0]="$($prt ${args[0]}|tr 'r' 'i')"
+	# [[ $1 = *'p' ]] && patch_mode=1 && args[0]="$($prt ${args[0]}|tr -d 'P')"
+
+	[[ ${args[0]} = '-v' || ${args[0]} = "--verbose" ]] && pki_verbose=1 && args=(${args[@]:1})
+	[[ ${args[0]} = '-p' || ${args[0]} = "--patch" ]] && patch_mode=1 && args=(${args[@]:1})
+	[[ ${args[0]} = '-r' || ${args[0]} = "--revert" ]] && rm_mode=1 && args=(${args[@]:1})
 
 	btk_props=(
 		--stdout --cursor-off-label --beep --keep-tite --no-collapse
@@ -1071,7 +1075,8 @@ download(){
 		$cp $lc_repo/$1.$file_format $bnd_dir/
 		btest -file="$bnd_dir/$1.$file_format" || return 1
 	fi
-	output -l "files" "$(ls . | grep $1.$file_format)"
+	# output -l "files" "$(ls . | grep $1.$file_format)"
+	ls .
 }
 unpack(){
 	btest -env -master || return 1
@@ -1080,7 +1085,7 @@ unpack(){
 	sfm -d $1/
 	tar -xf $1.$file_format -C $1/
 	sfm -r $1.$file_format
-	output -l "files" "$(ls $bnd_dir/$1/)"
+	ls $bnd_dir/$1/
 }
 cook(){
 	btest -env -master || return 1
@@ -1135,7 +1140,7 @@ cook(){
 	fi
 
 	## Packages installation
-	[[ -f packages || -f flatpaks ]] && [[ ! -z $patch_mode ]] && output -hT "Installing “$bnd_name” packages" && pkg_install
+	[[ -f packages || -f flatpaks ]] && output -hT "Installing “$bnd_name” packages" && pkg_install
 
 	## Recipe file process
 	if [[ -e recipe ]]
