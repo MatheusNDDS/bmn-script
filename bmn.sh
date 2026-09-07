@@ -107,7 +107,7 @@ bmn_data(){
 	add_ppa="$ir add-apt-repository"
 	flatpak_remote="flatpak remote-add --if-not-exists"
 	fp_overide="s$r flatpak override"
-	pnl="$prt \n"
+	pnl="printf \n"
 	pwd="$ir pwd"
 	pkgi="pkg_install"
 	header="output -bH"
@@ -453,7 +453,7 @@ $(output -t "BMN Register commands")
 
 	[[ $1 = 3 ]] && t[3]="bndp_a=(${bndp_a[*]})\nbndf=$bndf\nbnd_raw_name=$bnd_raw_name\nbnd_pre_name=(${bnd_pre_name[*]})\nbnd_name=$bnd_name\nbnd_pre_flags=(${bnd_pre_flags[*]})\nflags=(${bnd_flags[*]})"
 	[[ $1 = '-h' ]] && t['-h']="$(output -T "$name_upper Output Formatter")\n\n$(output -t "Titles")\n -hT : High Normal.\n -ahT : High Alert.\n -shT : High Sucess.\n -ehT : High Error.\n -T : Low Title.\n\n$(output -t "Dialogs")\n -d : Normal.\n -l : List.\n -p : Process.\n -t : Task.\n -a : Alert.\n -s : Sucess.\n -e : Error."
-	[[ $1 = '-p' ]] && t['-p']="\033[01;35m [$2]: -=- $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") -=-\033[00m" #Process
+	[[ $1 = '-p' ]] && t['-p']="\033[01;35m -=- $2: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") -=-\033[00m" #Process
 	[[ $1 = '-l' ]] && t['-l']="\033[01m $2: [ $($prt $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")|tr ' ' ', ') ]\033[00m " #items list
 	[[ $1 = '-hT' ]] &&  t['-hT']="\n\033[01;36m******** [ ${out_a[*]:1} ] ********\033[00m\n" #High Title
 	[[ $1 = '-bhT' ]] &&  t['-bhT']="\n\033[01;36m-=-=-=-=-=-=-=-=- [ ${out_a[*]:1} ] -=-=-=-=-=-=-=-=-\033[00m" #High Title for bundles recipe
@@ -462,14 +462,14 @@ $(output -t "BMN Register commands")
 	[[ $1 = '-ehT' ]] &&  t['-ehT']="\033[01;31m *#*#*#*# { $( echo "${out_a[*]:1}") } #*#*#*#*\033[00m" #Error High Title
 	[[ $1 = '-bH' ]] &&  t['-bH']="\033[01;36m ### $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") ###\n ~ $2 ~\033[00m\n" #Bundle Header
 	[[ $1 = '-T' ]] &&  t['-T']="\n\033[01;36m ## ${out_a[*]:1} ##\033[00m\n" #Title
-	[[ $1 = '-t' ]] &&  t['-t']="\033[01m -- ${out_a[*]:1}\033[00m" #subtitle
+	[[ $1 = '-t' ]] &&  t['-t']="\033[01m --- ${out_a[*]:1}\033[00m" #subtitle
 	[[ $1 = '-at' ]] &&  t['-at']="\033[01;33m** ${out_a[*]:1}\033[00m" #Alert subtitle
 	[[ $1 = '-et' ]] &&  t['-et']="\033[01;31m** ${out_a[*]:1}\033[00m" #Error subtitle
 	[[ $1 = '-m' ]] &&  t['-m']="\033[01;36m${out_a[*]:1}\033[00m" #Marker
-	[[ $1 = '-d' || $1 = '-qi' ]] &&  t['-d']="\033[01m [$2]: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Dialog, bmr Data
-	[[ $1 = '-e' || $1 = '-qi' ]] &&  t['-e']="\033[01;31m {$2}: >>$([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") <<\033[00m" #Error Dialog
-	[[ $1 = '-s' || $1 = '-qi' ]] &&  t['-s']="\033[01;32m ($2): $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Sucess Dialog
-	[[ $1 = '-a' || $1 = '-qi' ]] &&  t['-a']="\033[01;33m /$2/: >>$([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") <<\033[00m" #Alert Dialog
+	[[ $1 = '-d' || $1 = '-qi' ]] &&  t['-d']="\033[01m  [$2]: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Dialog, bmr Data
+	[[ $1 = '-e' || $1 = '-qi' ]] &&  t['-e']="\033[01;31m  {$2}: >>$([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") <<\033[00m" #Error Dialog
+	[[ $1 = '-s' || $1 = '-qi' ]] &&  t['-s']="\033[01;32m  ($2): $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Sucess Dialog
+	[[ $1 = '-a' || $1 = '-qi' ]] &&  t['-a']="\033[01;33m  /$2/: >>$([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") <<\033[00m" #Alert Dialog
 
 
 	if [[ "$1" != "-qi" ]]
@@ -951,9 +951,9 @@ pkg_install(){
 	if [[ ${pkgm_reg[*]} = *"#main"* ]]
 	then
 
-		output -p $pm "Validate packages for installation"
+		output -p $pm "Validating packages"
 		pkg_parser check pma-in &> $dnull
-		pkg_parser list_pkgs main
+		pkg_parser list_pkgs main ; $pnl
 
 		if [[ $pm_update = 1 ]]
 		then
@@ -968,7 +968,7 @@ pkg_install(){
 
 		for i in ${to_install_main[*]}
 		do
-			output -t "$pm/installing: $i"
+			output -t "Installing $i"
 			if [[ $verbose_mode = 1 ]]
 			then
 				pma -iy "$i"
@@ -976,17 +976,17 @@ pkg_install(){
 				pma -iy "$i" &> $dnull
 			fi
 		done
+		$pnl
 
 		if [[ ! -z $to_remove_main ]]
 		then
-			output -p $pm "Validate installed packages for remove"
 			pkg_parser check pma &> $dnull
 
 			for i in ${to_remove_main[*]}
 			do
 				if [[ " ${pkgs_in[@]} " = *" $i"* ]]
 				then
-					output -t "$pm/removing: $i"
+					output -t "Removing $i"
 					if [[ $verbose_mode = 1 ]]
 					then
 						pma -ry "$i"
@@ -994,7 +994,7 @@ pkg_install(){
 						pma -ry "$i" &> $dnull
 					fi
 				else
-					output -t "$pm/removing: $i"
+					output -t "Removing $i"
 					output -s "$pm" "“$i” is not installed"
 				fi
 			done
@@ -1006,7 +1006,8 @@ pkg_install(){
 	if [[ ${pkgm_reg[*]} = *"#flatpak"* ]]
 	then
 		output -hT "Flatpak packages setup / “$bnd_name”"
-		pkg_parser list_pkgs fp
+		output -p "Flatpak" "Validating packages"
+		pkg_parser list_pkgs fp ; $pnl
 
 		if [[ $pm_update = 1 ]]
 		then
@@ -1018,10 +1019,10 @@ pkg_install(){
 		do
 			if [[ "$pkgs_in" = *"$i"* ]]
 			then
-				output -t "flatpak/installing: $i"
+				output -t "Installing $i"
 				output -s "flatpak" "“$i” is already installed"
 			else
-				output -t "flatpak/installing: $i"
+				output -t "Installing $i"
 				if [[ $verbose_mode = 1 ]]
 				then
 					$ir flatpak $fp_mode install  $i -y
@@ -1030,15 +1031,16 @@ pkg_install(){
 				fi
 			fi
 		done
+		$pnl
 
-		if [[ -z $to_remove_fp ]]
+		if [[ ! -z $to_remove_fp ]]
 		then
 			pkg_parser check fp
 			for i in ${to_remove_fp[*]}
 			do
 				if [[ "$pkgs_in" = *"$i"* ]]
 				then
-					output -t "flatpak/removing: $i"
+					output -t "Removing $i"
 					if [[ $verbose_mode = 1 ]]
 					then
 						$ir flatpak uninstall $fp_mode $i -y
@@ -1046,7 +1048,7 @@ pkg_install(){
 						$ir flatpak uninstall $fp_mode $i -y 2> $dnull
 					fi
 				else
-					output -t "flatpak/removing: $i"
+					output -t "Removing $i"
 					output -s "flatpak" "“$i” is not installed"
 				fi
 			done
