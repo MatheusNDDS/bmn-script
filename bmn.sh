@@ -453,8 +453,8 @@ $(output -t "BMN Register commands")
 
 	[[ $1 = 3 ]] && t[3]="bndp_a=(${bndp_a[*]})\nbndf=$bndf\nbnd_raw_name=$bnd_raw_name\nbnd_pre_name=(${bnd_pre_name[*]})\nbnd_name=$bnd_name\nbnd_pre_flags=(${bnd_pre_flags[*]})\nflags=(${bnd_flags[*]})"
 	[[ $1 = '-h' ]] && t['-h']="$(output -T "$name_upper Output Formatter")\n\n$(output -t "Titles")\n -hT : High Normal.\n -ahT : High Alert.\n -shT : High Sucess.\n -ehT : High Error.\n -T : Low Title.\n\n$(output -t "Dialogs")\n -d : Normal.\n -l : List.\n -p : Process.\n -t : Task.\n -a : Alert.\n -s : Sucess.\n -e : Error."
-	[[ $1 = '-p' ]] && t['-p']="\033[01;35m -=- $2: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") -=-\033[00m" #Process
-	[[ $1 = '-l' ]] && t['-l']="\033[01m $2: [ $($prt $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")|tr ' ' ', ') ]\033[00m " #items list
+	[[ $1 = '-p' ]] && t['-p']="\033[01;35m |$2|: -=- $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") -=-\033[00m" #Process
+	[[ $1 = '-l' ]] && t['-l']="\033[01m  $2: [ $($prt $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")|tr ' ' ', ') ]\033[00m " #items list
 	[[ $1 = '-hT' ]] &&  t['-hT']="\n\033[01;36m******** [ ${out_a[*]:1} ] ********\033[00m\n" #High Title
 	[[ $1 = '-bhT' ]] &&  t['-bhT']="\n\033[01;36m-=-=-=-=-=-=-=-=- [ ${out_a[*]:1} ] -=-=-=-=-=-=-=-=-\033[00m" #High Title for bundles recipe
 	[[ $1 = '-ahT' ]] &&  t['-ahT']="\033[01;33m******** // ${out_a[*]:1} // ********\033[00m" #Alert High Title
@@ -462,14 +462,14 @@ $(output -t "BMN Register commands")
 	[[ $1 = '-ehT' ]] &&  t['-ehT']="\033[01;31m *#*#*#*# { $( echo "${out_a[*]:1}") } #*#*#*#*\033[00m" #Error High Title
 	[[ $1 = '-bH' ]] &&  t['-bH']="\033[01;36m ### $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") ###\n ~ $2 ~\033[00m\n" #Bundle Header
 	[[ $1 = '-T' ]] &&  t['-T']="\n\033[01;36m ## ${out_a[*]:1} ##\033[00m\n" #Title
-	[[ $1 = '-t' ]] &&  t['-t']="\033[01m --- ${out_a[*]:1}\033[00m" #subtitle
+	[[ $1 = '-t' ]] &&  t['-t']="\033[01m • ${out_a[*]:1}\033[00m" #subtitle
 	[[ $1 = '-at' ]] &&  t['-at']="\033[01;33m** ${out_a[*]:1}\033[00m" #Alert subtitle
 	[[ $1 = '-et' ]] &&  t['-et']="\033[01;31m** ${out_a[*]:1}\033[00m" #Error subtitle
 	[[ $1 = '-m' ]] &&  t['-m']="\033[01;36m${out_a[*]:1}\033[00m" #Marker
 	[[ $1 = '-d' || $1 = '-qi' ]] &&  t['-d']="\033[01m  [$2]: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Dialog, bmr Data
 	[[ $1 = '-e' || $1 = '-qi' ]] &&  t['-e']="\033[01;31m  {$2}: >>$([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") <<\033[00m" #Error Dialog
 	[[ $1 = '-s' || $1 = '-qi' ]] &&  t['-s']="\033[01;32m  ($2): $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Sucess Dialog
-	[[ $1 = '-a' || $1 = '-qi' ]] &&  t['-a']="\033[01;33m  /$2/: >>$([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") <<\033[00m" #Alert Dialog
+	[[ $1 = '-a' || $1 = '-qi' ]] &&  t['-a']="\033[01;33m  /$2\: >>$([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") <<\033[00m" #Alert Dialog
 
 
 	if [[ "$1" != "-qi" ]]
@@ -1005,7 +1005,7 @@ pkg_install(){
 	## Flatpaks
 	if [[ ${pkgm_reg[*]} = *"#flatpak"* ]]
 	then
-		output -hT "Flatpak packages setup / “$bnd_name”"
+		output -hT "Flatpak packages setup | “$bnd_name”"
 		output -p "Flatpak" "Validating packages"
 		pkg_parser list_pkgs fp ; $pnl
 
@@ -1197,7 +1197,7 @@ cook(){
 	fi
 
 	## Packages installation
-	[[ -f packages || -f flatpaks ]] && output -hT "System packages setup / “$bnd_name”" && pkg_install
+	[[ -f packages || -f flatpaks ]] && output -hT "System packages setup | “$bnd_name”" && pkg_install
 
 	## Recipe file process
 	if [[ -e recipe ]]
