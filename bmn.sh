@@ -134,11 +134,11 @@ bmn_data(){
 	sfm_verbose=0 #Enable verbose log for SFM
 	bkc=@
 	date_f=('§' '%d-%m-%Y,%H:%M')
-	pki_verbose=0
+	verbose_mode=0
 	patch_mode=0
    
    #Modifier flags
-	[[ ${args[0]} = '-v' || ${args[0]} = "--verbose" ]] && pki_verbose=1 && args=(${args[@]:1})
+	[[ ${args[0]} = '-v' || ${args[0]} = "--verbose" ]] && verbose_mode=1 && args=(${args[@]:1})
 	[[ ${args[0]} = '-p' || ${args[0]} = "--patch" ]] && patch_mode=1 && args=(${args[@]:1})
 	[[ ${args[0]} = '-r' || ${args[0]} = "--revert" ]] && rm_mode=1 && args=(${args[@]:1})
    
@@ -912,12 +912,12 @@ pkg_parser(){
 		'list_pkgs')
 			case $2 in
 				main)
-					[[ -n "${to_install_main[*]}" ]] && output -l "to install" "${to_install_main[*]}"
-					[[ -n "${to_remove_main[*]}" ]] && output -l "to remove" "${to_remove_main[*]}"
+					[[ -n "${to_install_main[*]}" ]] && output -d "to install" "${to_install_main[*]}"
+					[[ -n "${to_remove_main[*]}" ]] && output -d "to remove" "${to_remove_main[*]}"
 				;;
 				fp)
-					[[ -n "${to_install_fp[*]}" ]] && output -l "to install" "${to_install_fp[*]}"
-					[[ -n "${to_remove_fp[*]}" ]] && output -l "to remove" "${to_remove_fp[*]}"
+					[[ -n "${to_install_fp[*]}" ]] && output -d "to install" "${to_install_fp[*]}"
+					[[ -n "${to_remove_fp[*]}" ]] && output -d "to remove" "${to_remove_fp[*]}"
 				;;
 			esac
 		;;
@@ -952,32 +952,47 @@ pkg_install(){
 	then
 
 		output -p $pm "Validate packages for installation"
-		pkg_parser check pma-in
+		pkg_parser check pma-in &> $dnull
 		pkg_parser list_pkgs main
 
 		if [[ $pm_update = 1 ]]
 		then
 			output -p $pm "Updating Packages"
-			[[ $pki_verbose = 1 ]] && pma -u || pma -u &> $dnull
+			if [[ $verbose_mode = 1 ]]
+			then
+				pma -u
+			else
+				pma -u &> $dnull
+			fi
 		fi
 
 		for i in ${to_install_main[*]}
 		do
 			output -t "$pm/installing: $i"
-			[[ $pki_verbose = 1 ]] && pma -iy "$i" || pma -iy "$i" &> $dnull
+			if [[ $verbose_mode = 1 ]]
+			then
+				pma -iy "$i"
+			else
+				pma -iy "$i" &> $dnull
+			fi
 		done
 
 		if [[ ! -z $to_remove_main ]]
 		then
-			$pnl && output -p $pm "Validate installed packages for remove"
-			pkg_parser check pma
+			output -p $pm "Validate installed packages for remove"
+			pkg_parser check pma &> $dnull
 
 			for i in ${to_remove_main[*]}
 			do
 				if [[ " ${pkgs_in[@]} " = *" $i"* ]]
 				then
 					output -t "$pm/removing: $i"
-					[[ $pki_verbose = 1 ]] && pma -ry "$i" || pma -ry "$i" &> $dnull
+					if [[ $verbose_mode = 1 ]]
+					then
+						pma -ry "$i"
+					else
+						pma -ry "$i" &> $dnull
+					fi
 				else
 					output -t "$pm/removing: $i"
 					output -s "$pm" "“$i” is not installed"
@@ -990,7 +1005,7 @@ pkg_install(){
 	## Flatpaks
 	if [[ ${pkgm_reg[*]} = *"#flatpak"* ]]
 	then
-		output -hT "Installing “$bnd_name” Flatpaks"
+		output -hT "Flatpak packages setup / “$bnd_name”"
 		pkg_parser list_pkgs fp
 
 		if [[ $pm_update = 1 ]]
@@ -1007,7 +1022,12 @@ pkg_install(){
 				output -s "flatpak" "“$i” is already installed"
 			else
 				output -t "flatpak/installing: $i"
-				[[ $pki_verbose = 1 ]] && $ir flatpak $fp_mode install $fp_remote $i -y || $ir flatpak $fp_mode install $fp_remote $i -y 0> $dnull
+				if [[ $verbose_mode = 1 ]]
+				then
+					$ir flatpak $fp_mode install  $i -y
+				else
+					$ir flatpak $fp_mode install $i -y &> $dnull
+				fi
 			fi
 		done
 
@@ -1019,8 +1039,12 @@ pkg_install(){
 				if [[ "$pkgs_in" = *"$i"* ]]
 				then
 					output -t "flatpak/removing: $i"
-
-					[[ $pki_verbose = 1 ]] && $ir flatpak uninstall $fp_mode $i -y || $ir flatpak uninstall $fp_mode $i -y 2> $dnull
+					if [[ $verbose_mode = 1 ]]
+					then
+						$ir flatpak uninstall $fp_mode $i -y
+					else
+						$ir flatpak uninstall $fp_mode $i -y 2> $dnull
+					fi
 				else
 					output -t "flatpak/removing: $i"
 					output -s "flatpak" "“$i” is not installed"
@@ -1070,7 +1094,12 @@ download(){
 	then
 		output -p $name "Downloading “$1”"
 		btest -net || return 1
-		$dl $repo/$1.$file_format
+		if [[ $verbose_mode = 1 ]]
+		then
+			$dl $repo/$1.$file_format
+		else
+			$dl -q $repo/$1.$file_format
+		fi
 		btest -file="$bnd_dir/$1.$file_format" || return 1
 	else
 		output -p $name "Importing “$1”"
@@ -1104,18 +1133,30 @@ cook(){
 	then
 		output -p $name "Writing “$bndid” root file system"
 		ls -a \@rootfs
-		$cp \@rootfs/* /
-		$cp \@rootfs/.* /
+		if [[ $verbose_mode = 1 ]]
+		then
+			$cp \@rootfs/* /
+			$cp \@rootfs/.* /
+		else
+			$cp \@rootfs/* / &> $dnull
+			$cp \@rootfs/.* / &> $dnull
+		fi
 	fi
 	## Current user home file system auto writing
 	if [[ -e @homefs ]]
 	then
 		output -p $name "Writing “$bndid” home file system"
-		#output -l "homefs_dirs" " ${homefs_dirs[@]:2} "
 		ls -a \@homefs
-		$set_owner @homefs/* @homefs/.*
-		cp -pR \@homefs/* $h/
-		cp -pR \@homefs/.* $h/
+		if [[ $verbose_mode = 1 ]]
+		then
+			$set_owner @homefs/* @homefs/.*
+			cp -pR \@homefs/* $h/
+			cp -pR \@homefs/.* $h/
+		else
+			$set_owner @homefs/* @homefs/.* &> $dnull
+			cp -pR \@homefs/* $h/ &> $dnull
+			cp -pR \@homefs/.* $h/ &> $dnull
+		fi
 	fi
 	## All user homes file system auto writing
 	if [[ -e @usersfs ]]
@@ -1129,13 +1170,24 @@ cook(){
 				for i in ${usersfs_dirs[@]:2}
 				do
 					userarr=($($prt $user | tr '/' ' ' ))
-					$cp "@usersfs/"$i /home/${userarr[1]}/
-					$cho ${userarr[1]}:${userarr[1]} -R /home/${userarr[1]}/$i
+					if [[ $verbose_mode = 1 ]]
+					then
+						$cp "@usersfs/"$i /home/${userarr[1]}/
+						$cho ${userarr[1]}:${userarr[1]} -R /home/${userarr[1]}/$i
+					else
+						$cp "@usersfs/"$i /home/${userarr[1]}/ &> $dnull
+						$cho ${userarr[1]}:${userarr[1]} -R /home/${userarr[1]}/$i &> $dnull
+					fi
 				done
 			else
 				for i in ${usersfs_dirs[@]:2}
 				do
-					$cp "@usersfs/"$i $user/
+					if [[ $verbose_mode = 1 ]]
+					then
+						$cp "@usersfs/"$i $user/
+					else
+					 $cp "@usersfs/"$i $user/ &> $dnull
+					fi
 				done
 			fi
 			output -t "“$user” writed"
@@ -1143,7 +1195,7 @@ cook(){
 	fi
 
 	## Packages installation
-	[[ -f packages || -f flatpaks ]] && output -hT "Installing “$bnd_name” packages" && pkg_install
+	[[ -f packages || -f flatpaks ]] && output -hT "System packages setup / “$bnd_name”" && pkg_install
 
 	## Recipe file process
 	if [[ -e recipe ]]
