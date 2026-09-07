@@ -214,7 +214,6 @@ bmn_init(){
 				unpack $bnd_name  || return 1
 				cook $bnd_name ${bnd_flags[@]}
 				sfm -r $bnd_dir/$bnd_name
-				lc_inst=0
 			else
 				output -a $name "“$bnd_name” bundle not found in repository"
 				output -d i "Maybe the relese file has outdated, try “$name -rU”."
@@ -256,7 +255,6 @@ bmn_init(){
 				unpack $bnd_name || return 1
 				cook $bnd_name ${bnd_flags[@]}
 				sfm -r $bnd_dir/$bnd_name
-				lc_inst=0
 			fi
 		done
 
@@ -288,7 +286,6 @@ bmn_init(){
 				cd $bnd_dir/
 				cook $bnd_name ${bnd_flags[@]}
 				sfm -r $bnd_dir/$bnd_name
-				lc_inst=0
 			fi
 		done
 
@@ -334,7 +331,7 @@ bmn_init(){
 	elif [[ ${args[0]} = '-sc' || ${args[0]} = '--set-config' ]]
 	then
 		bconfig -set ${args[@]:1}
-	elif [[ ${args[0]} = '-ss' || ${args[0]} = '--setup' ]]
+	elif [[ ${args[0]} = '-ss' || ${args[0]} = '--simple-setup' ]]
 	then
 		bmn_update $script
 	elif [[ ${args[0]} = '-U' || ${args[0]} = "--$name-update" ]]
@@ -352,7 +349,6 @@ bmn_init(){
 		output 1
 	elif [[ ! -z $2 && ${args[0]} = '-bd' || ${args[0]} = '--bnd-data' ]]
 	then
-		#output -hT "$2"
 		bnd_parser $2
 		output 3
 	elif [[ ! -z $2 && ${args[0]} = '-rl' ]]
@@ -424,6 +420,12 @@ $(output -t "Bundles managment")
   --repo-update -rU : Update repository release file, use this regularly.
   --clean -c : Clean invalid bundles residues.
 
+$(output -t "Behavior Flags")
+ Flags that are used in bundle install instructions.
+ Syntax: $name $(output -m "-p") -i bundle ...
+  --patch -p : Only patch file systems and run the recipe script, ignores packages parse and install.
+  --verbose -v : Show $pm install progress.
+
 $(output -t "Script tools")
   --$name-update -U : Update $name script from Repo source or local script.
   --list-config -lc : List all avaliable configurations.
@@ -463,10 +465,12 @@ $(output -t "BMN Register commands")
 	[[ $1 = '-t' ]] &&  t['-t']="\033[01m -- ${out_a[*]:1}\033[00m" #subtitle
 	[[ $1 = '-at' ]] &&  t['-at']="\033[01;33m** ${out_a[*]:1}\033[00m" #Alert subtitle
 	[[ $1 = '-et' ]] &&  t['-et']="\033[01;31m** ${out_a[*]:1}\033[00m" #Error subtitle
+	[[ $1 = '-m' ]] &&  t['-m']="\033[01;36m${out_a[*]:1}\033[00m" #Marker
 	[[ $1 = '-d' || $1 = '-qi' ]] &&  t['-d']="\033[01m [$2]: $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Dialog, bmr Data
 	[[ $1 = '-e' || $1 = '-qi' ]] &&  t['-e']="\033[01;31m {$2}: >>$([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") <<\033[00m" #Error Dialog
 	[[ $1 = '-s' || $1 = '-qi' ]] &&  t['-s']="\033[01;32m ($2): $([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//")\033[00m" #Sucess Dialog
 	[[ $1 = '-a' || $1 = '-qi' ]] &&  t['-a']="\033[01;33m /$2/: >>$([[ ! -z $3 ]] && $prt "$*" | sed "s/$1 $2//") <<\033[00m" #Alert Dialog
+
 
 	if [[ "$1" != "-qi" ]]
 	then
