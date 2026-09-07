@@ -118,7 +118,7 @@ bmn_data(){
 	error="bmr -e @$1"
 #--------------------------------------------------------
 
-## Script Variables : Change this variables broke bundle execution ##
+## Script Variables : Change this variables brokes bundle execution ##
 	#References
 	name="bmn"
 	name_upper="$($prt $name|tr [:lower:] [:upper:])"
@@ -136,14 +136,13 @@ bmn_data(){
 	date_f=('§' '%d-%m-%Y,%H:%M')
 	pki_verbose=0
 	patch_mode=0
-	# [[ $1 = *'V' ]] && pki_verbose=1 && args[0]="$($prt ${args[0]}|tr -d 'V')"
-	# [[ $1 = *'r' ]] && bnd_rm_mode=1 && args[0]="$($prt ${args[0]}|tr 'r' 'i')"
-	# [[ $1 = *'p' ]] && patch_mode=1 && args[0]="$($prt ${args[0]}|tr -d 'P')"
-
+   
+   #Modifier flags
 	[[ ${args[0]} = '-v' || ${args[0]} = "--verbose" ]] && pki_verbose=1 && args=(${args[@]:1})
 	[[ ${args[0]} = '-p' || ${args[0]} = "--patch" ]] && patch_mode=1 && args=(${args[@]:1})
 	[[ ${args[0]} = '-r' || ${args[0]} = "--revert" ]] && rm_mode=1 && args=(${args[@]:1})
-
+   
+   #Dialog style
 	btk_props=(
 		--stdout --cursor-off-label --beep --keep-tite --no-collapse
 		--ok-label "✓"
@@ -197,7 +196,7 @@ bmn_data(){
 bmn_init(){
 	btest -master || return 1
 	[[ -z $1 ]] && exec bmn -h
-	sfm -d $lc_dir $bnd_dir && $cho -R root:root $lc_dir &> $dnull #auto generate bmn directories
+	sfm -d $lc_dir $bnd_dir && $cho -R root:root $lc_dir &> $dnull #auto generate ~/.bmn directories
 ## Download a bundle file and install
 	if [[ ${args[0]} = '-i' || ${args[0]} = '--install' ]]
 	then
