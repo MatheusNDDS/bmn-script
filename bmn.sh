@@ -1133,6 +1133,8 @@ cook(){
 	## Packages installation
 	[[ -f packages || -f flatpaks ]] && output -hT "System packages setup | “$bnd_name”" && pkg_install
 
+
+	[[ -e @rootfs || -e @homefs || -e @usersfs ]] &&  output -hT "File system setup | “$bnd_name”"
 	## Root file system auto writing
 	if [[ -e @rootfs ]]
 	then
