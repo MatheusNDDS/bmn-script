@@ -424,7 +424,7 @@ $(output -t "Behavior Flags")
  Flags that are used in bundle install instructions.
  Syntax: $name $(output -m "-p") -i bundle ...
   --patch -p : Only patch file systems and run the recipe script, ignores packages parse and install.
-  --verbose -v : Show $pm install progress.
+  --verbose -v : Show more execution information.
 
 $(output -t "Script tools")
   --$name-update -U : Update $name script from Repo source or local script.
@@ -1130,6 +1130,9 @@ cook(){
 	[[ -e @usersfs ]] && usersfs_dirs=($(ls -a @usersfs/ ))
 	[[ -e @rootfs ]] && bnd_rootfs_dirs=($(ls -a @rootfs/ ))
 	
+	## Packages installation
+	[[ -f packages || -f flatpaks ]] && output -hT "System packages setup | “$bnd_name”" && pkg_install
+
 	## Root file system auto writing
 	if [[ -e @rootfs ]]
 	then
@@ -1195,9 +1198,6 @@ cook(){
 			output -t "“$user” writed"
 		done
 	fi
-
-	## Packages installation
-	[[ -f packages || -f flatpaks ]] && output -hT "System packages setup | “$bnd_name”" && pkg_install
 
 	## Recipe file process
 	if [[ -e recipe ]]
